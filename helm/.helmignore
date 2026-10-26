@@ -1,0 +1,8 @@
+.git/
+tests/
+*.tgz
+*.age
+*.sops.yaml
+*.local.yaml
+private/
+images/

@@ -1,0 +1,188 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "voxos"
+dynamic = ["version"]
+description = "Shared utilities for voxos AI applications"
+readme = "README.md"
+requires-python = ">=3.12.4"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [# FastAPI server (stateless, no database required)
+    "fastapi",
+    "uvicorn[standard]",
+    "livekit",
+    "livekit-agents[google,openai,xai]~=1.5",
+    "mcp",
+    "alembic",
+    "sqlmodel",
+    "redis",
+    "firebase-admin",
+    # Keep cachecontrol's transitive msgpack dependency on a patched release.
+    "msgpack>=1.2.1",
+    "google-auth",
+    "google-cloud-kms",
+    # AWS dependencies
+    "aiobotocore",
+    "boto3",
+    "botocore",
+    # HTTP client for Ollama and Mistral
+    "httpx",
+    "openai",
+    # JSON serialization
+    "jsonschema",
+    "orjson",
+    # Pydantic settings
+    "pydantic",
+    "pydantic[email]",
+    "pydantic-settings",
+    # Error monitoring
+    "sentry-sdk[fastapi]",
+    "slowapi",
+    # Template engine for prompts
+    "jinja2",
+    "asyncpg>=0.31.0",
+    "cryptography>=50.0.0",
+    "greenlet>=3.5.1",
+    "pyjwt>=2.14.0",
+    "twilio>=9.10.9",
+    "telnyx!=4.87.1,!=4.87.2,>=4.163.2,<5",
+    "pillow>=12.3.0",
+    "pillow-heif>=1.1.1",
+    "python-multipart>=0.0.32",
+    "newrelic",
+    "websockets>=15,<17",
+    "cachetools>=5.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "coverage",
+    "detect-secrets==1.5.0",
+    "ruff",
+    "mypy",
+    "pre-commit",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "coverage",
+    "detect-secrets==1.5.0",
+    "ruff",
+    "mypy",
+    "pre-commit",
+    "fastapi",
+    "redis>=4",
+    "langgraph-cli",
+    "aiosqlite>=0.22.1",
+]
+
+[tool.hatch.version]
+path = "src/voxos/__init__.py"
+
+[tool.hatch.build]
+dev-mode-dirs = [
+    "src",
+    ".",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/voxos",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/voxos",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.uv]
+package = true
+exclude-newer = "7 days"
+# LiveKit Agents 1.6 pins json-repair 0.59.10, which is vulnerable to
+# unbounded CPU use when resolving circular JSON Schema references.
+override-dependencies = ["json-repair>=0.60.1"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+fix = true
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "TCH", # flake8-type-checking
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]  # assert allowed in tests
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src/voxos/"]
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_errors = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--import-mode=importlib",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "gpu: marks tests requiring GPU",
+]

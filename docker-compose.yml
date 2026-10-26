@@ -1,0 +1,331 @@
+x-voxos-service: &voxos-service
+  build:
+    context: .
+  image: voxos:local
+  env_file:
+    - .env
+  volumes:
+    - ./src:/app/src:ro
+    - ./scripts:/app/scripts:ro
+    - voxos-attachments:/var/lib/voxos/attachments
+  environment: &voxos-environment
+    DB_HOST: pgvector
+    DB_PORT: "5432"
+    DB_NAME: ${DB_NAME:-voxos}
+    DB_USER: ${DB_USER:-voxos}
+    DB_PASSWORD: ${DB_PASSWORD:-voxos}
+    DATABASE_URL: postgresql+asyncpg://${DB_USER:-voxos}:${DB_PASSWORD:-voxos}@pgvector:5432/${DB_NAME:-voxos}
+    DATABASE_TLS_MODE: driver-default
+    PGSSLMODE: disable
+    PGCHANNELBINDING: disable
+    NEW_RELIC_ENABLED: "false"
+    OUTBOUND_TRUSTED_ENDPOINTS_JSON: '[{"purpose":"mcp","kind":"local_container","url":"http://flightradar24-mcp:8000/mcp"},{"purpose":"mcp","kind":"local_container","url":"http://monzo-mcp:8000/mcp"}]'
+    ATTACHMENT_STORAGE_BACKEND: local
+    CHAT_IMAGE_INPUT_ENABLED: ${CHAT_IMAGE_INPUT_ENABLED:-true}
+    ATTACHMENT_LOCAL_PATH: /var/lib/voxos/attachments
+    BROWSER_ACCOUNTS_STAGEHAND_BASE_URL: http://browser-agent:3100
+    BROWSER_ACCOUNTS_STAGEHAND_SERVICE_TOKEN: ${BROWSER_AGENT_SERVICE_TOKEN:?Set a random browser service token in .env}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+services:
+  browser-agent:
+    build:
+      context: ./browser-agent
+    image: voxos-browser-agent:local
+    environment:
+      PORT: "3100"
+      STEEL_BASE_URL: http://steel-browser:3000
+      BROWSER_AGENT_SERVICE_TOKEN: ${BROWSER_AGENT_SERVICE_TOKEN:?Set a random browser service token in .env}
+      STEEL_SERVICE_TOKEN: ${STEEL_SERVICE_TOKEN:?Set a random Steel service token in .env}
+      TASK_TIMEOUT_MS: "570000"
+    depends_on:
+      steel-browser:
+        condition: service_started
+    expose:
+      - "3100"
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:3100/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  steel-browser:
+    build:
+      context: ./helm/images/steel
+    image: voxos-steel:local
+    environment:
+      HOST: 127.0.0.1
+      HOST_IP: steel-browser
+      NODE_ENV: production
+      DISABLE_CHROME_SANDBOX: "false"
+      STEEL_SERVICE_TOKEN: ${STEEL_SERVICE_TOKEN:?Set a random Steel service token in .env}
+    expose:
+      - "3000"
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=./helm/images/steel/seccomp.json
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,uid=1000,gid=1000
+      - /home/node:rw,nosuid,nodev,uid=1000,gid=1000
+      - /files:rw,nosuid,nodev,uid=1000,gid=1000
+    init: true
+    restart: unless-stopped
+    shm_size: 1gb
+
+  api:
+    <<: *voxos-service
+    command:
+      - uvicorn
+      - voxos.api.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+      - --reload-dir
+      - /app/src
+    depends_on:
+      browser-agent:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${PORT:-7100}:8000"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:8000/health
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    restart: unless-stopped
+
+  voice-worker:
+    <<: *voxos-service
+    profiles:
+      - voice
+    environment:
+      <<: *voxos-environment
+      VOICE_LIVEKIT_ENDPOINT_POLICY: trusted_private
+    command:
+      - watchfiles
+      - --filter
+      - python
+      - /app/scripts/run-dev-worker.sh python -m voxos.voice.worker
+      - /app/src
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      disable: true
+
+  whatsapp-worker:
+    <<: *voxos-service
+    profiles:
+      - whatsapp
+    environment:
+      <<: *voxos-environment
+      WHATSAPP_BRIDGE_EXECUTABLE: /usr/local/bin/node
+      WHATSAPP_BRIDGE_SCRIPT: /workspace/whatsapp-bridge/dist/index.js
+    volumes:
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      # Build and test commands recreate dist, so mount the stable parent.
+      - ./whatsapp-bridge:/workspace/whatsapp-bridge:ro
+      - whatsapp-bridge-node-modules:/workspace/whatsapp-bridge/node_modules:ro
+    command:
+      # A linked device requires one long-lived worker. Rebuilds and source
+      # edits must not terminate an active WhatsApp connection.
+      - python
+      - -m
+      - voxos.whatsapp.worker
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      whatsapp-bridge-builder:
+        condition: service_healthy
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -m
+        - voxos.whatsapp.worker
+        - --healthcheck
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  agent-run-worker:
+    <<: *voxos-service
+    command:
+      - watchfiles
+      - --filter
+      - python
+      - /app/scripts/run-dev-worker.sh python -m voxos.agent_runtime.run_worker
+      - /app/src
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+
+  scheduler:
+    <<: *voxos-service
+    command:
+      - watchfiles
+      - --filter
+      - python
+      - /app/scripts/run-dev-worker.sh python -m voxos.agent_runtime.schedule_worker
+      - /app/src
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+
+  migrate:
+    <<: *voxos-service
+    command:
+      - alembic
+      - upgrade
+      - head
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src:ro
+      - ./alembic:/app/alembic:ro
+      - ./alembic.ini:/app/alembic.ini:ro
+
+  livekit:
+    image: livekit/livekit-server:latest
+    command:
+      - --dev
+      - --bind
+      - 0.0.0.0
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+    restart: unless-stopped
+
+  frontend:
+    image: node:22-bookworm-slim
+    working_dir: /workspace/frontend
+    command:
+      - sh
+      - -c
+      - npm ci && npm run dev -- --host 0.0.0.0
+    ports:
+      - "127.0.0.1:5173:5173"
+    volumes:
+      - ./frontend:/workspace/frontend
+      - frontend-node-modules:/workspace/frontend/node_modules
+    depends_on:
+      api:
+        condition: service_healthy
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://localhost:5173').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  ngrok:
+    image: ngrok/ngrok:3
+    command:
+      - http
+      - --url=${NGROK_URL:?NGROK_URL is required}
+      - api:8000
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:?NGROK_AUTHTOKEN is required}
+    ports:
+      - "127.0.0.1:4040:4040"
+    depends_on:
+      api:
+        condition: service_healthy
+    init: true
+    restart: unless-stopped
+
+  whatsapp-bridge-builder:
+    image: node:22-bookworm-slim
+    profiles:
+      - whatsapp
+    working_dir: /workspace/whatsapp-bridge
+    command:
+      - sh
+      - -c
+      - npm ci && npm exec tsc -- --project tsconfig.build.json --watch --preserveWatchOutput
+    volumes:
+      - ./whatsapp-bridge:/workspace/whatsapp-bridge
+      - whatsapp-bridge-node-modules:/workspace/whatsapp-bridge/node_modules
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -f /workspace/whatsapp-bridge/dist/index.js
+      interval: 5s
+      timeout: 5s
+      start_period: 30s
+      retries: 6
+
+  pgvector:
+    image: pgvector/pgvector:0.8.5-pg16-bookworm
+    environment:
+      POSTGRES_DB: ${DB_NAME:-voxos}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-voxos_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-voxos_admin}
+      APP_DB_NAME: ${DB_NAME:-voxos}
+      APP_DB_USER: ${DB_USER:-voxos}
+      APP_DB_PASSWORD: ${DB_PASSWORD:-voxos}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$APP_DB_USER" -d "$$APP_DB_NAME"
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:${VOXOS_DB_HOST_PORT:-55432}:5432"
+    volumes:
+      - voxos-pgvector-data:/var/lib/postgresql/data
+      - ./docker/pgvector/init:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+
+volumes:
+  voxos-attachments:
+  voxos-pgvector-data:
+  frontend-node-modules:
+  whatsapp-bridge-node-modules:

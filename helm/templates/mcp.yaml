@@ -1,0 +1,112 @@
+{{- if eq .Values.mode "application" }}
+{{- $root := . }}
+{{- $name := include "voxos.name" . }}
+{{- range $component, $settings := .Values.mcp }}
+{{- if $settings.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-{{ $component }}-mcp
+  labels:
+    {{- include "voxos.labels" $root | nindent 4 }}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}-mcp}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}-mcp}
+      annotations:
+        voxos.io/settings-revision: {{ $root.Values.application.settingsRevision | quote }}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq $component "monzo" }}
+      initContainers:
+        - name: prepare-endpoint-token
+          image: {{ $settings.image | quote }}
+          imagePullPolicy: {{ $root.Values.imagePullPolicy }}
+          command:
+            - python
+            - -c
+            - "import os; from pathlib import Path; os.umask(0o077); Path('/token/endpoint-token').write_bytes(Path('/source/endpoint-token').read_bytes())"
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          resources:
+            requests: {cpu: 25m, memory: 32Mi}
+            limits: {memory: 128Mi}
+          volumeMounts:
+            - {name: endpoint-token-source, mountPath: /source, readOnly: true}
+            - {name: endpoint-token, mountPath: /token}
+      {{- end }}
+      containers:
+        - name: mcp
+          image: {{ required (printf "mcp.%s.image is required" $component) $settings.image | quote }}
+          imagePullPolicy: {{ $root.Values.imagePullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: [ALL]}
+            runAsUser: {{ if eq $component "monzo" }}10001{{ else }}1000{{ end }}
+            runAsGroup: {{ if eq $component "monzo" }}10001{{ else }}1000{{ end }}
+            runAsNonRoot: true
+            readOnlyRootFilesystem: true
+          {{- if eq $component "flightradar" }}
+          args: [--stdio, "mcp-fr24api-mcp", --outputTransport, streamableHttp, --stateful, --sessionTimeout, "60000", --port, "8000", --streamableHttpPath, /mcp, --healthEndpoint, /healthz]
+          envFrom: [{secretRef: {name: {{ $settings.existingSecret }}}}]
+          volumeMounts:
+            - {name: tmp, mountPath: /tmp}
+          {{- else }}
+          env:
+            - {name: MONZO_MCP_ENABLE_WRITES, value: "false"}
+            - {name: MONZO_MCP_ACCESS_TOKEN_PROVIDER, value: broker}
+            - {name: MONZO_MCP_ENDPOINT_TOKEN_FILE, value: /run/secrets/endpoint-token}
+            - {name: MONZO_MCP_TOKEN_BROKER_URL, value: {{ printf "http://%s-api:8000/api/internal/mcp/credential-broker/v1/access-token" $name | quote }}}
+            - {name: MONZO_MCP_HTTP_HOST, value: "0.0.0.0"}
+            - {name: MONZO_MCP_HTTP_PORT, value: "8000"}
+            - {name: MONZO_MCP_HTTP_ALLOWED_HOSTS, value: {{ printf "%s,%s:8000" $settings.serviceName $settings.serviceName | quote }}}
+          volumeMounts:
+            - {name: endpoint-token, mountPath: /run/secrets, readOnly: true}
+            - {name: tmp, mountPath: /tmp}
+          {{- end }}
+          ports: [{name: http, containerPort: 8000}]
+          startupProbe: {tcpSocket: {port: http}, periodSeconds: 5, failureThreshold: 60}
+          readinessProbe: {tcpSocket: {port: http}, periodSeconds: 10}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+      volumes:
+        - {name: tmp, emptyDir: {sizeLimit: 256Mi}}
+        {{- if eq $component "monzo" }}
+        - name: endpoint-token-source
+          secret:
+            secretName: {{ $settings.endpointTokenSecret }}
+            defaultMode: 0444
+        - {name: endpoint-token, emptyDir: {medium: Memory, sizeLimit: 1Mi}}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $settings.serviceName }}
+  labels:
+    {{- include "voxos.labels" $root | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}-mcp}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+{{- end }}
+{{- end }}
+{{- end }}

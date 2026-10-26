@@ -1,0 +1,120 @@
+{
+  "docs_dir": "docs/wiki",
+  "generated_at": "2026-10-26T20:58:07.161665Z",
+  "pages": [
+    {
+      "last_updated": "2026-10-01",
+      "path": "Account-And-Auth.md",
+      "source_fingerprint": "a406-dcd3-d835-ac11",
+      "title": "Account And Auth"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "Agent-Knowledge-And-Persistence.md",
+      "source_fingerprint": "745c-af87-d644-a68d",
+      "title": "Agent Knowledge And Persistence"
+    },
+    {
+      "last_updated": "2026-10-26",
+      "path": "Architecture-And-Security.md",
+      "source_fingerprint": "8b1c-d865-e5ed-40cf",
+      "title": "Architecture And Security"
+    },
+    {
+      "last_updated": "2026-08-26",
+      "path": "Browser-Accounts.md",
+      "source_fingerprint": "dd30-b574-7413-6fb3",
+      "title": "Browser Accounts"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "Chat-And-Text.md",
+      "source_fingerprint": "5f1b-61ff-b6b8-9491",
+      "title": "Chat And Text"
+    },
+    {
+      "last_updated": "2026-10-26",
+      "path": "Developer-Setup.md",
+      "source_fingerprint": "1195-d55f-e235-a43f",
+      "title": "Developer Setup"
+    },
+    {
+      "last_updated": "2026-08-08",
+      "path": "Docs-Indexing-And-Agent-Retrieval.md",
+      "source_fingerprint": "38be-0b2d-44fc-98fe",
+      "title": "Docs Indexing And Agent Retrieval"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "Frontend-Guide.md",
+      "source_fingerprint": "2978-0710-7117-6447",
+      "title": "Frontend Guide"
+    },
+    {
+      "last_updated": "2026-08-26",
+      "path": "Home.md",
+      "source_fingerprint": "5c39-d50a-c6eb-1dc0",
+      "title": "Voxos Documentation"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "MCP-And-Tools.md",
+      "source_fingerprint": "40e8-fccf-add6-05a8",
+      "title": "MCP And Tools"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "Operations-Runs-And-Schedules.md",
+      "source_fingerprint": "06ef-26db-e5f5-26e3",
+      "title": "Operations Runs And Schedules"
+    },
+    {
+      "last_updated": "2026-08-21",
+      "path": "Phone-Integrations.md",
+      "source_fingerprint": "b354-df18-f052-eb0d",
+      "title": "Phone Integrations"
+    },
+    {
+      "last_updated": "2026-08-24",
+      "path": "Providers-And-Keys.md",
+      "source_fingerprint": "eda9-7288-5dd8-57b2",
+      "title": "Providers And Keys"
+    },
+    {
+      "last_updated": "2026-10-26",
+      "path": "Quick-Start.md",
+      "source_fingerprint": "1143-27eb-02f1-8dcd",
+      "title": "Quick Start"
+    },
+    {
+      "last_updated": "2026-08-26",
+      "path": "Self-Hosted-Models.md",
+      "source_fingerprint": "80cf-d808-5108-fe04",
+      "title": "Self-Hosted Models"
+    },
+    {
+      "last_updated": "2026-08-25",
+      "path": "Troubleshooting.md",
+      "source_fingerprint": "8f12-f73b-6065-07aa",
+      "title": "Troubleshooting"
+    },
+    {
+      "last_updated": "2026-10-05",
+      "path": "Voice-And-LiveKit.md",
+      "source_fingerprint": "6913-dbe4-e547-ffcf",
+      "title": "Voice And LiveKit"
+    },
+    {
+      "last_updated": "2026-07-05",
+      "path": "_Footer.md",
+      "source_fingerprint": "b985-5be6-7314-2b33",
+      "title": "_Footer"
+    },
+    {
+      "last_updated": "2026-08-26",
+      "path": "_Sidebar.md",
+      "source_fingerprint": "6c22-a64d-f3f9-30ce",
+      "title": "Voxos Wiki"
+    }
+  ]
+}

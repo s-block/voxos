@@ -1,0 +1,77 @@
+name: voxos-mcp
+
+services:
+  flightradar24-mcp:
+    image: supercorp/supergateway:3.4.3
+    environment:
+      FR24_API_KEY: ${FR24_API_KEY:?FR24_API_KEY is required}
+    command:
+      - --stdio
+      - npx -y @flightradar24/fr24api-mcp@1.0.2
+      - --outputTransport
+      - streamableHttp
+      - --stateful
+      - --sessionTimeout
+      - "60000"
+      - --port
+      - "8000"
+      - --streamableHttpPath
+      - /mcp
+      - --healthEndpoint
+      - /healthz
+    ports:
+      - "127.0.0.1:${FR24_MCP_PORT:-8181}:8000"
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:8000/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+
+  monzo-mcp:
+    image: ghcr.io/s-block/monzo-mcp:latest
+    pull_policy: always
+    user: "${MONZO_MCP_UID:-10001}:${MONZO_MCP_GID:-10001}"
+    environment:
+      MONZO_MCP_ENABLE_WRITES: "false"
+      MONZO_MCP_ACCESS_TOKEN_PROVIDER: broker
+      MONZO_MCP_ENDPOINT_TOKEN_FILE: /run/secrets/monzo-mcp-endpoint-token
+      MONZO_MCP_TOKEN_BROKER_URL: http://api:8000/api/internal/mcp/credential-broker/v1/access-token
+      MONZO_MCP_HTTP_HOST: 0.0.0.0
+      MONZO_MCP_HTTP_PORT: "8000"
+      MONZO_MCP_HTTP_ALLOWED_HOSTS: monzo-mcp,monzo-mcp:8000
+    volumes:
+      - type: bind
+        source: ${MONZO_MCP_HOST_ENDPOINT_TOKEN_FILE:-${HOME}/.config/monzo-mcp/monzo-mcp-endpoint-token}
+        target: /run/secrets/monzo-mcp-endpoint-token
+        read_only: true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).read()"
+      interval: 10s
+      timeout: 5s
+      start_period: 15s
+      retries: 5
+
+networks:
+  default:
+    external: true
+    name: voxos_default

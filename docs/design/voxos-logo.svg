@@ -1,0 +1,57 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">VoxOS logo</title>
+  <desc id="desc">Dark background VoxOS logo with gradient speech bubble and voice bars.</desc>
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#0b2225" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#060b10" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#020407" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="brandGrad" x1="270" y1="240" x2="920" y2="760" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#19F0C4"/>
+      <stop offset="46%" stop-color="#16CFEA"/>
+      <stop offset="100%" stop-color="#6657FF"/>
+    </linearGradient>
+    <linearGradient id="wordGrad" x1="665" y1="720" x2="925" y2="850" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#18E9D0"/>
+      <stop offset="100%" stop-color="#5D63FF"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.03  0 0 0 0 0.95  0 0 0 0 0.95  0 0 0 0.45 0" result="glow"/>
+      <feMerge>
+        <feMergeNode in="glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="1200" fill="url(#bgGlow)"/>
+
+  <g transform="translate(0 8)" filter="url(#softGlow)">
+    <!-- Speech-bubble / OS orbit mark -->
+    <path d="M475 622 L424 672 L444 603 A178 178 0 1 1 758 619" fill="none" stroke="url(#brandGrad)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Voice waveform bars -->
+    <g fill="url(#brandGrad)">
+      <rect x="508" y="520" width="24" height="118" rx="12"/>
+      <rect x="552" y="496" width="24" height="157" rx="12"/>
+      <rect x="596" y="465" width="24" height="202" rx="12"/>
+      <rect x="640" y="502" width="24" height="150" rx="12"/>
+      <rect x="684" y="530" width="24" height="96" rx="12"/>
+    </g>
+  </g>
+
+  <!-- Wordmark. Uses system fonts; convert to outlines in Figma/Illustrator for production. -->
+  <g font-family="Inter, Manrope, Avenir Next, Helvetica Neue, Arial, sans-serif" font-weight="800" letter-spacing="-18">
+    <text x="318" y="829" font-size="174" fill="#F6F7F8">Vox</text>
+    <text x="667" y="829" font-size="174" fill="url(#wordGrad)">OS</text>
+  </g>
+
+  <g font-family="Inter, Manrope, Avenir Next, Helvetica Neue, Arial, sans-serif" font-weight="600" font-size="28" letter-spacing="11">
+    <text x="341" y="902" fill="#9AA0AA">VOICE</text>
+    <circle cx="538" cy="892" r="5.5" fill="#14E2D4"/>
+    <text x="574" y="902" fill="#1BE7D1">ACTION</text>
+    <circle cx="739" cy="892" r="5.5" fill="#4E78FF"/>
+    <text x="776" y="902" fill="#9AA0AA">CONNECTED</text>
+  </g>
+</svg>

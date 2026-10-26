@@ -1,0 +1,7 @@
+VOXOS_ANDROID_APPLICATION_ID=org.example.voxos
+# Optional release signing. Set all four fields for signed distribution.
+# A relative keystore path is relative to the android/ directory.
+VOXOS_ANDROID_KEYSTORE_PATH=
+VOXOS_ANDROID_KEYSTORE_PASSWORD=
+VOXOS_ANDROID_KEY_ALIAS=
+VOXOS_ANDROID_KEY_PASSWORD=

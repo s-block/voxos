@@ -1,0 +1,4 @@
+interface:
+  display_name: "Voxos Local Login"
+  short_description: "Log in to the local Voxos app"
+  default_prompt: "Use $voxos-local-login to sign in to the local Voxos app before testing authenticated UI flows."

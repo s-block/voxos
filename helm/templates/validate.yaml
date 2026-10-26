@@ -1,0 +1,24 @@
+{{- if eq .Values.mode "application" -}}
+{{- range $component, $settings := .Values.mcp -}}
+{{- if and $settings.enabled (empty $settings.image) -}}
+{{- fail (printf "mcp.%s.image is required when enabled" $component) -}}
+{{- end -}}
+{{- end -}}
+{{- if and .Values.application.firebaseAdminCredentialsSecret (hasKey .Values.application.env "GOOGLE_APPLICATION_CREDENTIALS") -}}
+{{- fail "application.firebaseAdminCredentialsSecret configures GOOGLE_APPLICATION_CREDENTIALS automatically" -}}
+{{- end -}}
+{{- if hasKey .Values.application.env "BROWSER_ACCOUNTS_STAGEHAND_SERVICE_TOKEN" -}}
+{{- fail "browser service credentials belong in browser.existingSecret" -}}
+{{- end -}}
+{{- if eq .Values.application.databaseSecret .Values.application.migrationSecret -}}
+{{- fail "application.databaseSecret and migrationSecret must differ: runtime requires a non-superuser role" -}}
+{{- end -}}
+{{- if and .Values.ingress.enabled (empty .Values.ingress.hosts) -}}
+{{- fail "ingress.hosts is required when ingress.enabled is true" -}}
+{{- end -}}
+{{- range .Values.ingress.hosts -}}
+{{- if not (index $.Values.components .component).enabled -}}
+{{- fail (printf "ingress target %s must be enabled" .component) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

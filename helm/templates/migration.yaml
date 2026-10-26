@@ -1,0 +1,59 @@
+{{- if and (eq .Values.mode "application") .Values.migrations.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "voxos.name" . }}-migrate
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: {{ .Values.migrations.timeoutSeconds }}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: migrate}
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      securityContext: {fsGroup: 10001, runAsUser: 10001, runAsGroup: 10001, runAsNonRoot: true, seccompProfile: {type: RuntimeDefault}}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: {{ include "voxos.image" (dict "root" . "key" "api") | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          command: [sh, -ec, "alembic upgrade head && python /migration/configure-runtime-role.py"]
+          envFrom:
+            - secretRef: {name: {{ .Values.application.existingSecret }}}
+            - secretRef: {name: {{ .Values.application.migrationSecret }}}
+          env:
+            {{- include "voxos.appEnv" . | nindent 12 }}
+            - name: VOXOS_RUNTIME_ROLE
+              valueFrom:
+                secretKeyRef: {name: {{ .Values.database.existingSecret }}, key: APP_DB_USER}
+          volumeMounts:
+            {{- if .Values.application.firebaseAdminCredentialsSecret }}
+            - {name: firebase-admin, mountPath: /var/run/voxos-firebase, readOnly: true}
+            {{- end }}
+            - {name: tmp, mountPath: /tmp}
+            - {name: migration-config, mountPath: /migration, readOnly: true}
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits: {memory: 1Gi}
+      volumes:
+        {{- if .Values.application.firebaseAdminCredentialsSecret }}
+        - name: firebase-admin
+          secret:
+            secretName: {{ .Values.application.firebaseAdminCredentialsSecret }}
+            defaultMode: 0440
+            items: [{key: credentials.json, path: credentials.json}]
+        {{- end }}
+        - {name: tmp, emptyDir: {sizeLimit: 64Mi}}
+        - {name: migration-config, configMap: {name: {{ include "voxos.name" . }}-migration-config}}
+{{- end }}

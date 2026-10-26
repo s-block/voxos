@@ -1,0 +1,29 @@
+{
+  "name": "@voxos/whatsapp-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "npm run clean && tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist .test-dist",
+    "lint": "eslint .",
+    "start": "node dist/index.js",
+    "test": "npm run build && tsc --project tsconfig.test.json && node --test .test-dist/*.test.js",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "baileys": "7.0.0-rc13",
+    "pino": "9.14.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.4",
+    "@types/node": "20.19.43",
+    "eslint": "10.8.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0"
+  }
+}

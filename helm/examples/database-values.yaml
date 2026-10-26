@@ -1,0 +1,10 @@
+mode: database
+database:
+  host: voxos-db
+  persistence:
+    storageClass: ""  # Uses the cluster default; choose a class with Retain policy.
+    size: 20Gi
+networkPolicy:
+  enabled: true
+  applicationReleaseName: voxos
+  databaseReleaseName: voxos-db

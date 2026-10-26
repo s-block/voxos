@@ -1,0 +1,27 @@
+{
+  "name": "@steel-browser/repl",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "start": "tsx ./src/script.ts"
+  },
+  "dependencies": {
+    "@fastify/static": "10.1.5",
+    "@hey-api/openapi-ts": "0.99.0",
+    "defuddle": "0.19.4",
+    "file-type": "22.1.1",
+    "puppeteer-core": "^25.12.0",
+    "react-router-dom": "7.18.4",
+    "vitest": "5.0.3"
+  },
+  "devDependencies": {
+    "tsx": "*"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "overrides": {
+    "tar-fs": ">=3.1.1"
+  }
+}

@@ -1,0 +1,25 @@
+<svg width="1024" height="1024" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">VoxOS app icon</title>
+  <desc id="desc">VoxOS speech bubble and voice bars on a dark background.</desc>
+  <defs>
+    <radialGradient id="voxos-icon-background" cx="50%" cy="42%" r="68%">
+      <stop offset="0%" stop-color="#123438"/>
+      <stop offset="55%" stop-color="#0A1419"/>
+      <stop offset="100%" stop-color="#020407"/>
+    </radialGradient>
+    <linearGradient id="voxos-icon-flow" gradientUnits="userSpaceOnUse" x1="34" y1="28" x2="103" y2="84">
+      <stop offset="0%" stop-color="#19F0C4"/>
+      <stop offset="46%" stop-color="#16CFEA"/>
+      <stop offset="100%" stop-color="#6657FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" fill="url(#voxos-icon-background)"/>
+  <path d="M31.25 80 L18.5 92 L23.5 75.25 A44.5 44.5 0 1 1 102 79.25" fill="none" stroke="url(#voxos-icon-flow)" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="url(#voxos-icon-flow)">
+    <rect x="39.5" y="54.5" width="6" height="29.5" rx="3"/>
+    <rect x="50.5" y="48.5" width="6" height="39.25" rx="3"/>
+    <rect x="61.5" y="40.75" width="6" height="50.5" rx="3"/>
+    <rect x="72.5" y="50" width="6" height="37.5" rx="3"/>
+    <rect x="83.5" y="57" width="6" height="24" rx="3"/>
+  </g>
+</svg>

@@ -1,0 +1,8 @@
+{
+  "name": "voxos-codex-runner",
+  "version": "0.148.0",
+  "private": true,
+  "dependencies": {
+    "@openai/codex": "0.148.0"
+  }
+}

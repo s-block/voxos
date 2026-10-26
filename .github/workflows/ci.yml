@@ -1,0 +1,391 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  DOCKER_BUILDKIT: "1"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-format:
+    name: Validate format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: python -m pip install --upgrade pip uv
+
+      - name: Install Python dependencies
+        run: uv sync --all-extras --dev --frozen
+
+      - name: Check public source boundaries
+        run: make publication-check
+
+      - name: Check Ruff formatting
+        run: uv run ruff format --check --no-cache .
+
+      - name: Check Ruff fixes
+        run: make lint
+
+  validate-lint:
+    name: Validate lint
+    runs-on: ubuntu-latest
+    needs:
+      - validate-format
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: python -m pip install --upgrade pip uv
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev --frozen
+
+      - name: Run Ruff
+        run: make lint
+
+  validate-mypy:
+    name: Validate mypy
+    runs-on: ubuntu-latest
+    needs:
+      - validate-format
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: python -m pip install --upgrade pip uv
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev --frozen
+
+      - name: Run mypy
+        run: uv run mypy src/voxos/
+
+  whatsapp-bridge:
+    name: WhatsApp bridge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: whatsapp-bridge/package-lock.json
+
+      - name: Install locked bridge dependencies
+        working-directory: whatsapp-bridge
+        run: npm ci
+
+      - name: Lint bridge
+        working-directory: whatsapp-bridge
+        run: npm run lint
+
+      - name: Typecheck bridge
+        working-directory: whatsapp-bridge
+        run: npm run typecheck
+
+      - name: Test bridge
+        working-directory: whatsapp-bridge
+        run: npm test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs:
+      - validate-lint
+      - validate-mypy
+    env:
+      ENVIRONMENT: ci
+      DB_HOST: localhost
+      DB_NAME: voxos_test
+      DB_USER: voxos
+      DB_PASSWORD: voxos # pragma: allowlist secret
+      DATABASE_URL: postgresql+asyncpg://voxos:voxos@localhost:5432/voxos_test # pragma: allowlist secret
+      VOXOS_RLS_TEST_DATABASE_URL: postgresql+asyncpg://voxos:voxos@localhost:5432/voxos_test # pragma: allowlist secret
+      FIREBASE_PROJECT_ID: voxos-ci
+      LOCAL_SECRET_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY= # pragma: allowlist secret
+      AWS_DB_SECRET_NAME: ci-placeholder
+      AWS_DEFAULT_SECRETS_COLLECTION_NAME: ci-placeholder
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      LLM_FALLBACK_ENABLED: "false"
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.3-pg16-bookworm
+        env:
+          POSTGRES_DB: voxos_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres # pragma: allowlist secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d voxos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: python -m pip install --upgrade pip uv
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev --frozen
+
+      - name: Create non-superuser application database role
+        env:
+          PGPASSWORD: postgres # pragma: allowlist secret
+        run: |
+          psql --host localhost --username postgres --dbname voxos_test --set ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE voxos WITH LOGIN PASSWORD 'voxos' NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS; -- pragma: allowlist secret
+          ALTER DATABASE voxos_test OWNER TO voxos;
+          ALTER SCHEMA public OWNER TO voxos;
+          REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+          CREATE EXTENSION IF NOT EXISTS vector;
+          SQL
+
+      - name: Migrate disposable test database
+        run: uv run alembic upgrade head
+
+      - name: Run pytest with coverage
+        run: uv run coverage run -m pytest -v
+
+      - name: Write coverage XML
+        if: always()
+        run: uv run coverage xml
+
+      - name: Print coverage report
+        if: always()
+        run: uv run coverage report
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: error
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f
+        with:
+          files: coverage.xml
+          token: ${{ env.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  bandit:
+    name: bandit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install Bandit
+        run: python -m pip install --upgrade pip bandit[toml]
+
+      - name: Run Bandit
+        run: bandit -r src/voxos -x tests --severity-level medium --confidence-level medium
+
+  safety:
+    name: safety
+    runs-on: ubuntu-latest
+    env:
+      SAFETY_API_KEY: ${{ secrets.SAFETY_API_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        if: env.SAFETY_API_KEY != ''
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        if: env.SAFETY_API_KEY != ''
+        run: python -m pip install --upgrade pip uv
+
+      - name: Export locked production requirements
+        if: env.SAFETY_API_KEY != ''
+        run: uv export --frozen --no-dev --format requirements.txt --output-file requirements.txt
+
+      - name: Skip Safety when API key is not configured
+        if: env.SAFETY_API_KEY == ''
+        run: echo "SAFETY_API_KEY is not configured; skipping Safety scan."
+
+      - name: Run Safety
+        if: env.SAFETY_API_KEY != ''
+        uses: pyupio/safety-action@7baf6605473beffc874c1313ddf2db085c0cacf2
+        with:
+          api-key: ${{ env.SAFETY_API_KEY }}
+          args: scan --detailed-output --target .
+
+  semgrep:
+    name: semgrep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12"
+
+      - name: Install Semgrep
+        run: python -m pip install --upgrade pip semgrep
+
+      - name: Run Semgrep
+        run: semgrep scan --config p/ci --error --metrics=off .
+
+  trivy-fs-scan:
+    name: trivy:fs-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          timeout: 10m
+
+  build-image:
+    name: Build and publish GHCR image
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - whatsapp-bridge
+      - bandit
+      - safety
+      - semgrep
+      - trivy-fs-scan
+    permissions: {contents: read, packages: write}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Resolve GHCR image tags
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          repository="${GITHUB_REPOSITORY,,}"
+          short_sha="${GITHUB_SHA::7}"
+          image_ref="ghcr.io/${repository}-oss-api:sha-${short_sha}"
+
+          {
+            printf "%s\n" "$image_ref"
+
+            if [ "$GITHUB_EVENT_NAME" != "pull_request" ]; then
+              ref_tag="${GITHUB_REF_NAME//\//-}"
+              ref_tag="${ref_tag,,}"
+              printf "%s\n" "ghcr.io/${repository}-oss-api:${ref_tag}"
+
+              if [ "$GITHUB_REF" = "refs/heads/main" ]; then
+                printf "%s\n" "ghcr.io/${repository}-oss-api:latest"
+              fi
+            fi
+          } > image-tags.txt
+
+          {
+            echo "IMAGE_REF=$image_ref"
+            echo "IMAGE_SOURCE=https://github.com/$GITHUB_REPOSITORY"
+            echo "IMAGE_REVISION=$GITHUB_SHA"
+          } >> "$GITHUB_ENV"
+
+      - name: Build image
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t image_tags < image-tags.txt
+          tag_args=()
+
+          for image_tag in "${image_tags[@]}"; do
+            tag_args+=(-t "$image_tag")
+          done
+
+          docker build \
+            --build-arg "OCI_SOURCE=$IMAGE_SOURCE" \
+            --build-arg "OCI_REVISION=$IMAGE_REVISION" \
+            "${tag_args[@]}" \
+            .
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ${{ env.IMAGE_REF }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          timeout: 10m
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to GHCR
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r image_tag; do
+            docker push "$image_tag"
+          done < image-tags.txt

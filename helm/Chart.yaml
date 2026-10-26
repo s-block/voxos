@@ -1,0 +1,7 @@
+apiVersion: v2
+name: voxos
+description: Voxos application and pgvector database deployment
+type: application
+version: 0.2.1
+appVersion: "0.1.0"
+kubeVersion: ">=1.34.0-0"
