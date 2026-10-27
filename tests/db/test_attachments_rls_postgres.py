@@ -259,11 +259,11 @@ async def insert_chat(
             """
             INSERT INTO agent_sessions (
                 id, user_id, agent_id, provider, model, channel, title,
-                room_metadata, effective_tool_policy_json, status,
+                room_metadata, effective_tool_policy_json, status, owner_authenticated,
                 started_at, created_at, updated_at
             ) VALUES (
                 :id, :user_id, NULL, 'openai', 'gpt-5.6-sol', 'text', 'RLS test',
-                '{}'::json, '{}'::json, 'started',
+                '{}'::json, '{}'::json, 'started', true,
                 :now, :now, :now
             )
             """,

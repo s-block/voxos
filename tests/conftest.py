@@ -1,8 +1,10 @@
 import os
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
+from sqlalchemy.engine import URL
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlmodel import SQLModel
 
@@ -168,8 +170,9 @@ REGISTERED_MODELS = (
 
 
 @pytest_asyncio.fixture
-async def sqlite_session_factory() -> AsyncIterator[AsyncSessionFactory]:
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+async def sqlite_session_factory(tmp_path: Path) -> AsyncIterator[AsyncSessionFactory]:
+    # Independent connections keep concurrent session rollbacks isolated.
+    engine = create_async_engine(URL.create("sqlite+aiosqlite", database=str(tmp_path / "test.sqlite3")))
     async with engine.begin() as connection:
         await connection.run_sync(SQLModel.metadata.create_all)
 

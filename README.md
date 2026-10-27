@@ -582,8 +582,8 @@ uv run pytest tests/voice/test_worker.py
 uv run pytest tests/mcp/test_services.py
 ```
 
-CI runs formatting, linting, mypy, tests with coverage, Bandit, Safety when
-configured, Semgrep, Trivy filesystem scans, container builds, and image scans.
+CI runs formatting, linting, mypy, tests with coverage, Bandit, locked dependency audits,
+Semgrep, Trivy filesystem scans, container builds, and image scans.
 
 ## Security Model
 

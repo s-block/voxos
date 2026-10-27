@@ -328,11 +328,11 @@ async def insert_dependencies(
                 """
                 INSERT INTO agent_sessions (
                     id, user_id, agent_id, provider, model, channel, title,
-                    room_metadata, effective_tool_policy_json, status,
+                    room_metadata, effective_tool_policy_json, status, owner_authenticated,
                     started_at, created_at, updated_at
                 ) VALUES (
                     :id, :user_id, :agent_id, 'openai', 'gpt-5.6-sol', 'text',
-                    'Browser RLS test', '{}'::json, '{}'::json, 'started',
+                    'Browser RLS test', '{}'::json, '{}'::json, 'started', true,
                     :now, :now, :now
                 )
                 """,
