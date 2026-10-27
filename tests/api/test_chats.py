@@ -89,6 +89,14 @@ from voxos.text.service import (
 )
 
 
+@pytest.fixture(name="sqlite_session_factory")
+def chat_session_factory(
+    sqlite_file_session_factory: AsyncSessionFactory,
+) -> AsyncSessionFactory:
+    """Isolate the chat runtime's concurrent database transactions."""
+    return sqlite_file_session_factory
+
+
 @dataclass(frozen=True, slots=True)
 class StaticAuthDependency:
     authenticated_user: AuthenticatedUser

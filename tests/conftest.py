@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import pytest
@@ -170,15 +171,29 @@ REGISTERED_MODELS = (
 
 
 @pytest_asyncio.fixture
-async def sqlite_session_factory(tmp_path: Path) -> AsyncIterator[AsyncSessionFactory]:
-    # Independent connections keep concurrent session rollbacks isolated.
-    engine = create_async_engine(URL.create("sqlite+aiosqlite", database=str(tmp_path / "test.sqlite3")))
-    async with engine.begin() as connection:
-        await connection.run_sync(SQLModel.metadata.create_all)
+async def sqlite_session_factory() -> AsyncIterator[AsyncSessionFactory]:
+    async with sqlite_test_sessions("sqlite+aiosqlite:///:memory:") as factory:
+        yield factory
 
-    yield create_session_factory(engine)
 
-    await dispose_engine(engine)
+@pytest_asyncio.fixture
+async def sqlite_file_session_factory(tmp_path: Path) -> AsyncIterator[AsyncSessionFactory]:
+    database_url = URL.create("sqlite+aiosqlite", database=str(tmp_path / "test.sqlite3"))
+    async with sqlite_test_sessions(database_url) as factory:
+        yield factory
+
+
+@asynccontextmanager
+async def sqlite_test_sessions(database_url: str | URL) -> AsyncIterator[AsyncSessionFactory]:
+    engine = create_async_engine(database_url)
+    try:
+        async with engine.begin() as connection:
+            # The SQLite legacy driver otherwise commits DDL once per statement.
+            await connection.exec_driver_sql("BEGIN")
+            await connection.run_sync(SQLModel.metadata.create_all)
+        yield create_session_factory(engine)
+    finally:
+        await dispose_engine(engine)
 
 
 @pytest.fixture
