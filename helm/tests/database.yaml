@@ -1,0 +1,5 @@
+mode: database
+database:
+  persistence: {storageClass: retained-local}
+networkPolicy:
+  enabled: true

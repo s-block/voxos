@@ -1,0 +1,31 @@
+# Select one immutable revision built from the same source for every image.
+images:
+  api: {tag: sha-REPLACE_WITH_REVISION}
+  frontend: {tag: sha-REPLACE_WITH_REVISION}
+  browserAgent: {tag: sha-REPLACE_WITH_REVISION}
+  steel: {tag: sha-REPLACE_WITH_REVISION}
+application:
+  settingsRevision: initial
+  firebaseAdminCredentialsSecret: voxos-firebase-admin  # pragma: allowlist secret - existing Kubernetes Secret name
+frontend:
+  firebaseAuthHost: your-project-id.firebaseapp.com
+ingress:
+  enabled: true
+  className: your-ingress-class
+  hosts:
+    - {host: app.example.com, component: frontend}
+  tls:
+    - secretName: voxos-tls  # pragma: allowlist secret - existing Kubernetes Secret name
+      hosts: [app.example.com]
+attachments:
+  storageClass: ""
+networkPolicy:
+  enabled: true
+  applicationReleaseName: voxos
+  databaseReleaseName: voxos-db
+  ingressController:
+    namespaceSelector: {kubernetes.io/metadata.name: your-ingress-namespace}
+    podSelector: {app.kubernetes.io/name: your-ingress-controller}
+  publicEgress:
+    enabled: true
+    additionalDeniedCIDRs: []  # Add node public IPs and other protected networks.

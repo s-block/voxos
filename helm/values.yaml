@@ -1,0 +1,183 @@
+# Install the database first with mode: database. Application mode uses its Service.
+mode: application
+nameOverride: ""
+images:
+  api:
+    repository: ghcr.io/s-block/voxos-oss-api
+    tag: ""
+    digest: ""
+  frontend:
+    repository: ghcr.io/s-block/voxos-oss-frontend
+    tag: ""
+    digest: ""
+  browserAgent:
+    repository: ghcr.io/s-block/voxos-oss-browser-agent
+    tag: ""
+    digest: ""
+  steel:
+    repository: ghcr.io/s-block/voxos-oss-steel-browser
+    tag: ""
+    digest: ""
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+application:
+  settingsRevision: ""
+  firebaseAdminCredentialsSecret: ""
+  existingSecret: voxos-settings  # pragma: allowlist secret - existing Kubernetes Secret name
+  databaseSecret: voxos-database-runtime  # pragma: allowlist secret - existing Kubernetes Secret name
+  migrationSecret: voxos-database-migration  # pragma: allowlist secret - existing Kubernetes Secret name
+  env: {}
+database:
+  existingSecret: voxos-database-bootstrap  # pragma: allowlist secret - existing Kubernetes Secret name
+  image: pgvector/pgvector:0.8.5-pg18-bookworm@sha256:12a379b47ad65289572ea0756efc11b7c241a6662833e8af7038cd3b73d647e0
+  host: voxos-db
+  port: 5432
+  persistence:
+    existingClaim: ""
+    storageClass: ""
+    size: 20Gi
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {memory: 2Gi}
+attachments:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  size: 5Gi
+browser:
+  existingSecret: voxos-browser-service  # pragma: allowlist secret - existing Kubernetes Secret name
+  seccompProfile: {type: RuntimeDefault}
+  appArmorProfile: {type: RuntimeDefault}
+networkPolicy:
+  enabled: false
+  applicationReleaseName: voxos
+  databaseReleaseName: voxos-db
+  publicEgress:
+    enabled: false
+    additionalDeniedCIDRs: []
+  ingressController:
+    namespaceSelector: {}
+    podSelector: {}
+  dns:
+    namespaceSelector: {kubernetes.io/metadata.name: kube-system}
+    podSelector: {k8s-app: kube-dns}
+frontend:
+  publicConfigSecret: ""
+  firebaseAuthHost: ""
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
+migrations:
+  enabled: true
+  timeoutSeconds: 300
+components:
+  api:
+    enabled: true
+    replicas: 1
+    image: api
+    command: [uvicorn, voxos.api.main:app, --host, "0.0.0.0", --port, "8000"]
+    port: 8000
+    healthPath: /health
+    shutdownSeconds: 30
+    attachments: true
+    resources:
+      requests: {cpu: 100m, memory: 384Mi}
+      limits: {memory: 1Gi}
+  frontend:
+    enabled: true
+    replicas: 1
+    image: frontend
+    command: []
+    port: 8080
+    healthPath: /frontend-health
+    shutdownSeconds: 30
+    attachments: false
+    resources:
+      requests: {cpu: 25m, memory: 32Mi}
+      limits: {memory: 128Mi}
+  browser-agent:
+    enabled: true
+    replicas: 1
+    image: browserAgent
+    command: []
+    port: 3100
+    healthPath: /health
+    shutdownSeconds: 30
+    attachments: false
+    resources:
+      requests: {cpu: 50m, memory: 128Mi}
+      limits: {memory: 512Mi}
+  steel-browser:
+    enabled: true
+    replicas: 1
+    image: steel
+    command: []
+    port: 3000
+    healthPath: /health
+    shutdownSeconds: 30
+    attachments: false
+    resources:
+      requests: {cpu: 100m, memory: 384Mi}
+      limits: {memory: 2Gi}
+  agent-run-worker:
+    enabled: true
+    replicas: 1
+    image: api
+    command: [python, -m, voxos.agent_runtime.run_worker]
+    port: 0
+    healthPath: ""
+    shutdownSeconds: 60
+    attachments: true
+    resources:
+      requests: {cpu: 100m, memory: 384Mi}
+      limits: {memory: 1Gi}
+  scheduler:
+    enabled: true
+    replicas: 1
+    image: api
+    command: [python, -m, voxos.agent_runtime.schedule_worker]
+    port: 0
+    healthPath: ""
+    shutdownSeconds: 30
+    attachments: true
+    resources:
+      requests: {cpu: 25m, memory: 256Mi}
+      limits: {memory: 512Mi}
+  voice-worker:
+    enabled: true
+    replicas: 1
+    image: api
+    command: [python, -m, voxos.voice.worker]
+    port: 0
+    healthPath: ""
+    shutdownSeconds: 60
+    attachments: true
+    resources:
+      requests: {cpu: 250m, memory: 1Gi}
+      limits: {memory: 3Gi}
+  whatsapp-worker:
+    enabled: true
+    replicas: 1
+    image: api
+    command: [python, -m, voxos.whatsapp.worker]
+    port: 0
+    healthPath: ""
+    shutdownSeconds: 60
+    attachments: false
+    resources:
+      requests: {cpu: 100m, memory: 384Mi}
+      limits: {memory: 1Gi}
+mcp:
+  flightradar:
+    enabled: false
+    serviceName: flightradar24-mcp
+    image: ""
+    existingSecret: voxos-mcp-settings  # pragma: allowlist secret - existing Kubernetes Secret name
+  monzo:
+    enabled: false
+    serviceName: monzo-mcp
+    image: ""
+    endpointTokenSecret: voxos-monzo-endpoint-token  # pragma: allowlist secret - existing Kubernetes Secret name

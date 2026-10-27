@@ -1,0 +1,21 @@
+images:
+  api: {tag: test}
+  frontend: {tag: test}
+  browserAgent: {tag: test}
+  steel: {tag: test}
+ingress:
+  enabled: true
+  className: traefik
+  hosts:
+    - {host: app.example.test, component: frontend}
+    - {host: api.example.test, component: api}
+  tls:
+    - {secretName: voxos-tls, hosts: [app.example.test, api.example.test]}  # pragma: allowlist secret - existing Kubernetes Secret name
+mcp:
+  flightradar: {enabled: true, image: registry.example.test/flightradar-mcp:test}
+  monzo: {enabled: true, image: registry.example.test/monzo-mcp:test}
+networkPolicy:
+  enabled: true
+  ingressController:
+    namespaceSelector: {kubernetes.io/metadata.name: ingress-system}
+    podSelector: {app.kubernetes.io/name: ingress-controller}

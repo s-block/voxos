@@ -1,0 +1,681 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "enum": [
+        "database",
+        "application"
+      ]
+    },
+    "nameOverride": {
+      "type": "string",
+      "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
+      "maxLength": 48
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "$ref": "#/definitions/image"
+        },
+        "frontend": {
+          "$ref": "#/definitions/image"
+        },
+        "browserAgent": {
+          "$ref": "#/definitions/image"
+        },
+        "steel": {
+          "$ref": "#/definitions/image"
+        }
+      },
+      "required": [
+        "api",
+        "frontend",
+        "browserAgent",
+        "steel"
+      ]
+    },
+    "imagePullPolicy": {
+      "enum": [
+        "Always",
+        "IfNotPresent",
+        "Never"
+      ]
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+            "maxLength": 63
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "settingsRevision": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "databaseSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "migrationSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "env": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "firebaseAdminCredentialsSecret": {
+          "type": "string",
+          "pattern": "^(|[a-z0-9]([-a-z0-9]*[a-z0-9])?)$",
+          "maxLength": 63
+        }
+      },
+      "required": [
+        "existingSecret",
+        "databaseSecret",
+        "migrationSecret",
+        "env",
+        "firebaseAdminCredentialsSecret"
+      ]
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        },
+        "host": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9.-]*$"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "persistence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "existingClaim": {
+              "type": "string"
+            },
+            "storageClass": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string",
+              "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+            }
+          },
+          "required": [
+            "existingClaim",
+            "storageClass",
+            "size"
+          ]
+        },
+        "resources": {
+          "$ref": "#/definitions/resources"
+        }
+      },
+      "required": [
+        "existingSecret",
+        "image",
+        "host",
+        "port",
+        "persistence",
+        "resources"
+      ]
+    },
+    "attachments": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "existingClaim": {
+          "type": "string"
+        },
+        "storageClass": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string",
+          "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+        }
+      },
+      "required": [
+        "enabled",
+        "existingClaim",
+        "storageClass",
+        "size"
+      ]
+    },
+    "frontend": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "publicConfigSecret": {
+          "type": "string"
+        },
+        "firebaseAuthHost": {
+          "type": "string",
+          "pattern": "^(|[a-zA-Z0-9][a-zA-Z0-9.-]*\\.firebaseapp\\.com)$"
+        }
+      },
+      "required": [
+        "publicConfigSecret",
+        "firebaseAuthHost"
+      ]
+    },
+    "ingress": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "className": {
+          "type": "string"
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "host": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$"
+              },
+              "component": {
+                "enum": [
+                  "api",
+                  "frontend"
+                ]
+              }
+            },
+            "required": [
+              "host",
+              "component"
+            ]
+          }
+        },
+        "tls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "secretName": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "maxLength": 63
+              },
+              "hosts": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "secretName",
+              "hosts"
+            ]
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "className",
+        "annotations",
+        "hosts",
+        "tls"
+      ]
+    },
+    "migrations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 3600
+        }
+      },
+      "required": [
+        "enabled",
+        "timeoutSeconds"
+      ]
+    },
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "api": {
+          "$ref": "#/definitions/component"
+        },
+        "frontend": {
+          "$ref": "#/definitions/component"
+        },
+        "browser-agent": {
+          "$ref": "#/definitions/component"
+        },
+        "steel-browser": {
+          "$ref": "#/definitions/component"
+        },
+        "agent-run-worker": {
+          "$ref": "#/definitions/component"
+        },
+        "scheduler": {
+          "$ref": "#/definitions/component"
+        },
+        "voice-worker": {
+          "$ref": "#/definitions/component"
+        },
+        "whatsapp-worker": {
+          "$ref": "#/definitions/component"
+        }
+      },
+      "required": [
+        "api",
+        "frontend",
+        "browser-agent",
+        "steel-browser",
+        "agent-run-worker",
+        "scheduler",
+        "voice-worker",
+        "whatsapp-worker"
+      ]
+    },
+    "mcp": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "flightradar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "serviceName": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "image": {
+              "type": "string"
+            },
+            "existingSecret": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            }
+          },
+          "required": [
+            "enabled",
+            "serviceName",
+            "image",
+            "existingSecret"
+          ]
+        },
+        "monzo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "serviceName": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "image": {
+              "type": "string"
+            },
+            "endpointTokenSecret": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            }
+          },
+          "required": [
+            "enabled",
+            "serviceName",
+            "image",
+            "endpointTokenSecret"
+          ]
+        }
+      },
+      "required": [
+        "flightradar",
+        "monzo"
+      ]
+    },
+    "browser": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "seccompProfile": {
+          "$ref": "#/definitions/sandboxProfile"
+        },
+        "appArmorProfile": {
+          "$ref": "#/definitions/sandboxProfile"
+        }
+      },
+      "required": [
+        "existingSecret",
+        "seccompProfile",
+        "appArmorProfile"
+      ]
+    },
+    "networkPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "ingressController": {
+          "$ref": "#/definitions/networkPeerSelectors"
+        },
+        "dns": {
+          "$ref": "#/definitions/networkPeerSelectors"
+        },
+        "applicationReleaseName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 53
+        },
+        "databaseReleaseName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 53
+        },
+        "publicEgress": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "additionalDeniedCIDRs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(\\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}/([0-9]|[12][0-9]|3[0-2])$"
+              }
+            }
+          },
+          "required": [
+            "enabled",
+            "additionalDeniedCIDRs"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "ingressController",
+        "dns",
+        "applicationReleaseName",
+        "databaseReleaseName",
+        "publicEgress"
+      ]
+    }
+  },
+  "required": [
+    "mode",
+    "nameOverride",
+    "images",
+    "imagePullPolicy",
+    "imagePullSecrets",
+    "application",
+    "database",
+    "attachments",
+    "frontend",
+    "ingress",
+    "migrations",
+    "components",
+    "mcp",
+    "browser",
+    "networkPolicy"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "image": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repository": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^(|sha256:[a-f0-9]{64})$"
+        }
+      },
+      "required": [
+        "repository",
+        "tag",
+        "digest"
+      ]
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "image": {
+          "enum": [
+            "api",
+            "frontend",
+            "browserAgent",
+            "steel"
+          ]
+        },
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "healthPath": {
+          "type": "string",
+          "pattern": "^(|/[^\\s]*)$"
+        },
+        "shutdownSeconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "attachments": {
+          "type": "boolean"
+        },
+        "resources": {
+          "$ref": "#/definitions/resources"
+        }
+      },
+      "required": [
+        "enabled",
+        "replicas",
+        "image",
+        "command",
+        "port",
+        "healthPath",
+        "shutdownSeconds",
+        "attachments",
+        "resources"
+      ]
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "requests": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+            }
+          },
+          "required": []
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cpu": {
+              "type": "string",
+              "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+            },
+            "memory": {
+              "type": "string",
+              "pattern": "^[0-9]+([.][0-9]+)?([EPTGMK]i?|m)?$"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    },
+    "networkPeerSelectors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "namespaceSelector": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "podSelector": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "namespaceSelector",
+        "podSelector"
+      ]
+    },
+    "sandboxProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "RuntimeDefault",
+            "Localhost"
+          ]
+        },
+        "localhostProfile": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "Localhost"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "localhostProfile"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "localhostProfile"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

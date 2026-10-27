@@ -1,0 +1,1 @@
+"""Image generation runtime services."""

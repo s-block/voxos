@@ -1,0 +1,139 @@
+[[skills]]
+name = "Evidence-Backed Web Research"
+slug = "evidence-backed-web-research"
+category = "tool_use"
+description = "Research a current question with Exa web search and page fetch, comparing authoritative sources, dates, disagreements, citations, and uncertainty."
+body_path = "evidence-backed-web-research.md"
+load_selector = { preset_id = "exa" }
+
+[[skills.requirements]]
+selector = { preset_id = "exa" }
+tools = ["web_search_exa", "web_fetch_exa"]
+
+[[skills]]
+name = "Website Content And Performance Audit"
+slug = "website-content-performance-audit"
+category = "tool_use"
+description = "Audit representative website pages for content, structure, SEO and accessibility signals, and Lighthouse performance using bounded Browserless tools."
+body_path = "website-content-performance-audit.md"
+load_selector = { preset_id = "browserless" }
+
+[[skills.requirements]]
+selector = { preset_id = "browserless" }
+tools = ["browserless_map", "browserless_smartscraper", "browserless_performance"]
+
+[[skills]]
+name = "GitHub Repository Orientation"
+slug = "github-repository-orientation"
+category = "tool_use"
+description = "Orient a developer in a GitHub repository by examining structure, branches, commits, issues, pull requests, conventions, ownership clues, and change impact."
+body_path = "github-repository-orientation.md"
+load_selector = { preset_id = "github" }
+
+[[skills.requirements]]
+selector = { preset_id = "github" }
+tools = ["get_file_contents", "list_branches", "list_commits", "list_issues", "list_pull_requests", "search_code"]
+
+[[skills]]
+name = "GitHub Pull Request Review"
+slug = "github-pull-request-review"
+category = "tool_use"
+description = "Review a GitHub PR or pull request for correctness, regressions, security, tests, and maintainability using its diff, files, commits, checks, and review context."
+body_path = "github-pull-request-review.md"
+load_selector = { preset_id = "github" }
+
+[[skills.requirements]]
+selector = { preset_id = "github" }
+tools = ["pull_request_read", "get_file_contents", "get_commit"]
+
+[[skills]]
+name = "Grounded Local Day Plan"
+slug = "grounded-local-day-plan"
+category = "tool_use"
+description = "Build a practical local itinerary or day plan with verified places, relevant weather, consecutive route feasibility, travel time, and Google Maps attribution."
+body_path = "grounded-local-day-plan.md"
+load_selector = { preset_id = "google-maps-grounding-lite" }
+
+[[skills.requirements]]
+selector = { preset_id = "google-maps-grounding-lite" }
+tools = ["search_places", "lookup_weather", "compute_routes"]
+
+[[skills]]
+name = "Multimodal Journey Plan"
+slug = "multimodal-journey-plan"
+category = "tool_use"
+description = "Plan a door-to-door public transport or multimodal journey with resolved locations, route alternatives, live departures, transfers, accessibility constraints, and a shareable TripGo link."
+body_path = "multimodal-journey-plan.md"
+load_selector = { preset_id = "tripgo" }
+
+[[skills.requirements]]
+selector = { preset_id = "google-maps-grounding-lite" }
+tools = ["search_places"]
+
+[[skills.requirements]]
+selector = { preset_id = "tripgo" }
+tools = ["tripgo-locations", "tripgo-routing", "tripgo-departures", "tripgo-get-trip-url"]
+
+[[skills]]
+name = "Flight Activity Brief"
+slug = "flight-activity-brief"
+category = "tool_use"
+description = "Brief live or recent flight activity using Flightradar24 airport, airline, position, count, and UTC summary tools without confusing observations with schedules or predictions."
+body_path = "flight-activity-brief.md"
+load_selector = { preset_id = "flightradar24" }
+
+[[skills.requirements]]
+selector = { preset_id = "flightradar24" }
+tools = ["get_airline_info", "get_airport_info_light", "get_flight_summary_light", "get_live_flights_count", "get_live_flights_positions_light"]
+
+[[skills]]
+name = "Accommodation Shortlist"
+slug = "accommodation-shortlist"
+category = "tool_use"
+description = "Shortlist vacation rentals or accommodation with OpenBnB listing details, date-specific prices, guest constraints, travel times to trip anchors, nearby essentials, and booking caveats."
+body_path = "accommodation-shortlist.md"
+load_selector = { preset_id = "openbnb" }
+
+[[skills.requirements]]
+selector = { preset_id = "openbnb" }
+tools = ["airbnb_search", "airbnb_listing", "maps_distance_matrix", "maps_search_places", "maps_place_details"]
+
+[[skills]]
+name = "Gmail Inbox Triage And Drafting"
+slug = "gmail-inbox-triage-and-drafting"
+category = "tool_use"
+description = "Triage a Gmail inbox by searching and reading relevant threads, grouping actionable mail, proposing labels, and creating drafts only after explicit confirmation."
+body_path = "gmail-inbox-triage-and-drafting.md"
+load_selector = { preset_id = "google-workspace", preset_variant_id = "gmail" }
+
+[[skills.requirements]]
+selector = { preset_id = "google-workspace", preset_variant_id = "gmail" }
+tools = ["gmail.search_threads", "gmail.get_thread", "gmail.list_labels", "gmail.label_thread", "gmail.create_draft"]
+
+[[skills]]
+name = "Meeting Preparation Brief"
+slug = "meeting-preparation-brief"
+category = "tool_use"
+description = "Prepare for a meeting by finding the Google Calendar event and related Gmail threads, then summarizing the agenda, decisions, commitments, open questions, and attendee context."
+body_path = "meeting-preparation-brief.md"
+load_selector = { preset_id = "google-workspace", preset_variant_id = "calendar" }
+
+[[skills.requirements]]
+selector = { preset_id = "google-workspace", preset_variant_id = "calendar" }
+tools = ["calendar.list_events", "calendar.get_event"]
+
+[[skills.requirements]]
+selector = { preset_id = "google-workspace", preset_variant_id = "gmail" }
+tools = ["gmail.search_threads", "gmail.get_thread"]
+
+[[skills]]
+name = "Personal Spending Review"
+slug = "personal-spending-review"
+category = "tool_use"
+description = "Review personal Monzo spending for an explicit account and period using bounded transaction pages, balances, pots, currency-aware minor-unit conversion, and privacy-conscious summaries."
+body_path = "personal-spending-review.md"
+load_selector = { preset_id = "monzo" }
+
+[[skills.requirements]]
+selector = { preset_id = "monzo" }
+tools = ["monzo_connection_status", "monzo_list_accounts", "monzo_get_balance", "monzo_list_pots", "monzo_list_transactions", "monzo_get_transaction"]

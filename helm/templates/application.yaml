@@ -1,0 +1,250 @@
+{{- if eq .Values.mode "application" }}
+{{- $root := . }}
+{{- $name := include "voxos.name" . }}
+{{- if and .Values.attachments.enabled (not .Values.attachments.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-attachments
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  accessModes: [ReadWriteOnce]
+  {{- if .Values.attachments.storageClass }}
+  storageClassName: {{ .Values.attachments.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests: {storage: {{ .Values.attachments.size }}}
+---
+{{- end }}
+{{- range $component, $settings := .Values.components }}
+{{- if $settings.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-{{ $component }}
+  labels:
+    {{- include "voxos.labels" $root | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  replicas: {{ $settings.replicas }}
+  {{- if or (eq $component "voice-worker") (eq $component "whatsapp-worker") (eq $component "scheduler") }}
+  strategy: {type: Recreate}
+  {{- else }}
+  strategy: {type: RollingUpdate, rollingUpdate: {maxSurge: 1, maxUnavailable: 0}}
+  {{- end }}
+  selector:
+    matchLabels: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}}
+      annotations:
+        voxos.io/settings-revision: {{ $root.Values.application.settingsRevision | quote }}
+        {{- if eq $component "frontend" }}
+        checksum/frontend: {{ include (print $root.Template.BasePath "/frontend.yaml") $root | sha256sum }}
+        {{- end }}
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ $settings.shutdownSeconds }}
+      securityContext:
+        fsGroup: 10001
+        seccompProfile:
+          {{- if eq $component "steel-browser" }}
+          {{- toYaml $root.Values.browser.seccompProfile | nindent 10 }}
+          {{- else }}
+          type: RuntimeDefault
+          {{- end }}
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if eq $settings.image "api" }}
+      initContainers:
+        - name: database-readiness
+          image: {{ include "voxos.image" (dict "root" $root "key" "api") | quote }}
+          imagePullPolicy: {{ $root.Values.imagePullPolicy }}
+          command: [python, -m, voxos.db.runtime_readiness]
+          securityContext: {runAsUser: 10001, runAsGroup: 10001, runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          envFrom:
+            - secretRef: {name: {{ $root.Values.application.databaseSecret }}}
+          env:
+            {{- include "voxos.appEnv" $root | nindent 12 }}
+          {{- if $root.Values.application.firebaseAdminCredentialsSecret }}
+          volumeMounts:
+            - {name: firebase-admin, mountPath: /var/run/voxos-firebase, readOnly: true}
+          {{- end }}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 512Mi}
+      {{- end }}
+      containers:
+        - name: {{ $component }}
+          image: {{ include "voxos.image" (dict "root" $root "key" $settings.image) | quote }}
+          imagePullPolicy: {{ $root.Values.imagePullPolicy }}
+          securityContext:
+            {{- if eq $component "steel-browser" }}
+            appArmorProfile:
+              {{- toYaml $root.Values.browser.appArmorProfile | nindent 14 }}
+            {{- end }}
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            {{- if eq $settings.image "api" }}
+            runAsUser: 10001
+            runAsGroup: 10001
+            {{- else if eq $component "frontend" }}
+            runAsUser: 101
+            runAsGroup: 101
+            {{- else if or (eq $component "browser-agent") (eq $component "steel-browser") }}
+            runAsUser: 1000
+            runAsGroup: 1000
+            {{- end }}
+          {{- if $settings.command }}
+          command:
+            {{- toYaml $settings.command | nindent 12 }}
+          {{- end }}
+          {{- if eq $settings.image "api" }}
+          envFrom:
+            - secretRef: {name: {{ $root.Values.application.existingSecret }}}
+            - secretRef: {name: {{ $root.Values.application.databaseSecret }}}
+          env:
+            {{- include "voxos.appEnv" $root | nindent 12 }}
+            {{- if (index $root.Values.components "browser-agent").enabled }}
+            - name: BROWSER_ACCOUNTS_STAGEHAND_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef: {name: {{ $root.Values.browser.existingSecret }}, key: service-token}
+            {{- end }}
+            {{- if eq $component "whatsapp-worker" }}
+            - {name: WHATSAPP_BRIDGE_EXECUTABLE, value: /usr/local/bin/node}
+            - {name: WHATSAPP_BRIDGE_SCRIPT, value: /app/whatsapp-bridge/dist/index.js}
+            - {name: WHATSAPP_HEALTH_PATH, value: /var/run/voxos/whatsapp-worker-health.json}
+            {{- end }}
+          {{- else if eq $component "browser-agent" }}
+          env:
+            - {name: PORT, value: "3100"}
+            - {name: STEEL_BASE_URL, value: {{ printf "http://%s-steel-browser:3000" $name | quote }}}
+            - {name: TASK_TIMEOUT_MS, value: "570000"}
+            - name: BROWSER_AGENT_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef: {name: {{ $root.Values.browser.existingSecret }}, key: service-token}
+            - name: STEEL_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef: {name: {{ $root.Values.browser.existingSecret }}, key: steel-api-key}
+          {{- else if eq $component "steel-browser" }}
+          env:
+            - {name: HOST, value: "127.0.0.1"}
+            - {name: HOST_IP, value: {{ printf "%s-steel-browser" $name }}}
+            - {name: LOG_LEVEL, value: warn}
+            - {name: NODE_ENV, value: production}
+            - {name: DISABLE_CHROME_SANDBOX, value: "false"}
+            - name: STEEL_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef: {name: {{ $root.Values.browser.existingSecret }}, key: steel-api-key}
+          {{- end }}
+          {{- if $settings.port }}
+          ports: [{name: http, containerPort: {{ $settings.port }}}]
+          startupProbe:
+            {{- if eq $component "steel-browser" }}
+            httpGet: {path: {{ $settings.healthPath }}, port: http}
+            {{- else }}
+            tcpSocket: {port: http}
+            {{- end }}
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            {{- if $settings.healthPath }}
+            httpGet: {path: {{ $settings.healthPath }}, port: http}
+            {{- else }}
+            tcpSocket: {port: http}
+            {{- end }}
+            periodSeconds: 10
+          {{- if eq $component "steel-browser" }}
+          livenessProbe:
+            httpGet: {path: {{ $settings.healthPath }}, port: http}
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          {{- end }}
+          {{- else if eq $component "whatsapp-worker" }}
+          startupProbe:
+            exec: {command: [python, -m, voxos.whatsapp.worker, --healthcheck]}
+            periodSeconds: 30
+            timeoutSeconds: 30
+            failureThreshold: 20
+          readinessProbe:
+            exec: {command: [python, -m, voxos.whatsapp.worker, --healthcheck]}
+            periodSeconds: 30
+            timeoutSeconds: 30
+          {{- end }}
+          resources:
+            {{- toYaml $settings.resources | nindent 12 }}
+          volumeMounts:
+            {{- if and (eq $settings.image "api") $root.Values.application.firebaseAdminCredentialsSecret }}
+            - {name: firebase-admin, mountPath: /var/run/voxos-firebase, readOnly: true}
+            {{- end }}
+            - {name: runtime, mountPath: /var/run/voxos}
+            - {name: tmp, mountPath: /tmp}
+            {{- if and $settings.attachments $root.Values.attachments.enabled }}
+            - {name: attachments, mountPath: /var/lib/voxos/attachments}
+            {{- end }}
+            {{- if eq $component "steel-browser" }}
+            - {name: shm, mountPath: /dev/shm}
+            - {name: browser-home, mountPath: /home/node}
+            - {name: browser-files, mountPath: /files}
+            {{- end }}
+            {{- if eq $component "frontend" }}
+            - {name: frontend-cache, mountPath: /var/cache/nginx}
+            - {name: frontend-config, mountPath: /etc/nginx/conf.d/default.conf, subPath: default.conf, readOnly: true}
+            {{- if $root.Values.frontend.publicConfigSecret }}
+            - {name: public-config, mountPath: /var/run/voxos-public, readOnly: true}
+            {{- end }}
+            {{- end }}
+      volumes:
+        {{- if and (eq $settings.image "api") $root.Values.application.firebaseAdminCredentialsSecret }}
+        - name: firebase-admin
+          secret:
+            secretName: {{ $root.Values.application.firebaseAdminCredentialsSecret }}
+            defaultMode: 0440
+            items: [{key: credentials.json, path: credentials.json}]
+        {{- end }}
+        - {name: runtime, emptyDir: {}}
+        - {name: tmp, emptyDir: {sizeLimit: {{ if eq $component "steel-browser" }}1Gi{{ else }}256Mi{{ end }}}}
+        {{- if and $settings.attachments $root.Values.attachments.enabled }}
+        - name: attachments
+          persistentVolumeClaim:
+            claimName: {{ default (printf "%s-attachments" $name) $root.Values.attachments.existingClaim }}
+        {{- end }}
+        {{- if eq $component "steel-browser" }}
+        - {name: shm, emptyDir: {medium: Memory, sizeLimit: 1Gi}}
+        - {name: browser-home, emptyDir: {sizeLimit: 512Mi}}
+        - {name: browser-files, emptyDir: {sizeLimit: 512Mi}}
+        {{- end }}
+        {{- if eq $component "frontend" }}
+        - {name: frontend-cache, emptyDir: {sizeLimit: 64Mi}}
+        - {name: frontend-config, configMap: {name: {{ $name }}-frontend}}
+        {{- if $root.Values.frontend.publicConfigSecret }}
+        - {name: public-config, secret: {secretName: {{ $root.Values.frontend.publicConfigSecret }}}}
+        {{- end }}
+        {{- end }}
+---
+{{- if $settings.port }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-{{ $component }}
+  labels:
+    {{- include "voxos.labels" $root | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/instance: {{ $root.Release.Name | quote }}, app.kubernetes.io/component: {{ $component }}}
+  ports: [{name: http, port: {{ $settings.port }}, targetPort: http}]
+---
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

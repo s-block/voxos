@@ -1,0 +1,15 @@
+- Create optimum setup instructions
+- Allow agent to set up itself
+- Setup wizard
+- Enable conversation / task "notes" - store steps, things to remember, reasoning notes, etc.
+-
+-
+- Agent store User information / Rules / preferences - Users Name,
+- Create tool access for searching memories, prreferences, - check how memories, preferences are created
+- Add config for turning on/ clearing, memories
+- Create RAG or index search for searching conversation history.
+- Delete integrations / tokens
+- Delete account and all data
+
+- Flight lookup MCP
+-

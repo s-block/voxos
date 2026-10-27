@@ -1,0 +1,258 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- $name := include "voxos.name" . }}
+{{- $runtime := list "api" "agent-run-worker" "voice-worker" "whatsapp-worker" }}
+{{- $databaseClients := concat $runtime (list "scheduler" "migrate") }}
+{{- if eq .Values.mode "database" }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-isolation
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: postgres}
+  policyTypes: [Ingress, Egress]
+  egress: []
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Values.networkPolicy.applicationReleaseName | quote }}}
+            matchExpressions:
+              - {key: app.kubernetes.io/component, operator: In, values: {{ $databaseClients | toJson }}}
+      ports: [{protocol: TCP, port: 5432}]
+{{- else }}
+{{- if or (empty .Values.networkPolicy.ingressController.namespaceSelector) (empty .Values.networkPolicy.ingressController.podSelector) }}
+{{- fail "networkPolicy.ingressController requires non-empty namespaceSelector and podSelector when enabled" }}
+{{- end }}
+{{- if or (empty .Values.networkPolicy.dns.namespaceSelector) (empty .Values.networkPolicy.dns.podSelector) }}
+{{- fail "networkPolicy.dns requires non-empty namespaceSelector and podSelector when enabled" }}
+{{- end }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-default-deny
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress: []
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-dns
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: {{ .Values.networkPolicy.dns.namespaceSelector | toJson }}
+          podSelector:
+            matchLabels: {{ .Values.networkPolicy.dns.podSelector | toJson }}
+      ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-frontend-network
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: frontend}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {{ .Values.networkPolicy.ingressController.namespaceSelector | toJson }}
+          podSelector:
+            matchLabels: {{ .Values.networkPolicy.ingressController.podSelector | toJson }}
+      ports: [{protocol: TCP, port: 8080}]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: api}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-api-ingress
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: api}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {{ .Values.networkPolicy.ingressController.namespaceSelector | toJson }}
+          podSelector:
+            matchLabels: {{ .Values.networkPolicy.ingressController.podSelector | toJson }}
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+            matchExpressions:
+              - {key: app.kubernetes.io/component, operator: In, values: [frontend, monzo-mcp]}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-database-egress
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+    matchExpressions:
+      - {key: app.kubernetes.io/component, operator: In, values: {{ $databaseClients | toJson }}}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Values.networkPolicy.databaseReleaseName | quote }}, app.kubernetes.io/component: postgres}
+      ports: [{protocol: TCP, port: 5432}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-runtime-services
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+    matchExpressions:
+      - {key: app.kubernetes.io/component, operator: In, values: {{ $runtime | toJson }}}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: browser-agent}
+      ports: [{protocol: TCP, port: 3100}]
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+            matchExpressions:
+              - {key: app.kubernetes.io/component, operator: In, values: [flightradar-mcp, monzo-mcp]}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-browser-agent-network
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: browser-agent}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+            matchExpressions:
+              - {key: app.kubernetes.io/component, operator: In, values: {{ $runtime | toJson }}}
+      ports: [{protocol: TCP, port: 3100}]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: steel-browser}
+      ports: [{protocol: TCP, port: 3000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-steel-ingress
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: steel-browser}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: browser-agent}
+      ports: [{protocol: TCP, port: 3000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-mcp-network
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+    matchExpressions:
+      - {key: app.kubernetes.io/component, operator: In, values: [flightradar-mcp, monzo-mcp]}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+            matchExpressions:
+              - {key: app.kubernetes.io/component, operator: In, values: {{ $runtime | toJson }}}
+      ports: [{protocol: TCP, port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ $name }}-monzo-broker-egress
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: monzo-mcp}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}, app.kubernetes.io/component: api}
+      ports: [{protocol: TCP, port: 8000}]
+{{- end }}
+{{- end }}
+{{- if and (eq .Values.mode "application") .Values.networkPolicy.enabled .Values.networkPolicy.publicEgress.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "voxos.name" . }}-public-egress
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/instance: {{ .Release.Name | quote }}}
+    matchExpressions:
+      - key: app.kubernetes.io/component
+        operator: In
+        values: [api, agent-run-worker, voice-worker, whatsapp-worker, browser-agent, steel-browser, flightradar-mcp, monzo-mcp, frontend]
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 0.0.0.0/8
+              - 10.0.0.0/8
+              - 100.64.0.0/10
+              - 127.0.0.0/8
+              - 169.254.0.0/16
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+              - 224.0.0.0/4
+              - 240.0.0.0/4
+              {{- with .Values.networkPolicy.publicEgress.additionalDeniedCIDRs }}
+              {{- toYaml . | nindent 14 }}
+              {{- end }}
+{{- end }}

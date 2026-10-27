@@ -1,0 +1,32 @@
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    command:
+      - --dev
+      - --bind
+      - 0.0.0.0
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: voxos
+      POSTGRES_USER: voxos
+      POSTGRES_PASSWORD: voxos
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U voxos -d voxos
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - voxos-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  voxos-postgres-data:

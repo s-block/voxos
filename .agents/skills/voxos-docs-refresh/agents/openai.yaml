@@ -1,0 +1,4 @@
+interface:
+  display_name: "Voxos Docs Refresh"
+  short_description: "Refresh Voxos wiki docs from repo changes"
+  default_prompt: "Use $voxos-docs-refresh to refresh Voxos docs after recent code or UI changes."

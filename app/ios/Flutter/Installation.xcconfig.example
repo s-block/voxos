@@ -1,0 +1,6 @@
+VOXOS_IOS_BUNDLE_ID = org.example.voxos
+// Leave empty for unsigned simulator builds. Set your team for device/archive builds.
+VOXOS_APPLE_TEAM_ID =
+
+// Use the REVERSED_CLIENT_ID from your Firebase iOS application's configuration.
+GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.YOUR_IOS_OAUTH_CLIENT_ID

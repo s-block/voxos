@@ -1,0 +1,128 @@
+{
+  "name": "@steel-browser/api",
+  "version": "0.5.3",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./plugin": {
+      "import": {
+        "types": "./build/steel-browser-plugin.d.ts",
+        "default": "./build/steel-browser-plugin.js"
+      }
+    },
+    "./cdp-plugin": {
+      "import": {
+        "types": "./build/services/cdp/plugins/core/base-plugin.d.ts",
+        "default": "./build/services/cdp/plugins/core/base-plugin.js"
+      }
+    },
+    "./logger": {
+      "import": {
+        "types": "./build/plugins/logging/browser-logger.d.ts",
+        "default": "./build/plugins/logging/browser-logger.js"
+      }
+    },
+    "./storage": {
+      "import": {
+        "types": "./build/services/cdp/instrumentation/storage/log-storage.interface.d.ts",
+        "default": "./build/services/cdp/instrumentation/storage/log-storage.interface.js"
+      }
+    },
+    "./browser": {
+      "import": {
+        "types": "./build/types/browser.d.ts",
+        "default": "./build/types/browser.js"
+      }
+    }
+  },
+  "scripts": {
+    "start": "node ./build/index.js",
+    "build": "tsc && npm run copy:templates && npm run copy:fingerprint",
+    "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 10",
+    "copy:templates": "mkdir -p build/templates && cp -r src/templates/* build/templates/",
+    "copy:fingerprint": "cp src/scripts/fingerprint.js build/scripts/fingerprint.js",
+    "prepare:recorder": "cd extensions/recorder && npm install && npm run build",
+    "dev": "npm run prepare:recorder && tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:heavy": "SCRAPE_EVAL_HEAVY=1 vitest run",
+    "eval:report": "tsx src/utils/scrape/__tests__/eval/runEval.ts",
+    "pretty": "prettier --write \"src/**/*.ts\"",
+    "generate:openapi": "tsx ./openapi/generate.ts"
+  },
+  "author": "Nasr Mohamed",
+  "devDependencies": {
+    "@opentelemetry/api": "1.9.0",
+    "@types/archiver": "^6.0.3",
+    "@types/iconv-lite": "^0.0.1",
+    "@types/json-stringify-safe": "^5.0.3",
+    "@types/lodash-es": "^4.17.12",
+    "@types/mime-types": "^2.1.4",
+    "@types/node": "^22.14.1",
+    "@types/ws": "^8.5.14",
+    "fastify": "^5.2.1",
+    "prettier": "3.0.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.4.4",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/multipart": "^9.0.3",
+    "@fastify/reply-from": "^12.0.2",
+    "@fastify/sensible": "^6.0.3",
+    "@fastify/static": "^10.1.5",
+    "@fastify/swagger": "^9.4.2",
+    "@fastify/view": "10.0.2",
+    "@hey-api/openapi-ts": "0.99.0",
+    "@scalar/fastify-api-reference": "^1.25.116",
+    "archiver": "^7.0.1",
+    "axios": "^1.12.0",
+    "cheerio": "^1.1.2",
+    "chokidar": "^4.0.3",
+    "defuddle": "^0.19.4",
+    "dotenv": "^16.4.7",
+    "duckdb-async": "^1.1.3",
+    "ejs": "^3.1.10",
+    "fastify-plugin": "^5.0.1",
+    "file-type": "^22.1.1",
+    "fingerprint-generator": "2.1.82",
+    "fingerprint-injector": "2.1.82",
+    "http-proxy": "^1.18.1",
+    "https-proxy-agent": "^7.0.6",
+    "iconv-lite": "^0.6.3",
+    "jsdom": "^24.1.3",
+    "json-stringify-safe": "^5.0.1",
+    "level": "^9.0.0",
+    "lodash-es": "^4.17.21",
+    "mime-types": "^2.1.35",
+    "mupdf": "^1.27.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "proxy-chain": "^2.5.6",
+    "puppeteer-core": "^25.16.0",
+    "react-router-dom": "7.18.4",
+    "socks-proxy-agent": "^8.0.5",
+    "uuid": "^11.0.5",
+    "zod": "^4.6.7"
+  },
+  "overrides": {
+    "cross-spawn": "^7.0.6",
+    "tar-fs": ">=3.1.1"
+  },
+  "peerDependencies": {
+    "@opentelemetry/api": "1.9.0",
+    "fastify": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": false
+    },
+    "@opentelemetry/api": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,156 @@
+name: Kubernetes artifacts
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+    tags: ["helm-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  chart:
+    name: Validate Helm chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with: {python-version: "3.12"}
+      - name: Install Python dependencies
+        run: python -m pip install uv && uv sync --all-extras --dev --frozen
+      - name: Install verified chart tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          tool_directory=$(mktemp -d)
+          trap 'rm -rf "$tool_directory"' EXIT
+          cd "$tool_directory"
+          curl -fsSLO https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz.sha256sum
+          sha256sum --check helm-v4.3.0-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v4.3.0-linux-amd64.tar.gz
+          sudo install linux-amd64/helm /usr/local/bin/helm
+          curl -fsSLO https://github.com/yannh/kubeconform/releases/download/v0.8.0/kubeconform-linux-amd64.tar.gz
+          curl -fsSLO https://github.com/yannh/kubeconform/releases/download/v0.8.0/CHECKSUMS
+          grep -E ' kubeconform-linux-amd64[.]tar[.]gz$' CHECKSUMS | sha256sum --check
+          tar -xzf kubeconform-linux-amd64.tar.gz kubeconform
+          sudo install kubeconform /usr/local/bin/kubeconform
+      - name: Validate both release modes and migration contracts
+        run: |
+          set -e
+          helm lint helm --strict --values helm/tests/database.yaml
+          helm lint helm --strict --values helm/tests/application.yaml
+          uv run pytest tests/deployment/test_helm_chart.py -q
+          helm package helm --destination /tmp/voxos-chart
+
+  frontend:
+    name: Validate frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci && npm run lint && npm test
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: https://deployment-config-test-only.example.test
+          VITE_FIREBASE_PROJECT_ID: deployment-config-test-only
+          VITE_FIREBASE_API_KEY: deployment-config-test-only  # pragma: allowlist secret - build privacy fixture
+          VITE_LOGODEV_PUBLISHABLE_KEY: deployment-config-test-only
+      - name: Verify portable release assets
+        run: |
+          if grep -R --quiet 'deployment-config-test-only' frontend/dist; then
+            echo 'Deployment configuration was embedded in release assets' >&2
+            exit 1
+          fi
+
+  browser-agent:
+    name: Browser service contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: browser-agent/package-lock.json
+      - run: npm ci
+        working-directory: browser-agent
+      - run: npm test
+        working-directory: browser-agent
+      - name: Audit browser dependencies
+        run: |
+          npm audit --package-lock-only --prefix browser-agent
+          npm audit --package-lock-only --prefix helm/images/steel
+
+  images:
+    name: Publish portable images
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    needs: [chart, frontend, browser-agent]
+    runs-on: ubuntu-latest
+    permissions: {contents: read, packages: write}
+    strategy:
+      matrix:
+        include:
+          - {component: frontend, context: frontend, dockerfile: frontend/Dockerfile.production}
+          - {component: browser-agent, context: browser-agent, dockerfile: browser-agent/Dockerfile}
+          - {component: steel-browser, context: helm/images/steel, dockerfile: helm/images/steel/Dockerfile}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish amd64 and arm64 images
+        env:
+          COMPONENT: ${{ matrix.component }}
+          BUILD_CONTEXT: ${{ matrix.context }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        run: |
+          set -euo pipefail
+          image="ghcr.io/${GITHUB_REPOSITORY,,}-oss-${COMPONENT}:sha-${GITHUB_SHA:0:7}"
+          docker buildx build --platform linux/amd64,linux/arm64 \
+            --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --file "$DOCKERFILE" --tag "$image" --push "$BUILD_CONTEXT"
+
+  publish-chart:
+    name: Publish Helm OCI chart
+    if: startsWith(github.ref, 'refs/tags/helm-v')
+    needs: [chart, frontend, browser-agent]
+    runs-on: ubuntu-latest
+    permissions: {contents: read, packages: write}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Install verified Helm
+        run: |
+          set -euo pipefail
+          tool_directory=$(mktemp -d)
+          trap 'rm -rf "$tool_directory"' EXIT
+          cd "$tool_directory"
+          curl -fsSLO https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz
+          curl -fsSLO https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz.sha256sum
+          sha256sum --check helm-v4.3.0-linux-amd64.tar.gz.sha256sum
+          tar -xzf helm-v4.3.0-linux-amd64.tar.gz
+          sudo install linux-amd64/helm /usr/local/bin/helm
+      - name: Publish matching chart version
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version=$(helm show chart helm | awk '/^version:/ {print $2}')
+          test "$GITHUB_REF_NAME" = "helm-v${version}"
+          printf '%s' "$GHCR_TOKEN" | helm registry login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          helm package helm --destination /tmp/voxos-chart
+          helm push "/tmp/voxos-chart/voxos-${version}.tgz" "oci://ghcr.io/${GITHUB_REPOSITORY,,}-oss-charts"

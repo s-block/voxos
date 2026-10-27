@@ -1,0 +1,15 @@
+{{- if and (eq .Values.mode "application") .Values.migrations.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "voxos.name" . }}-migration-config
+  labels:
+    {{- include "voxos.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: before-hook-creation
+data:
+  configure-runtime-role.py: |
+    {{- .Files.Get "files/configure-runtime-role.py" | nindent 4 }}
+{{- end }}
