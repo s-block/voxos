@@ -546,7 +546,9 @@ under GPLv3 terms and the Steel/MuPDF service under AGPLv3 terms; applicable
 MIT, Apache and LGPL notices remain with their components. See
 [Third-party software and source](https://github.com/s-block/voxos/blob/main/THIRD_PARTY_NOTICES.md) for access and
 redistribution instructions. Docker builds verify upstream source checksums;
-dependency-source versions are checked against the lockfiles.
+dependency-source versions are checked against the lockfiles and installed
+native bundle metadata. The API source directory includes libvips component
+archives, upstream build patches and locked librsvg Rust dependency sources.
 
 The Python integrations use LiveKit Agents 1.8, MCP SDK 2 and HTTPX 2 for SDK
 transports. Exposed MCP servers are built with `mcp.server.MCPServer` and the
