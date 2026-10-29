@@ -263,7 +263,7 @@ prompts/*
 
 # Installation data, credentials and recovery archives
 /.voxos/
-/.secrets/
+/.secrets
 /private/
 *.dump
 *.sql.gz

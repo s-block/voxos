@@ -1,9 +1,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
+
+function writeModified(path, content) {
+  writeFileSync(path, "// Modified by Voxos; see voxos-build/SOURCE.md in the source archive.\n" + content);
+}
+
 const cdpPath = "/source/api/src/services/cdp/cdp.service.ts";
 let cdp = readFileSync(cdpPath, "utf8");
 if (!cdp.includes('          "--remote-allow-origins=*",')) throw new Error("Upstream Chromium launch defaults changed");
 cdp = cdp.replace('          "--remote-allow-origins=*",\n', "").replace("IsolateOrigins,site-per-process,", "");
-writeFileSync(cdpPath, cdp);
+writeModified(cdpPath, cdp);
 const indexPath = "/source/api/src/index.ts";
 let index = readFileSync(indexPath, "utf8");
 const marker = "const setupServer = async () => {";
@@ -27,34 +32,34 @@ server.server.prependListener("upgrade", (request, socket) => {
   if (!authorized(request.headers.authorization)) socket.destroy();
 });
 ${marker}`);
-writeFileSync(indexPath, index);
+writeModified(indexPath, index);
 
 const eventsPath = "/source/api/src/services/cdp/instrumentation/page-events.ts";
 let events = readFileSync(eventsPath, "utf8");
 const oldError = "error: { message: err?.message, stack: err?.stack }";
 if (!events.includes(oldError)) throw new Error("Upstream page-error instrumentation changed");
 events = events.replaceAll(oldError, "error: { message: err instanceof Error ? err.message : 'Unknown browser error', stack: err instanceof Error ? err.stack : undefined }");
-writeFileSync(eventsPath, events);
+writeModified(eventsPath, events);
 
 const configPath = "/source/api/src/config.ts";
 let config = readFileSync(configPath, "utf8");
 if (!config.includes("  production: {},")) throw new Error("Upstream production logging configuration changed");
 config = config.replace("  production: {},", '  production: { level: process.env.LOG_LEVEL || "warn" },');
-writeFileSync(configPath, config);
+writeModified(configPath, config);
 
 const loggerPath = "/source/api/src/services/cdp/instrumentation/browser-logger.ts";
 let logger = readFileSync(loggerPath, "utf8");
 const consoleDefault = "const enableConsoleLogging = options.enableConsoleLogging ?? true;";
 if (!logger.includes(consoleDefault)) throw new Error("Upstream browser-event logging changed");
 logger = logger.replace(consoleDefault, "const enableConsoleLogging = false;");
-writeFileSync(loggerPath, logger);
+writeModified(loggerPath, logger);
 
 const sessionsPath = "/source/ui/src/contexts/sessions-context/sessions-context.tsx";
 let sessions = readFileSync(sessionsPath, "utf8");
 const routerType = 'import { ErrorResponse } from "@remix-run/router";';
 if (!sessions.includes(routerType)) throw new Error("Upstream UI session error typing changed");
 sessions = sessions.replace(routerType, 'import { GetSessionDetailsError } from "@/steel-client";').replace("useQuery<SessionDetails, ErrorResponse>", "useQuery<SessionDetails, GetSessionDetailsError>");
-writeFileSync(sessionsPath, sessions);
+writeModified(sessionsPath, sessions);
 
 // Zod 4 validates records with explicit keys and supplies defaults before transforms.
 const envPath = "/source/api/src/env.ts";
@@ -63,7 +68,7 @@ env = env.replaceAll('z.record(z.string())', 'z.record(z.string(), z.string())')
   .replaceAll('.default("false")', '.prefault("false")')
   .replaceAll('.default("true")', '.prefault("true")')
   .replaceAll('.default("")', '.prefault("")');
-writeFileSync(envPath, env);
+writeModified(envPath, env);
 for (const [path, before, after] of [
   ["modules/logs/logs.schema.ts", "z.record(z.any())", "z.record(z.string(), z.any())"],
   ["modules/selenium/selenium.schema.ts", "z.record(z.string())", "z.record(z.string(), z.string())"],
@@ -71,7 +76,7 @@ for (const [path, before, after] of [
   const schemaPath = `/source/api/src/${path}`;
   const schema = readFileSync(schemaPath, "utf8");
   if (!schema.includes(before)) throw new Error(`Upstream record schema changed: ${path}`);
-  writeFileSync(schemaPath, schema.replaceAll(before, after));
+  writeModified(schemaPath, schema.replaceAll(before, after));
 }
 const schemaPath = "/source/api/src/utils/schema.ts";
 let schema = readFileSync(schemaPath, "utf8");
@@ -89,4 +94,4 @@ schema = schema.replace('import { zodToJsonSchema } from "zod-to-json-schema";\n
       ? { type: "string", format: "date-time" }
       : "throw",
   })`);
-writeFileSync(schemaPath, schema);
+writeModified(schemaPath, schema);

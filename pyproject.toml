@@ -26,7 +26,7 @@ dependencies = [# FastAPI server (stateless, no database required)
     "redis",
     "firebase-admin",
     # Keep cachecontrol's transitive msgpack dependency on a patched release.
-    "msgpack>=1.2.1",
+    "msgpack>=1.2.3",
     "google-auth",
     "google-cloud-kms",
     # AWS dependencies
@@ -85,7 +85,6 @@ dev = [
     "pre-commit",
     "fastapi",
     "redis>=4",
-    "langgraph-cli",
     "aiosqlite>=0.22.1",
 ]
 
@@ -113,6 +112,7 @@ include = [
 [tool.uv]
 package = true
 exclude-newer = "7 days"
+constraint-dependencies = ["dnspython>=2.9.0"]
 # Reviewed security fixes published during the cooldown. The fixed cutoff keeps
 # future releases subject to review; remove these exceptions after 2026-11-03.
 [tool.uv.exclude-newer-package]
@@ -121,7 +121,6 @@ certifi = "2026-10-28T00:00:00Z"
 filelock = "2026-10-28T00:00:00Z"
 h2 = "2026-10-28T00:00:00Z"
 hpack = "2026-10-28T00:00:00Z"
-langgraph-sdk = "2026-10-28T00:00:00Z"
 mcp = "2026-10-28T00:00:00Z"
 multidict = "2026-10-28T00:00:00Z"
 opentelemetry-api = "2026-10-28T00:00:00Z"

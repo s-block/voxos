@@ -1,6 +1,6 @@
 # Architecture And Security
 
-Last updated: 2026-10-26
+Last updated: 2026-10-29
 
 Voxos is organized by product capability under `src/voxos/`. FastAPI app
 composition lives in `src/voxos/api/main.py`, and module routers call typed
@@ -397,3 +397,13 @@ values and referenced Secrets. Vault encryption keys and database credentials
 must survive redeployments and be included in encrypted off-cluster recovery
 procedures. The frontend obtains its server's public client configuration at
 runtime; credentials remain in the backend vault or deployment Secrets.
+
+## Source and redistribution
+
+Published images retain component license notices and source archives under
+`/usr/share/voxos/source`. Steel's `/source/` route serves these static build
+inputs; session, browser and DevTools operations require bearer authentication.
+The runtime contains compiled service assets and production dependencies,
+with test captures and dependency test directories excluded from the service
+tree. See [Developer Setup](Developer-Setup.md) for source access and the
+component-specific redistribution terms.

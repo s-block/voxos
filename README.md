@@ -684,4 +684,7 @@ place, and the app connects with the same role that owns runtime traffic.
 
 ## License
 
-Voxos is licensed under the MIT License. See `LICENSE`.
+Voxos-authored source is licensed under the MIT License. See `LICENSE`.
+The runtime images include separately licensed GPL, AGPL, LGPL, and permissive
+components. See [Third-party software and source](THIRD_PARTY_NOTICES.md)
+for component terms and access to the source included with each image.

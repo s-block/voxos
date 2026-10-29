@@ -18,6 +18,31 @@ permissions:
   contents: read
 
 jobs:
+  secret-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: "1.25"
+          cache: false
+      - name: Install pinned Gitleaks
+        run: go install github.com/zricethezav/gitleaks/v8@v8.30.1
+      - name: Include historical pull-request heads
+        run: git fetch --no-tags origin '+refs/pull/*/head:refs/remotes/pull/*'
+      - name: Verify secret-scanning exemptions
+        run: |
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          python3 -m unittest discover -s tests/deployment -p test_secret_scanning.py
+      - name: Scan complete Git history
+        run: |
+          "$(go env GOPATH)/bin/gitleaks" git . --log-opts="--all --full-history" \
+            --config .gitleaks.toml --ignore-gitleaks-allow --redact=100 \
+            --max-archive-depth=3 --no-banner
+
   validate-format:
     name: Validate format
     runs-on: ubuntu-latest
@@ -297,6 +322,7 @@ jobs:
     name: Build and publish GHCR image
     runs-on: ubuntu-latest
     needs:
+      - secret-scan
       - test
       - whatsapp-bridge
       - bandit

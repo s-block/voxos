@@ -1,6 +1,6 @@
 # Developer Setup
 
-Last updated: 2026-10-27
+Last updated: 2026-10-29
 
 This page collects development commands and repo conventions for contributors.
 
@@ -528,6 +528,22 @@ CI audits the locked Python and JavaScript runtime and development dependencies
 using `pip-audit` and `npm audit`. The dependency audit requires no maintainer
 credentials and gates API image publication. Review security updates with the
 SDK integration tests and rebuild the affected images before release.
+
+The `Secret scan` CI check fetches complete branch, tag and historical
+pull-request heads, then runs pinned Gitleaks with archive decoding and
+redacted output. Its exemptions identify exact synthetic values or hash
+formats and include regression tests for detecting new credentials in the
+same files. Report vulnerabilities through the private reporting channel in
+the repository's `SECURITY.md`.
+
+Published API and Steel images include source archives and license notices
+under `/usr/share/voxos/source`. Steel also exposes its source directory at
+`/source/` on the service HTTP port. The API's WhatsApp program is distributed
+under GPLv3 terms and the Steel/MuPDF service under AGPLv3 terms; applicable
+MIT, Apache and LGPL notices remain with their components. See
+[Third-party software and source](https://github.com/s-block/voxos/blob/main/THIRD_PARTY_NOTICES.md) for access and
+redistribution instructions. Docker builds verify upstream source checksums;
+dependency-source versions are checked against the lockfiles.
 
 The Python integrations use LiveKit Agents 1.8, MCP SDK 2 and HTTPX 2 for SDK
 transports. Exposed MCP servers are built with `mcp.server.MCPServer` and the

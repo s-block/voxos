@@ -1,0 +1,32 @@
+{
+  "baileys": {
+    "version": "7.0.0-rc13",
+    "url": "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/8053b086ecc97ec3f78299561de11959bab05d39",
+    "sha256": "345fa4d8ba33c98f4fca82dd7691b3f9d00af2a944f9cfb53917721998b1d9d8",
+    "license": "MIT"
+  },
+  "libsignal": {
+    "version": "6.0.0",
+    "url": "https://codeload.github.com/WhiskeySockets/libsignal-node/tar.gz/bcea72df9ec34d9d9140ab30619cf479c7c144c7",
+    "sha256": "e8237ac721bdf8c622d2f13a4035b69acccb9f0c5999aa5e88944c4f171dd174",
+    "license": "GPL-3.0-only"
+  },
+  "libvips": {
+    "version": "8.18.7",
+    "url": "https://github.com/libvips/libvips/releases/download/v8.18.7/vips-8.18.7.tar.xz",
+    "sha256": "5baaead3b0bb20ffdb9e9ff09aa9fda08620923df77b63b436654cb5e0b3bf94",
+    "license": "LGPL-2.1-or-later"
+  },
+  "sharp-libvips": {
+    "version": "1.3.4",
+    "url": "https://codeload.github.com/lovell/sharp-libvips/tar.gz/v1.3.4",
+    "sha256": "a8e96acb479c9bc1a5b7950f8f25aa6c8e1ef3a19755b45cf2f00d506aeaccc0",
+    "license": "Apache-2.0"
+  },
+  "mupdf": {
+    "version": "1.28.1",
+    "url": "https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz",
+    "sha256": "dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3",
+    "license": "AGPL-3.0-or-later"
+  }
+}

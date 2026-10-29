@@ -16,6 +16,7 @@ GIT = git_executable()
         "deploy/application.yaml",
         ".voxos/attachments/customer.png",
         ".secrets/service-account.json",
+        ".secrets",
         ".env.production",
         "application.env",
         "database-runtime.env",
@@ -40,7 +41,7 @@ GIT = git_executable()
 def test_installation_files_are_private_and_ignored(filename: str) -> None:
     assert is_private_path(filename)
     result = subprocess.run(  # noqa: S603 - resolved Git executable and synthetic fixture paths
-        [GIT, "check-ignore", "--no-index", "-q", filename], cwd=ROOT, check=False
+        [GIT, "-c", "core.excludesFile=/dev/null", "check-ignore", "--no-index", "-q", filename], cwd=ROOT, check=False
     )
     assert result.returncode == 0
 
