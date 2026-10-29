@@ -526,8 +526,11 @@ from public PyPI with `uv sync --frozen`; image builds need no private index.
 
 CI audits the locked Python and JavaScript runtime and development dependencies
 using `pip-audit` and `npm audit`. The dependency audit requires no maintainer
-credentials and gates API image publication. Review security updates with the
-SDK integration tests and rebuild the affected images before release.
+credentials and gates API image publication. Published API, frontend, browser
+service and Steel images also receive Trivy runtime vulnerability checks,
+including packaged Java libraries and operating-system packages. Review
+security updates with the SDK integration tests and rebuild the affected
+images before release.
 
 The `Secret scan` CI check fetches complete branch, tag and historical
 pull-request heads, then runs pinned Gitleaks with archive decoding and
@@ -543,7 +546,9 @@ under GPLv3 terms and the Steel/MuPDF service under AGPLv3 terms; applicable
 MIT, Apache and LGPL notices remain with their components. See
 [Third-party software and source](https://github.com/s-block/voxos/blob/main/THIRD_PARTY_NOTICES.md) for access and
 redistribution instructions. Docker builds verify upstream source checksums;
-dependency-source versions are checked against the lockfiles.
+dependency-source versions are checked against the lockfiles and installed
+native bundle metadata. The API source directory includes libvips component
+archives, upstream build patches and locked librsvg Rust dependency sources.
 
 The Python integrations use LiveKit Agents 1.8, MCP SDK 2 and HTTPX 2 for SDK
 transports. Exposed MCP servers are built with `mcp.server.MCPServer` and the

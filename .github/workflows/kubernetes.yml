@@ -122,10 +122,20 @@ jobs:
         run: |
           set -euo pipefail
           image="ghcr.io/${GITHUB_REPOSITORY,,}-oss-${COMPONENT}:sha-${GITHUB_SHA:0:7}"
+          echo "PUBLISHED_IMAGE=$image" >> "$GITHUB_ENV"
           docker buildx build --platform linux/amd64,linux/arm64 \
             --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --file "$DOCKERFILE" --tag "$image" --push "$BUILD_CONTEXT"
+      - name: Scan published runtime dependencies
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ${{ env.PUBLISHED_IMAGE }}
+          scanners: vuln
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          timeout: 10m
 
   publish-chart:
     name: Publish Helm OCI chart

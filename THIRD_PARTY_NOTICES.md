@@ -13,11 +13,18 @@ Its source, build configuration, and the exact upstream Baileys and libsignal
 sources are included under `/usr/share/voxos/source` in the API image.
 The full GPLv3 text is `/usr/share/voxos/licenses/GPL-3.0.txt`.
 
-Sharp's libvips binaries retain their LGPL and other dependency notices in
-the installed packages. The image also includes libvips 8.18.7 source and
-sharp-libvips 1.3.4 build scripts in the same source directory. Shared
-libraries and the bridge can be replaced by rebuilding the image from the
-included sources and build configuration.
+Sharp's libvips 8.18.7 shared library includes LGPLv3 components and Cairo
+under MPL 1.1, alongside separately licensed libraries. The image includes
+the versioned sources for all 28 native components, the five upstream build
+patches, sharp-libvips 1.3.4 build scripts, and librsvg's locked Rust dependency
+sources in `librsvg-rust-vendor.tar.gz`. Cargo source configuration accompanies
+the Rust archive. Image builds verify source versions against the installed
+native bundle metadata.
+
+The full LGPLv3 and MPL 1.1 texts and sharp-libvips's component notices are
+under `/usr/share/voxos/licenses`. Package-level notices remain in the
+installed dependencies. Shared libraries and the bridge can be replaced by
+rebuilding the image from the included sources and build configuration.
 
 ## Steel browser
 

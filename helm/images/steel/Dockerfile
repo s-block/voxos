@@ -13,7 +13,8 @@ FROM source AS redistribution-source
 COPY . /source/voxos-build/
 RUN mkdir /sources \
     && tar --exclude='*/__tests__' --exclude='*/tests' --exclude='*/test' \
-      --exclude='*/node_modules' --exclude='.git' -czf /sources/steel-source.tar.gz -C /source .
+      --exclude='*/node_modules' --exclude='./api/selenium' --exclude='./images' \
+      --exclude='.git' -czf /sources/steel-source.tar.gz -C /source .
 ADD --checksum=sha256:dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3 https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz /sources/mupdf-1.28.1-source.tar.gz
 COPY SOURCE.md AGPL-3.0.txt /sources/
 RUN chmod 0644 /sources/*
@@ -133,7 +134,7 @@ RUN mkdir -p /files
 # Copy compiled runtime assets and dependency notices from the build stage.
 COPY --from=api-build /runtime /app
 COPY --from=redistribution-source /sources/ /usr/share/voxos/source/
-ADD --checksum=sha256:4664ef41d4bf5ee78cd6264ff8dca480ef80628ca91df95ca554c4d66f7831c1 https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.50.0/selenium-server-4.50.0.jar /app/api/selenium/server/selenium-server.jar
+ADD --checksum=sha256:cd167b9a5d405e8e59fa316f949f7af256834545d0631d72224500dafbc79d0f https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.52.0/selenium-server-4.52.0.jar /app/api/selenium/server/selenium-server.jar
 RUN rm -rf /usr/local/lib/node_modules/npm /opt/yarn-* && \
     rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 
