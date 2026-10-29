@@ -1,6 +1,6 @@
 {
   "docs_dir": "docs/wiki",
-  "generated_at": "2026-10-27T05:46:40.223986Z",
+  "generated_at": "2026-10-29T12:52:10.931242Z",
   "pages": [
     {
       "last_updated": "2026-10-01",
@@ -15,9 +15,9 @@
       "title": "Agent Knowledge And Persistence"
     },
     {
-      "last_updated": "2026-10-26",
+      "last_updated": "2026-10-29",
       "path": "Architecture-And-Security.md",
-      "source_fingerprint": "8b1c-d865-e5ed-40cf",
+      "source_fingerprint": "9205-1989-3f73-4f60",
       "title": "Architecture And Security"
     },
     {
@@ -33,9 +33,9 @@
       "title": "Chat And Text"
     },
     {
-      "last_updated": "2026-10-27",
+      "last_updated": "2026-10-29",
       "path": "Developer-Setup.md",
-      "source_fingerprint": "5542-9f2c-c5e5-d34e",
+      "source_fingerprint": "9dc1-05bd-cdfe-d81a",
       "title": "Developer Setup"
     },
     {

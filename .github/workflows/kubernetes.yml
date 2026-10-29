@@ -86,6 +86,8 @@ jobs:
         working-directory: browser-agent
       - run: npm test
         working-directory: browser-agent
+      - name: Verify Steel runtime packaging
+        run: node --test helm/images/steel/prepare-runtime.test.mjs
       - name: Audit browser dependencies
         run: |
           npm audit --package-lock-only --prefix browser-agent

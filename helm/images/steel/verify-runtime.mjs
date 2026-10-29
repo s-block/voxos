@@ -17,6 +17,9 @@ for (let attempt = 0; ; attempt++) {
   }
 }
 assert.equal((await fetch(`${base}/v1/sessions`)).status, 401);
+assert.equal((await fetch(`${base}/source/`)).status, 200);
+assert.equal((await fetch(`${base}/source/steel-source.tar.gz`, { method: "HEAD" })).status, 200);
+assert.equal((await fetch(`${base}/source/mupdf-1.28.1-source.tar.gz`, { method: "HEAD" })).status, 200);
 assert.equal((await fetch("http://127.0.0.1:3001/v1/sessions")).status, 401);
 assert.equal((await fetch(`${base}/v1/sessions`, { headers: authorization })).status, 200);
 const created = await fetch(`${base}/v1/sessions`, {

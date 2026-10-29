@@ -6,6 +6,13 @@ set of patched JavaScript dependencies. It runs as UID 1000 with the Chromium
 sandbox enabled. The Steel API and CDP transports require the same bearer token.
 Chromium accepts its default trusted DevTools origins and retains site isolation.
 
+The Steel/MuPDF service is distributed under AGPLv3 terms, retaining the
+upstream Apache and other component notices. Its modified source and complete
+MuPDF source are available at `/source/` and in `/usr/share/voxos/source` in
+the image. See [source and license instructions](SOURCE.md). Runtime packaging
+includes compiled service assets and excludes captured test pages and
+dependency test directories.
+
 Build the image and provide a random 32-byte hexadecimal `STEEL_SERVICE_TOKEN`:
 
 ```sh

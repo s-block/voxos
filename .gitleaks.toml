@@ -1,0 +1,49 @@
+title = "Voxos source and history secret scanning"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "SHA-1 detection fingerprints contain no plaintext credentials"
+condition = "AND"
+paths = ['''(^|/)\.secrets\.baseline$''']
+regexTarget = "line"
+regexes = ['''^\s*"hashed_secret": "[a-f0-9]{40}",?\s*$''']
+
+[[rules.allowlists]]
+description = "CocoaPods integrity checksums for authentication libraries"
+condition = "AND"
+paths = ['''(^|/)app/ios/Podfile\.lock$''']
+regexTarget = "match"
+regexes = ['''^(AppAuth|firebase_auth|FirebaseAuth|FirebaseAuthInterop|GTMAppAuth): [a-f0-9]{40}\s*$''']
+
+[[rules.allowlists]]
+description = "Deterministic encryption key for the disposable CI test database"
+condition = "AND"
+paths = ['''(^|/)\.github/workflows/ci\.yml$''']
+regexTarget = "secret"
+regexes = ['''^(0123456789abcdef0123456789abcdef|MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=)$'''] # pragma: allowlist secret - deterministic CI fixture
+
+[[rules.allowlists]]
+description = "Empty environment template assignment"
+condition = "AND"
+paths = ['''(^|/)\.env\.example$''']
+regexTarget = "secret"
+regexes = ['''^API_DOCS_ENABLED=true$''']
+
+[[rules.allowlists]]
+description = "Synthetic route-key marker used to prove error redaction"
+condition = "AND"
+paths = ['''(^|/)tests/api/test_integrations\.py$''']
+regexTarget = "secret"
+regexes = ['''^route-key-marker-1b0a$''']
+
+[[rules.allowlists]]
+description = "Archived audit paragraph enumerates protected data classes"
+condition = "AND"
+paths = ['''(^|/)docs/security-audit-2026-08-23\.md$''']
+regexTarget = "secret"
+regexes = ['''^LiveKit/Twilio/Telnyx$''']
