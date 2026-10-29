@@ -15,6 +15,7 @@ test("runtime includes service assets and licenses without captured pages or tes
       "api/build/index.js", "api/build/templates/page.ejs",
       "api/extensions/recorder/dist/inject.js", "api/extensions/recorder/manifest.json",
       "api/extensions/recorder/icon.png", "api/selenium/driver/LICENSE.chromedriver",
+      "api/selenium/server/selenium-server.jar", "api/selenium/driver/chromedriver2",
       "node_modules/dependency/index.js", "node_modules/dependency/LICENSE",
       "node_modules/dependency/test/fixtures/server.key",
       "api/src/utils/scrape/__tests__/fixtures/article.html.gz",
@@ -31,10 +32,10 @@ test("runtime includes service assets and licenses without captured pages or tes
     prepareRuntime(build, runtime);
     for (const file of ["api/build/index.js", "api/build/templates/page.ejs", "LICENSE",
       "node_modules/dependency/LICENSE", "api/extensions/recorder/dist/inject.js",
-      "api/selenium/driver/LICENSE.chromedriver", "api/node_modules/nested/index.js"]) {
+      "api/node_modules/nested/index.js"]) {
       assert.equal(readFileSync(join(runtime, file), "utf8"), file);
     }
-    for (const file of ["api/src", "api/build/utils/scrape/__tests__",
+    for (const file of ["api/src", "api/selenium", "api/build/utils/scrape/__tests__",
       "node_modules/dependency/test", "api/node_modules/nested/tests"]) {
       assert.equal(existsSync(join(runtime, file)), false);
     }

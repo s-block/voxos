@@ -17,7 +17,6 @@ export function prepareRuntime(sourceDirectory, destinationDirectory) {
     "api/extensions/recorder/dist",
     "api/extensions/recorder/manifest.json",
     "api/extensions/recorder/icon.png",
-    "api/selenium",
   ];
   const optional = ["api/node_modules"];
   for (const path of [...required, ...optional.filter((path) => existsSync(join(sourceDirectory, path)))]) {
