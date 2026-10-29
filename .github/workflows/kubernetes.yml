@@ -132,7 +132,7 @@ jobs:
         with:
           image-ref: ${{ env.PUBLISHED_IMAGE }}
           scanners: vuln
-          severity: HIGH,CRITICAL
+          severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: "1"
           timeout: 10m
