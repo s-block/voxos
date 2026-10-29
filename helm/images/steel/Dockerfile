@@ -133,7 +133,7 @@ RUN mkdir -p /files
 # Copy compiled runtime assets and dependency notices from the build stage.
 COPY --from=api-build /runtime /app
 COPY --from=redistribution-source /sources/ /usr/share/voxos/source/
-ADD --checksum=sha256:4664ef41d4bf5ee78cd6264ff8dca480ef80628ca91df95ca554c4d66f7831c1 https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.50.0/selenium-server-4.50.0.jar /app/api/selenium/server/selenium-server.jar
+ADD --checksum=sha256:cd167b9a5d405e8e59fa316f949f7af256834545d0631d72224500dafbc79d0f https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.52.0/selenium-server-4.52.0.jar /app/api/selenium/server/selenium-server.jar
 RUN rm -rf /usr/local/lib/node_modules/npm /opt/yarn-* && \
     rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 

@@ -526,8 +526,11 @@ from public PyPI with `uv sync --frozen`; image builds need no private index.
 
 CI audits the locked Python and JavaScript runtime and development dependencies
 using `pip-audit` and `npm audit`. The dependency audit requires no maintainer
-credentials and gates API image publication. Review security updates with the
-SDK integration tests and rebuild the affected images before release.
+credentials and gates API image publication. Published API, frontend, browser
+service and Steel images also receive Trivy runtime vulnerability checks,
+including packaged Java libraries and operating-system packages. Review
+security updates with the SDK integration tests and rebuild the affected
+images before release.
 
 The `Secret scan` CI check fetches complete branch, tag and historical
 pull-request heads, then runs pinned Gitleaks with archive decoding and
