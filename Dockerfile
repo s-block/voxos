@@ -45,6 +45,7 @@ RUN apt-get update \
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/uv
+RUN python -m pip uninstall --yes pip
 
 WORKDIR /app
 
