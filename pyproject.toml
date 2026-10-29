@@ -112,7 +112,7 @@ include = [
 [tool.uv]
 package = true
 exclude-newer = "7 days"
-constraint-dependencies = ["dnspython>=2.9.0"]
+constraint-dependencies = ["dnspython>=2.9.0", "mako>=1.4.2"]
 # Reviewed security fixes published during the cooldown. The fixed cutoff keeps
 # future releases subject to review; remove these exceptions after 2026-11-03.
 [tool.uv.exclude-newer-package]
