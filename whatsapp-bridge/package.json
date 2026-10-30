@@ -20,7 +20,7 @@
     "pino": "9.14.0"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.4",
+    "@eslint/js": "9.39.5",
     "@types/node": "20.19.43",
     "eslint": "10.8.0",
     "typescript": "5.9.3",
