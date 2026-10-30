@@ -25,8 +25,12 @@ These rules apply inside `web/`, in addition to the repository root
   small progressive enhancements (copy button, mobile menu).
 - Keep the site's domain and deployment details out of the source. Pages get
   the site's URL from Astro's `site` through `configuredSite`, which comes from
-  the `WEB_SITE_URL` setting. The bucket, Cloudflare zone and AWS profile live
-  in the ignored `web/.env`. Use `example.com` in docs and examples.
+  the `WEB_SITE_URL` setting. The bucket, CloudFront distribution and AWS
+  profile live in the ignored `web/.env`. Use `example.com` in docs and
+  examples.
+- `infra/cloudfront-function.js` runs in CloudFront's `cloudfront-js-2.0`
+  runtime. Keep it a plain script with no imports, and update its tests with
+  it.
 - Put each landing section in its own component under
   `src/components/landing/`, and its data in `src/data/`.
 - Style with scoped component CSS and the tokens in `src/styles/tokens.css`.

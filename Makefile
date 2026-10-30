@@ -286,7 +286,7 @@ web-build: web-check ## Build the static website into web/dist and check its lin
 web-preview: ## Serve the built website on http://localhost:4322
 	$(WEB_NPM) run preview -- --port 4322
 
-web-deploy: web-build ## Upload web/dist to WEB_S3_BUCKET and purge the site from the Cloudflare cache
+web-deploy: web-build ## Upload web/dist to WEB_S3_BUCKET and invalidate its CloudFront distribution
 	@$(WEB_ENV) web/scripts/deploy.sh
 
 # Flutter Mobile App

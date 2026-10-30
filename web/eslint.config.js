@@ -8,4 +8,9 @@ export default defineConfig([
   js.configs.recommended,
   tseslint.configs.recommended,
   astro.configs.recommended,
+  {
+    // CloudFront Functions are classic scripts whose runtime calls `handler`.
+    files: ["infra/**/*.js"],
+    languageOptions: { sourceType: "script" },
+  },
 ]);

@@ -2,7 +2,7 @@
 
 The public website for Voxos: a landing page plus the full documentation,
 built with [Astro](https://astro.build) and [Starlight](https://starlight.astro.build)
-into static files served from an S3 bucket through Cloudflare.
+into static files served from a private S3 bucket through CloudFront.
 
 The docs are rendered from the Markdown already in this repository. Nothing is
 copied into `web/`, so editing a page under `docs/wiki/` updates the site on the
@@ -19,7 +19,7 @@ recommended).
 | `make web-check` | ESLint, `astro check` and the Vitest unit tests. |
 | `make web-build` | `web-check`, then a static build into `web/dist/` and a check of every internal link and `#fragment`. |
 | `make web-preview` | Serves the last build on `http://localhost:4322`. |
-| `make web-deploy` | Builds, then uploads `web/dist/` to S3 and purges the site from the Cloudflare cache. |
+| `make web-deploy` | Builds, then uploads `web/dist/` to S3 and invalidates the CloudFront cache. |
 
 ## Settings
 
@@ -31,9 +31,8 @@ the environment.
 | Setting | Used for |
 | --- | --- |
 | `WEB_SITE_URL` | The site's public URL, such as `https://example.com`. Canonical links, the sitemap, structured data and social cards are built from it. Without it, pages point at `http://localhost:4321`. |
-| `WEB_S3_BUCKET` | The bucket that `make web-deploy` uploads to. |
-| `WEB_CLOUDFLARE_ZONE_ID` | The Cloudflare zone that serves the site. |
-| `WEB_CLOUDFLARE_API_TOKEN` | A Cloudflare API token that can purge the zone's cache. |
+| `WEB_S3_BUCKET` | The private bucket that `make web-deploy` uploads to. |
+| `WEB_CLOUDFRONT_DISTRIBUTION_ID` | The CloudFront distribution that serves the bucket. |
 | `AWS_PROFILE` | Optional AWS CLI profile for the upload. |
 
 ## How the docs are built
@@ -77,6 +76,7 @@ web/
   src/pages/             landing page, 404, robots.txt, icons, social cards, .md copies
   src/seo/               structured data and social card rendering
   src/styles/            design tokens, landing styles, Starlight theme
+  infra/                 CloudFront Function for directory URLs
   scripts/               post-build link check and deploy
 ```
 
@@ -85,10 +85,13 @@ favicon and the Apple touch icon are generated from it at build time.
 
 ## Deploying
 
-The site is a set of static files in an S3 bucket, served through Cloudflare.
-Cloudflare provides HTTPS, caches pages close to visitors, and redirects the
-`www` hostname to the bare domain. Cloudflare's Free plan covers all of it, and
-S3 storage and requests for a site this size cost a few cents a month at most.
+The site is a set of static files in a private S3 bucket, served by CloudFront
+over HTTPS. CloudFront reads the bucket over HTTPS through Origin Access
+Control, so every hop is encrypted and the bucket never needs public access.
+Cloudflare, or another DNS provider, points the domain at CloudFront and
+redirects `www` to the bare domain. At this traffic, CloudFront's always-free
+allowance (1 TB of transfer, 10 million requests and 2 million function
+invocations a month) covers the site, and S3 costs a few cents a month at most.
 
 The setup commands below use your settings, so load them into your shell
 first:
@@ -97,69 +100,54 @@ first:
 set -a; . web/.env; set +a
 ```
 
-### One-time S3 setup
+### One-time AWS setup
 
-1. Create a bucket named exactly like the site's domain (the host in
-   `WEB_SITE_URL`), set `WEB_S3_BUCKET` to that name, and leave Block Public
-   Access on. S3 website endpoints find the bucket from the request's `Host`
-   header, which Cloudflare passes through, so the name must match the domain.
-2. Turn on static website hosting:
-
-   ```bash
-   aws s3 website "s3://${WEB_S3_BUCKET}" --index-document index.html --error-document 404.html
-   ```
-
-   The website endpoint serves `/docs/` from `docs/index.html` and redirects
-   `/docs` to `/docs/`.
-3. Let only Cloudflare read the bucket. The policy below allows Cloudflare's
-   published IPv4 ranges (S3 website endpoints do not use IPv6). S3 does not
-   count a policy limited to those ranges as public, so Block Public Access
-   stays on. `s3:ListBucket` makes missing pages return 404 instead of 403.
-   Run this again if Cloudflare changes its ranges.
+1. Create the bucket named in `WEB_S3_BUCKET`, with Block Public Access on and
+   static website hosting off.
+2. Request an ACM certificate in `us-east-1` for the site's domain, with DNS
+   validation, and add the validation record it shows to your DNS.
+3. Create and publish the CloudFront Function that serves directory URLs from
+   their `index.html` and adds missing trailing slashes:
 
    ```bash
-   policy="$(curl -fsS https://api.cloudflare.com/client/v4/ips | jq -c --arg bucket "${WEB_S3_BUCKET}" '{
-     Version: "2012-10-17",
-     Statement: [{
-       Sid: "CloudflareReadsWebsite",
-       Effect: "Allow",
-       Principal: "*",
-       Action: ["s3:GetObject", "s3:ListBucket"],
-       Resource: ["arn:aws:s3:::\($bucket)", "arn:aws:s3:::\($bucket)/*"],
-       Condition: {IpAddress: {"aws:SourceIp": .result.ipv4_cidrs}}
-     }]
-   }')"
-   aws s3api put-bucket-policy --bucket "${WEB_S3_BUCKET}" --policy "${policy}"
+   aws cloudfront create-function --name website-paths \
+     --function-config 'Comment=Directory URLs and trailing slashes,Runtime=cloudfront-js-2.0' \
+     --function-code fileb://web/infra/cloudfront-function.js
+   aws cloudfront publish-function --name website-paths \
+     --if-match "$(aws cloudfront describe-function --name website-paths --query ETag --output text)"
    ```
 
-4. Give the deploy credentials `s3:ListBucket` on the bucket, and
-   `s3:PutObject` and `s3:DeleteObject` on its objects.
+   After changing `infra/cloudfront-function.js`, update the function with
+   `aws cloudfront update-function` and publish it again.
+4. Create a CloudFront distribution:
+   - **Origin:** the bucket's REST endpoint (not its website endpoint) with
+     Origin Access Control, and the bucket policy CloudFront offers for it.
+   - **Behavior:** redirect HTTP to HTTPS, with the `CachingOptimized` cache
+     policy and the `SecurityHeadersPolicy` response headers policy.
+   - **Domain:** the site's domain as the alternate domain name, with the
+     certificate.
+   - **Default root object:** `index.html`.
+   - **Function association:** the published function on the viewer-request
+     event.
+   - **Error pages:** map 403 and 404 to `/404.html` with response code 404.
 
-### One-time Cloudflare setup
+   Set `WEB_CLOUDFRONT_DISTRIBUTION_ID` to the distribution's ID.
+5. Give the deploy credentials `s3:ListBucket` on the bucket, `s3:PutObject`
+   and `s3:DeleteObject` on its objects, and `cloudfront:CreateInvalidation` on
+   the distribution.
 
-1. **DNS.** Add a proxied `CNAME` record from the site's domain to the bucket's
-   website endpoint, which the S3 console shows under static website hosting.
-   Add a proxied `CNAME` from `www` to the site's domain.
-2. **SSL/TLS.** S3 website endpoints only serve HTTP, so Cloudflare reaches the
-   bucket in Flexible mode while visitors use HTTPS. Set the zone's encryption
-   mode to Flexible, or, if other hostnames in the zone need Full, add a
-   configuration rule that sets Flexible for the site's hostname. Turn on
-   **Always Use HTTPS**.
-3. **Redirect rule.** Send `www` to the bare domain with a wildcard pattern of
-   `https://www.*`, target URL `https://${1}`, status code 301, and **Preserve
-   query string** on.
-4. **Cache rule.** For the site's hostname, choose **Eligible for cache**, set
-   Edge TTL to **Use cache-control header if present, use default Cloudflare
-   caching behavior if not**, and set Browser TTL to **Respect origin**.
-   Without that Browser TTL, Cloudflare stretches the five-minute browser
-   lifetime of pages to its four-hour default.
-5. **API token.** Create a custom API token with the **Zone → Cache Purge →
-   Purge** permission for this zone, and set it as `WEB_CLOUDFLARE_API_TOKEN`.
-   Set `WEB_CLOUDFLARE_ZONE_ID` to the zone ID from the zone's overview page.
-6. **AI crawlers.** Cloudflare can block some AI crawlers by default. In **AI
-   Crawl Control**, set the search, assistant and training crawlers to
-   **Allow** so AI tools can read the docs, `llms.txt` and the Markdown
-   copies. The site's own `robots.txt` allows every crawler.
+### DNS and the www redirect with Cloudflare
+
+1. Add a `CNAME` record from the site's domain to the distribution's domain
+   name (`….cloudfront.net`), set to **DNS only**. Cloudflare flattens it at the
+   apex. Keep the certificate's validation record DNS only as well.
+2. Add a proxied `AAAA` record for `www` pointing to `100::`. Cloudflare answers
+   for `www` itself, so the address is never contacted.
+3. Add a redirect rule with a wildcard pattern of `https://www.*`, target URL
+   `https://${1}`, status code 301, and **Preserve query string** on.
+
+With another DNS provider, point the domain at the distribution with alias `A`
+and `AAAA` records, and redirect `www` there.
 
 ### Deploy
 
@@ -168,12 +156,12 @@ make web-deploy
 ```
 
 The deploy builds the site for `WEB_SITE_URL`, checks that `web/dist/` was
-built for that URL, uploads it to the bucket, then purges the site's hostname
-from the Cloudflare cache. Set `WEB_DEPLOY_DRY_RUN=1` to list the changes
-without uploading or purging anything.
+built for that URL, uploads it to the bucket, then invalidates the
+distribution's cache. Set `WEB_DEPLOY_DRY_RUN=1` to list the changes without
+uploading or invalidating anything.
 
 | Files | Cache-Control |
 | --- | --- |
 | `_astro/*` (hashed assets) | `public, max-age=31536000, immutable`; older assets stay in the bucket |
-| Pages and other files | `public, max-age=300, s-maxage=86400`: five minutes in browsers, and a day at Cloudflare until the next deploy purges them |
+| Pages and other files | `public, max-age=300, s-maxage=86400`: five minutes in browsers, and a day at CloudFront until the next deploy invalidates them |
 | `*.md` page copies | Same as pages, with `Content-Type: text/markdown; charset=utf-8` |
