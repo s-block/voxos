@@ -34,7 +34,8 @@ import { site } from "../site.config";
           <h2>Your choice</h2>
           <p>
             Your browser keeps your choice in local storage. Change it at any time with <AnalyticsSettings />. Turning
-            analytics off deletes the <code>_ga</code> cookies.
+            analytics off deletes the <code>_ga</code> cookies and, if Google Analytics had loaded, reloads the page so it
+            stops completely.
           </p>
         </>
       ) : (

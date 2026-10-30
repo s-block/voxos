@@ -8,10 +8,12 @@ declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    /** While true, Google Analytics sends nothing for that measurement ID. */
+    [optOut: `ga-disable-${string}`]: boolean | undefined;
   }
 }
 
-type GtagWindow = Pick<Window, "dataLayer" | "gtag">;
+type GtagWindow = Pick<Window, "dataLayer" | "gtag" | `ga-disable-${string}`>;
 
 const STORAGE_KEY = "voxos-analytics-consent";
 
@@ -32,36 +34,64 @@ function saveChoice(choice: Choice): void {
   }
 }
 
-/**
- * Turns Google Analytics on. The first call queues the consent defaults and
- * config and loads gtag.js; a later call, after the visitor declined in the
- * meantime, grants consent again.
- */
-export function enableGoogleAnalytics(page: GtagWindow, measurementId: string, loadScript: (src: string) => void): void {
-  if (page.gtag) {
-    page.gtag("consent", "update", { analytics_storage: "granted" });
-    return;
-  }
-  const dataLayer = (page.dataLayer ??= []);
-  page.gtag = function gtag() {
-    // gtag.js expects each call's arguments object, not an array.
-    // eslint-disable-next-line prefer-rest-params
-    dataLayer.push(arguments);
-  };
-  page.gtag("consent", "default", {
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-    analytics_storage: "granted",
-  });
-  page.gtag("js", new Date());
-  page.gtag("config", measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
-  loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`);
-}
+/** Google Analytics for one measurement ID, following the visitor's current choice. */
+export class GoogleAnalytics {
+  private readonly page: GtagWindow;
+  private readonly measurementId: string;
+  private readonly loadScript: (src: string) => void;
+  private allowed = false;
 
-/** Withdraws consent, so a loaded Google Analytics stops sending data and setting cookies. */
-export function disableGoogleAnalytics(page: GtagWindow): void {
-  page.gtag?.("consent", "update", { analytics_storage: "denied" });
+  constructor(page: GtagWindow, measurementId: string, loadScript: (src: string) => void) {
+    this.page = page;
+    this.measurementId = measurementId;
+    this.loadScript = loadScript;
+  }
+
+  /** Whether gtag.js has loaded on this page; a loaded tag stays in memory until the page reloads. */
+  get loaded(): boolean {
+    return this.page.gtag !== undefined;
+  }
+
+  /** Starts collection: the first time by loading gtag.js, afterwards by granting consent again. */
+  allow(): void {
+    this.allowed = true;
+    this.page[`ga-disable-${this.measurementId}`] = false;
+    if (this.page.gtag) {
+      this.page.gtag("consent", "update", { analytics_storage: "granted" });
+      return;
+    }
+    const dataLayer = (this.page.dataLayer ??= []);
+    this.page.gtag = function gtag() {
+      // gtag.js expects each call's arguments object, not an array.
+      // eslint-disable-next-line prefer-rest-params
+      dataLayer.push(arguments);
+    };
+    this.page.gtag("consent", "default", {
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      analytics_storage: "granted",
+    });
+    this.page.gtag("js", new Date());
+    this.page.gtag("config", this.measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
+    this.loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(this.measurementId)}`);
+  }
+
+  /**
+   * Stops collection: denies consent, sets the measurement ID's opt-out flag,
+   * and sends no more events. A loaded tag can still send cookieless pings
+   * until the page reloads, so callers reload when `loaded` was true.
+   */
+  decline(): void {
+    this.allowed = false;
+    this.page[`ga-disable-${this.measurementId}`] = true;
+    this.page.gtag?.("consent", "update", { analytics_storage: "denied" });
+  }
+
+  /** Sends an event only while the visitor allows analytics. */
+  track(name: string, params: Record<string, string>): void {
+    if (this.allowed) this.page.gtag?.("event", name, params);
+  }
 }
 
 function loadScript(src: string): void {
@@ -97,8 +127,9 @@ export function initAnalytics(): void {
   const measurementId = banner?.dataset.measurementId;
   if (!banner || !measurementId || location.host !== banner.dataset.siteHost) return;
 
+  const analytics = new GoogleAnalytics(window, measurementId, loadScript);
   const choice = readChoice();
-  if (choice === "granted") enableGoogleAnalytics(window, measurementId, loadScript);
+  if (choice === "granted") analytics.allow();
   if (choice === undefined) banner.hidden = false;
 
   document.addEventListener("click", (event) => {
@@ -108,11 +139,14 @@ export function initAnalytics(): void {
       saveChoice(value);
       banner.hidden = true;
       if (value === "granted") {
-        enableGoogleAnalytics(window, measurementId, loadScript);
-      } else {
-        disableGoogleAnalytics(window);
-        deleteAnalyticsCookies();
+        analytics.allow();
+        return;
       }
+      const wasLoaded = analytics.loaded;
+      analytics.decline();
+      deleteAnalyticsCookies();
+      // gtag.js cannot be unloaded, so reload; the reloaded page never loads it.
+      if (wasLoaded) location.reload();
       return;
     }
     if (closest(event.target, "[data-consent-open]")) {
@@ -122,8 +156,6 @@ export function initAnalytics(): void {
     }
     const tracked = closest<HTMLElement>(event.target, "[data-analytics-event]");
     const name = tracked?.dataset.analyticsEvent;
-    if (name && window.gtag) {
-      window.gtag("event", name, tracked instanceof HTMLAnchorElement ? { link_url: tracked.href } : {});
-    }
+    if (name) analytics.track(name, tracked instanceof HTMLAnchorElement ? { link_url: tracked.href } : {});
   });
 }
