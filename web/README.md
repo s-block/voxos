@@ -80,7 +80,7 @@ web/
   src/pages/             landing page, 404, robots.txt, icons, social cards, .md copies
   src/seo/               structured data and social card rendering
   src/styles/            design tokens, landing styles, Starlight theme
-  infra/                 CloudFront Function for directory URLs
+  infra/                 CloudFront Function for directory URLs and the www redirect
   scripts/               post-build link check and deploy
 ```
 
@@ -92,10 +92,11 @@ favicon and the Apple touch icon are generated from it at build time.
 The site is a set of static files in a private S3 bucket, served by CloudFront
 over HTTPS. CloudFront reads the bucket over HTTPS through Origin Access
 Control, so every hop is encrypted and the bucket never needs public access.
-Cloudflare, or another DNS provider, points the domain at CloudFront and
-redirects `www` to the bare domain. At this traffic, CloudFront's always-free
-allowance (1 TB of transfer, 10 million requests and 2 million function
-invocations a month) covers the site, and S3 costs a few cents a month at most.
+Route 53 points the domain and its `www` name at CloudFront, and a CloudFront
+Function redirects `www` to the bare domain. At this traffic, CloudFront's
+always-free allowance (1 TB of transfer, 10 million requests and 2 million
+function invocations a month) covers the site, and S3 costs a few cents a month
+at most.
 
 The setup commands below use your settings, so load them into your shell
 first:
@@ -108,14 +109,16 @@ set -a; . web/.env; set +a
 
 1. Create the bucket named in `WEB_S3_BUCKET`, with Block Public Access on and
    static website hosting off.
-2. Request an ACM certificate in `us-east-1` for the site's domain, with DNS
-   validation, and add the validation record it shows to your DNS.
+2. Request an ACM certificate in `us-east-1` for the site's domain and its `www`
+   name, with DNS validation. On the certificate's page, **Create records in
+   Route 53** adds the validation records to the domain's hosted zone.
 3. Create and publish the CloudFront Function that serves directory URLs from
-   their `index.html` and adds missing trailing slashes:
+   their `index.html`, adds missing trailing slashes, and redirects `www` to the
+   bare domain:
 
    ```bash
    aws cloudfront create-function --name website-paths \
-     --function-config 'Comment=Directory URLs and trailing slashes,Runtime=cloudfront-js-2.0' \
+     --function-config 'Comment=Directory URLs and the www redirect,Runtime=cloudfront-js-2.0' \
      --function-code fileb://web/infra/cloudfront-function.js
    aws cloudfront publish-function --name website-paths \
      --if-match "$(aws cloudfront describe-function --name website-paths --query ETag --output text)"
@@ -128,8 +131,8 @@ set -a; . web/.env; set +a
      Origin Access Control, and the bucket policy CloudFront offers for it.
    - **Behavior:** redirect HTTP to HTTPS, with the `CachingOptimized` cache
      policy and the `SecurityHeadersPolicy` response headers policy.
-   - **Domain:** the site's domain as the alternate domain name, with the
-     certificate.
+   - **Domains:** the site's domain and its `www` name as alternate domain
+     names, with the certificate.
    - **Default root object:** `index.html`.
    - **Function association:** the published function on the viewer-request
      event.
@@ -140,18 +143,17 @@ set -a; . web/.env; set +a
    and `s3:DeleteObject` on its objects, and `cloudfront:CreateInvalidation` on
    the distribution.
 
-### DNS and the www redirect with Cloudflare
+### DNS in Route 53
 
-1. Add a `CNAME` record from the site's domain to the distribution's domain
-   name (`….cloudfront.net`), set to **DNS only**. Cloudflare flattens it at the
-   apex. Keep the certificate's validation record DNS only as well.
-2. Add a proxied `AAAA` record for `www` pointing to `100::`. Cloudflare answers
-   for `www` itself, so the address is never contacted.
-3. Add a redirect rule with a wildcard pattern of `https://www.*`, target URL
-   `https://${1}`, status code 301, and **Preserve query string** on.
+In the domain's hosted zone, add alias `A` and `AAAA` records for the domain
+and for `www`, each pointing to the distribution. Requests for `www` reach the
+CloudFront Function, which answers with a 301 to the same path on the bare
+domain.
 
-With another DNS provider, point the domain at the distribution with alias `A`
-and `AAAA` records, and redirect `www` there.
+With another DNS provider, point both names at the distribution's domain name
+(`….cloudfront.net`) with `CNAME` records, using the provider's `ALIAS` record
+or CNAME flattening for the bare domain. If the provider can proxy traffic, as
+Cloudflare does, set these records to DNS only.
 
 ### Deploy
 

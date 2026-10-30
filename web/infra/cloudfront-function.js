@@ -3,19 +3,26 @@
 // and a private S3 origin behind Origin Access Control has no index documents:
 //   - `/docs/` is served from `/docs/index.html`
 //   - `/docs` redirects to `/docs/`
+//   - `www.` hosts redirect to the bare domain, in the same single redirect
 // Requests for files (`/robots.txt`, `/_astro/app.js`) pass through unchanged.
 
 /* exported handler */
 function handler(event) {
   var request = event.request;
   var uri = request.uri;
+  var host = request.headers.host.value.toLowerCase();
+  var lastSegment = uri.slice(uri.lastIndexOf("/") + 1);
+  // Extensionless paths are directories missing their trailing slash.
+  var path = lastSegment === "" || lastSegment.indexOf(".") !== -1 ? uri : uri + "/";
 
-  if (uri.charAt(uri.length - 1) === "/") {
-    request.uri = uri + "index.html";
-    return request;
+  if (host.indexOf("www.") === 0) {
+    return redirect("https://" + host.slice(4) + path + queryString(request.querystring));
   }
-  if (uri.slice(uri.lastIndexOf("/") + 1).indexOf(".") === -1) {
-    return redirect(uri + "/" + queryString(request.querystring));
+  if (path !== uri) {
+    return redirect(path + queryString(request.querystring));
+  }
+  if (lastSegment === "") {
+    request.uri = uri + "index.html";
   }
   return request;
 }
