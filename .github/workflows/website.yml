@@ -1,0 +1,68 @@
+name: Website deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Deploys run one at a time, in order, so an older build never lands last.
+concurrency:
+  group: website-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy website
+    # Forks have no website environment to deploy to.
+    if: ${{ !github.event.repository.fork }}
+    runs-on: ubuntu-latest
+    environment: website
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install locked website dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Lint, typecheck and test website
+        working-directory: web
+        run: npm run lint && npm run check && npm test
+
+      - name: Build website from the repository docs and check links
+        working-directory: web
+        env:
+          WEB_SITE_URL: ${{ vars.WEB_SITE_URL }}
+          WEB_GA_MEASUREMENT_ID: ${{ vars.WEB_GA_MEASUREMENT_ID }}
+        run: npm run build
+
+      - name: Sign in to AWS with the deploy role
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.WEB_AWS_ROLE_ARN }}
+          aws-region: ${{ vars.WEB_AWS_REGION }}
+          mask-aws-account-id: true
+
+      - name: Upload the site and invalidate CloudFront
+        env:
+          WEB_SITE_URL: ${{ vars.WEB_SITE_URL }}
+          WEB_S3_BUCKET: ${{ vars.WEB_S3_BUCKET }}
+          WEB_CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.WEB_CLOUDFRONT_DISTRIBUTION_ID }}
+        run: web/scripts/deploy.sh

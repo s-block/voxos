@@ -171,3 +171,27 @@ uploading or invalidating anything.
 | `_astro/*` (hashed assets) | `public, max-age=31536000, immutable`; older assets stay in the bucket |
 | Pages and other files | `public, max-age=300, s-maxage=86400`: five minutes in browsers, and a day at CloudFront until the next deploy invalidates them |
 | `*.md` page copies | Same as pages, with `Content-Type: text/markdown; charset=utf-8` |
+
+### Deploy on merge
+
+`.github/workflows/website.yml` deploys `main` on every push. It runs the same
+checks and build as CI, then `web/scripts/deploy.sh`, and signs in to AWS
+through GitHub's OpenID Connect provider, so no AWS keys are stored. Forks skip
+it.
+
+The job runs in a GitHub environment named `website`, limited to the `main`
+branch, which holds the deploy settings:
+
+| Name | Kind | Value |
+| --- | --- | --- |
+| `WEB_SITE_URL` | variable | The site's public URL |
+| `WEB_GA_MEASUREMENT_ID` | variable | Optional Google Analytics 4 measurement ID |
+| `WEB_S3_BUCKET` | variable | The site's bucket |
+| `WEB_CLOUDFRONT_DISTRIBUTION_ID` | variable | The distribution that serves it |
+| `WEB_AWS_REGION` | variable | The bucket's region |
+| `WEB_AWS_ROLE_ARN` | secret | The deploy role; a secret keeps its account ID out of the public run logs |
+
+Give the deploy role the permissions from step 5, and a trust policy for
+`token.actions.githubusercontent.com` that accepts only the audience
+`sts.amazonaws.com` and the subject
+`repo:<owner>/<repository>:environment:website`.
