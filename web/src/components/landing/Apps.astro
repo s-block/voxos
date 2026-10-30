@@ -1,0 +1,299 @@
+---
+import { Mic, Wrench } from "@lucide/astro";
+import Bubble from "../scenes/Bubble.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+/** Console pages, as listed in docs/wiki/Frontend-Guide.md. */
+const consolePages = [
+  "Chat",
+  "Voice",
+  "Agent",
+  "Knowledge",
+  "Operations",
+  "Providers",
+  "Phone",
+  "Contacts",
+  "Connection",
+  "Tools",
+  "MCP",
+  "Browser Accounts",
+  "Account",
+];
+---
+
+<section class="apps" aria-labelledby="apps">
+  <div class="vx-container">
+    <SectionHeading id="apps" eyebrow="Apps included" title="A web console and a phone app.">
+      Set everything up in the web console, then chat or call your agent from the iOS and Android app. Both connect to
+      your own Voxos server.
+    </SectionHeading>
+
+    <div class="stage">
+      <figure class="browser">
+        <div class="chrome" aria-hidden="true">
+          <span class="dots"><span></span><span></span><span></span></span>
+          <span class="address">localhost:5173/chat</span>
+        </div>
+        <div class="console" aria-hidden="true">
+          <ul class="sidebar">
+            {consolePages.map((page) => <li class:list={{ active: page === "Chat" }}>{page}</li>)}
+          </ul>
+          <div class="pane">
+            <p class="pane-title">Weekly planning</p>
+            <Bubble from="you">Which pull requests need my review?</Bubble>
+            <span class="tool"><Wrench size={14} /> github · list_pull_requests <b>allowed</b></span>
+            <Bubble from="agent">Three are waiting on you. The oldest has been open four days. Want a review summary?</Bubble>
+          </div>
+        </div>
+        <figcaption>The web console: chat, voice, phone numbers, MCP servers, schedules and more.</figcaption>
+      </figure>
+
+      <figure class="phone">
+        <div class="device" aria-hidden="true">
+          <span class="notch"></span>
+          <p class="app-title">Voxos</p>
+          <div class="messages">
+            <Bubble from="you">What's the plan for tomorrow?</Bubble>
+            <Bubble from="agent">Gym at 7, dentist at 10:30, then the Acme call at 2.</Bubble>
+          </div>
+          <div class="composer">
+            <span class="field">Message</span>
+            <span class="mic"><Mic size={18} /></span>
+          </div>
+        </div>
+        <figcaption>The Flutter app for iPhone and Android, with one-tap voice calls.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<style>
+  .apps {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+  }
+
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    align-items: end;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  figcaption {
+    margin-top: 0.9rem;
+    color: var(--vx-ink-muted);
+    font-size: 0.92rem;
+  }
+
+  .browser {
+    min-width: 0;
+  }
+
+  .chrome {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    border: 2px solid var(--vx-ink);
+    border-bottom: 0;
+    border-radius: var(--vx-radius) var(--vx-radius) 0 0;
+    background: var(--vx-paper-soft);
+  }
+
+  .dots {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+
+  .dots span {
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1.5px solid var(--vx-ink);
+    border-radius: 50%;
+    background: var(--vx-coral);
+  }
+
+  .dots span:nth-child(2) {
+    background: var(--vx-sun);
+  }
+
+  .dots span:nth-child(3) {
+    background: var(--vx-mint);
+  }
+
+  .address {
+    flex: 1;
+    max-width: 22rem;
+    padding: 0.25rem 0.8rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: 999px;
+    background: var(--vx-paper);
+    color: var(--vx-ink-muted);
+    font-family: var(--vx-font-mono);
+    font-size: 0.8rem;
+  }
+
+  .console {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr);
+    min-height: 22rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: 0 0 var(--vx-radius) var(--vx-radius);
+    background: var(--vx-paper);
+    box-shadow: 8px 8px 0 var(--vx-ink);
+    overflow: hidden;
+  }
+
+  .sidebar {
+    display: grid;
+    align-content: start;
+    gap: 0.1rem;
+    padding: 0.9rem 0.6rem;
+    border-inline-end: 1.5px solid var(--vx-line);
+    background: var(--vx-paper-soft);
+    list-style: none;
+    font-size: 0.85rem;
+  }
+
+  .sidebar li {
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    color: var(--vx-ink-soft);
+  }
+
+  .sidebar .active {
+    background: var(--vx-tint-violet);
+    color: var(--vx-violet-deep);
+    font-weight: 700;
+  }
+
+  .pane {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: 1.25rem;
+  }
+
+  .pane-title {
+    font-family: var(--vx-font-display);
+    font-weight: 800;
+    font-size: 1.2rem;
+  }
+
+  .tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-self: start;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: var(--vx-paper-soft);
+    border: 1.5px solid var(--vx-line-strong);
+    font-family: var(--vx-font-mono);
+    font-size: 0.78rem;
+  }
+
+  .tool b {
+    color: var(--vx-teal-ink);
+  }
+
+  .device {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    height: 30rem;
+    padding: 2.2rem 0.9rem 1rem;
+    border: 3px solid var(--vx-ink);
+    border-radius: 2.4rem;
+    background: var(--vx-paper);
+    box-shadow: 8px 8px 0 var(--vx-violet);
+    transform: rotate(2.5deg);
+  }
+
+  .notch {
+    position: absolute;
+    top: 0.8rem;
+    left: 50%;
+    width: 5.5rem;
+    height: 1.4rem;
+    border-radius: 999px;
+    background: var(--vx-ink);
+    transform: translateX(-50%);
+  }
+
+  .app-title {
+    font-family: var(--vx-font-display);
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .messages {
+    display: grid;
+    align-content: end;
+    gap: 0.6rem;
+    flex: 1;
+  }
+
+  .composer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.35rem 0.35rem 0.9rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: 999px;
+  }
+
+  .field {
+    flex: 1;
+    color: var(--vx-ink-muted);
+    font-size: 0.9rem;
+  }
+
+  .mic {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 50%;
+    background: var(--vx-ink);
+    color: var(--vx-mint);
+  }
+
+  @media (max-width: 60rem) {
+    .stage {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+
+    .browser {
+      width: 100%;
+    }
+
+    .phone {
+      width: min(17rem, 100%);
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .console {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      border-inline-end: 0;
+      border-bottom: 1.5px solid var(--vx-line);
+    }
+
+    .sidebar li {
+      flex: none;
+    }
+  }
+</style>

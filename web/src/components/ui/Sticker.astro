@@ -1,0 +1,38 @@
+---
+interface Props {
+  tone?: "sun" | "mint";
+  /** Rotation in degrees, for the slapped-on-a-laptop look. */
+  tilt?: number;
+}
+
+const { tone = "sun", tilt = -2 } = Astro.props;
+---
+
+<span class="sticker" data-tone={tone} style={`--tilt: ${tilt}deg`}><slot /></span>
+
+<style>
+  .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.35em 0.85em;
+    border: 2px solid var(--vx-ink);
+    border-radius: 999px;
+    background: var(--vx-tint-sun);
+    color: var(--vx-ink);
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transform: rotate(var(--tilt));
+    box-shadow: 2px 2px 0 var(--vx-ink);
+  }
+
+  [data-tone="mint"] {
+    background: var(--vx-tint-mint);
+  }
+
+  .sticker :global(svg) {
+    width: 1em;
+    height: 1em;
+  }
+</style>

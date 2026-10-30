@@ -1,0 +1,17 @@
+---
+import { siGithub } from "simple-icons";
+import { repositoryUrl } from "../../site.config";
+import Button from "./Button.astro";
+
+interface Props {
+  label?: string;
+  size?: "md" | "lg";
+}
+
+const { label = "Star on GitHub", size = "md" } = Astro.props;
+---
+
+<Button href={repositoryUrl} variant="secondary" size={size}>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={siGithub.path} /></svg>
+  {label}
+</Button>

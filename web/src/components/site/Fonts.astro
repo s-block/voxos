@@ -1,0 +1,9 @@
+---
+import { Font } from "astro:assets";
+---
+
+{/* Preload only the faces visible in the first screen. */}
+<Font cssVariable="--font-display" preload={[{ weight: 800 }]} />
+<Font cssVariable="--font-body" preload={[{ weight: 400 }]} />
+<Font cssVariable="--font-mono" />
+<Font cssVariable="--font-hand" />

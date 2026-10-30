@@ -1,0 +1,203 @@
+---
+import { ArrowRight, CalendarClock, MessageSquare, Mic, Phone, Plug, Sparkles } from "@lucide/astro";
+import { siWhatsapp } from "simple-icons";
+import CallScene from "../scenes/CallScene.astro";
+import Button from "../ui/Button.astro";
+import GitHubButton from "../ui/GitHubButton.astro";
+import HandNote from "../ui/HandNote.astro";
+import Squiggle from "../ui/Squiggle.astro";
+import Sticker from "../ui/Sticker.astro";
+
+const chips = [
+  { label: "Voice", href: "#channels", icon: Mic },
+  { label: "Phone calls", href: "#channels", icon: Phone },
+  { label: "SMS", href: "#channels", icon: MessageSquare },
+  { label: "WhatsApp", href: "#channels", icon: undefined },
+  { label: "Skills", href: "#features", icon: Sparkles },
+  { label: "Schedules", href: "#features", icon: CalendarClock },
+  { label: "MCP", href: "#integrations", icon: Plug },
+];
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="vx-container grid">
+    <div class="copy">
+      <Sticker tilt={-3}>Open source · MIT · Self-hosted</Sticker>
+      <h1 id="hero-title">
+        The open-source voice AI agent that <Squiggle id="hero-squiggle" tail=".">picks up the phone</Squiggle>
+      </h1>
+      <p class="lede">
+        Voxos is a self-hosted AI agent you can <strong>talk to</strong>, <strong>call</strong>, <strong>text</strong>
+        and <strong>WhatsApp</strong>. Teach it skills, put its chores on a schedule and plug in any MCP tool. Your keys,
+        your database, your agent.
+      </p>
+      <ul class="chips" aria-label="What Voxos does">
+        {
+          chips.map(({ label, href, icon: Icon }) => (
+            <li>
+              <a href={href}>
+                {Icon ? (
+                  <Icon size={16} aria-hidden="true" />
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d={siWhatsapp.path} />
+                  </svg>
+                )}
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="ctas">
+        <Button href="/docs/quick-start/" size="lg">Get started <ArrowRight aria-hidden="true" /></Button>
+        <GitHubButton size="lg" />
+      </div>
+      <p class="meta">Python, FastAPI, Postgres and LiveKit. One <code>make up</code> to run it all locally.</p>
+    </div>
+    <div class="stage">
+      <HandNote arrow="down-left" class="note-call">yes, a real phone call</HandNote>
+      <CallScene />
+      <span class="blob mint" aria-hidden="true"></span>
+      <span class="blob violet" aria-hidden="true"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(3rem, 7vw, 6rem);
+    overflow: clip;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .copy {
+    display: grid;
+    justify-items: start;
+    gap: 1.4rem;
+  }
+
+  h1 {
+    font-size: clamp(2.45rem, 4.6vw + 0.6rem, 4.7rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  .lede {
+    max-width: 36rem;
+    color: var(--vx-ink-soft);
+    font-size: clamp(1.08rem, 0.4vw + 1rem, 1.25rem);
+  }
+
+  .lede strong {
+    color: var(--vx-ink);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: 999px;
+    background: var(--vx-paper);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease;
+  }
+
+  .chips a:hover {
+    border-color: var(--vx-ink);
+    transform: translateY(-2px) rotate(-1deg);
+  }
+
+  .chips svg {
+    width: 1rem;
+    height: 1rem;
+    color: var(--vx-violet);
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin-top: 0.4rem;
+  }
+
+  .meta {
+    color: var(--vx-ink-muted);
+    font-size: 0.95rem;
+  }
+
+  .meta code {
+    padding: 0.1em 0.4em;
+    border-radius: 6px;
+    background: var(--vx-paper-soft);
+    color: var(--vx-ink);
+  }
+
+  .stage {
+    position: relative;
+    padding-top: 2.5rem;
+  }
+
+  .stage :global(.note-call) {
+    position: absolute;
+    top: -0.5rem;
+    right: 1.5rem;
+    z-index: 2;
+  }
+
+  .blob {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(50px);
+    opacity: 0.55;
+  }
+
+  .blob.mint {
+    top: 10%;
+    left: -12%;
+    width: 16rem;
+    height: 16rem;
+    background: var(--vx-mint);
+  }
+
+  .blob.violet {
+    right: -14%;
+    bottom: -8%;
+    width: 18rem;
+    height: 18rem;
+    background: var(--vx-violet);
+    opacity: 0.35;
+  }
+
+  @media (max-width: 60rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stage {
+      max-width: 34rem;
+    }
+  }
+</style>

@@ -13,6 +13,15 @@ GIT = git_executable()
     "filename",
     [
         "terraform/hetzner/main.tf",
+        "web/terraform/main.tf",
+        "infra/main.tf",
+        "infra/outputs.tf.json",
+        "infra/production.tfbackend",
+        "infra/backend.hcl",
+        "infra/.terraform.lock.hcl",
+        "infra/.terraform/environment",
+        ".terraformrc",
+        "web/.env",
         "deploy/application.yaml",
         ".voxos/attachments/customer.png",
         ".secrets/service-account.json",
@@ -50,6 +59,7 @@ def test_installation_files_are_private_and_ignored(filename: str) -> None:
     "filename",
     [
         ".env.example",
+        "web/.env.example",
         "helm/examples/application.env.example",
         "helm/examples/application-values.yaml",
         "app/android/installation.properties.example",

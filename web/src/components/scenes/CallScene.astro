@@ -1,0 +1,204 @@
+---
+import { CalendarClock, PhoneOutgoing } from "@lucide/astro";
+import { inlineSvg, voxosMarkSvg } from "../../brand";
+import Waveform from "../ui/Waveform.astro";
+import Bubble from "./Bubble.astro";
+---
+
+<figure class="scene">
+  <div class="window">
+    <div class="titlebar">
+      <span class="avatar" set:html={inlineSvg(voxosMarkSvg, "call-scene-avatar")} />
+      <span class="who"><strong>Voxos</strong><small>Chat with your agent</small></span>
+      <span class="live"><span class="dot"></span>online</span>
+    </div>
+    <ol class="feed">
+      <li style="--step: 0">
+        <Bubble from="you">Can you call the dentist and move my cleaning to Friday morning?</Bubble>
+      </li>
+      <li style="--step: 1"><Bubble from="agent">On it. Calling Dentist now.</Bubble></li>
+      <li style="--step: 2">
+        <div class="call-card">
+          <div class="call-head">
+            <span class="call-icon"><PhoneOutgoing size={17} aria-hidden="true" /></span>
+            <span class="call-who"><strong>Dentist</strong><small>Outbound call · saved contact</small></span>
+            <Waveform talking />
+          </div>
+          <p class="line agent-line">“Hi! I'm calling for Sam to move Tuesday's cleaning to Friday morning.”</p>
+          <p class="line">“Friday at 10:30 works.”</p>
+        </div>
+      </li>
+      <li style="--step: 3"><Bubble from="you">Nice. Remind me Thursday evening?</Bubble></li>
+      <li style="--step: 4">
+        <Bubble from="agent">Done. I'll ping you here on Thursday at 6 pm.</Bubble>
+        <span class="scheduled"><CalendarClock size={15} aria-hidden="true" /> Scheduled · Thu 6:00 pm</span>
+      </li>
+    </ol>
+  </div>
+  <figcaption class="vx-visually-hidden">
+    An example Voxos chat: the agent phones a saved contact to move an appointment, then schedules a reminder.
+  </figcaption>
+</figure>
+
+<style>
+  .scene {
+    position: relative;
+  }
+
+  .window {
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius-lg);
+    background: var(--vx-paper);
+    box-shadow: 8px 8px 0 var(--vx-ink);
+    overflow: hidden;
+  }
+
+  .titlebar {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.85rem 1.1rem;
+    border-bottom: 1.5px solid var(--vx-line);
+    background: var(--vx-paper-soft);
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0.3rem;
+    border: 1.5px solid var(--vx-ink);
+    border-radius: 50%;
+    background: var(--vx-paper);
+  }
+
+  .avatar :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .who {
+    display: grid;
+    line-height: 1.2;
+  }
+
+  .who small {
+    color: var(--vx-ink-muted);
+    font-size: 0.78rem;
+  }
+
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-inline-start: auto;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--vx-teal-ink);
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--vx-mint);
+    box-shadow: 0 0 0 3px rgb(25 240 196 / 25%);
+  }
+
+  .feed {
+    display: grid;
+    gap: 0.7rem;
+    padding: 1.1rem;
+    list-style: none;
+    background:
+      radial-gradient(circle at 1px 1px, var(--vx-line) 1px, transparent 0) 0 0 / 18px 18px,
+      var(--vx-paper);
+  }
+
+  /* Rows slide into place but stay fully opaque, so the whole story is readable on first paint. */
+  .feed > li {
+    display: grid;
+    gap: 0.35rem;
+    animation: slide-in 520ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+    animation-delay: calc(150ms + var(--step) * 160ms);
+  }
+
+  .call-card {
+    padding: 0.8rem 0.9rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: 18px;
+    background: var(--vx-tint-mint);
+    font-size: 0.9rem;
+  }
+
+  .call-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+  }
+
+  .call-icon {
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--vx-ink);
+    color: var(--vx-mint);
+  }
+
+  .call-who {
+    display: grid;
+    margin-inline-end: auto;
+    font-size: 0.92rem;
+    line-height: 1.2;
+  }
+
+  .call-who small {
+    color: var(--vx-ink-soft);
+    font-size: 0.75rem;
+  }
+
+  .line {
+    padding: 0.15rem 0 0.15rem 0.6rem;
+    border-inline-start: 3px solid var(--vx-cyan);
+    color: var(--vx-ink-soft);
+    line-height: 1.4;
+  }
+
+  .line + .line {
+    margin-top: 0.35rem;
+    border-color: var(--vx-violet);
+  }
+
+  .agent-line {
+    color: var(--vx-ink);
+  }
+
+  .scheduled {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    justify-self: start;
+    padding: 0.3rem 0.7rem;
+    border: 1.5px dashed var(--vx-violet);
+    border-radius: 999px;
+    background: var(--vx-tint-violet);
+    color: var(--vx-violet-deep);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  @keyframes slide-in {
+    from {
+      transform: translateY(14px) scale(0.97);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+</style>

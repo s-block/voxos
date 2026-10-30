@@ -1,0 +1,144 @@
+---
+import { Menu, X } from "@lucide/astro";
+import GitHubButton from "../ui/GitHubButton.astro";
+import Logo from "./Logo.astro";
+
+const links = [
+  { href: "/#features", label: "Features" },
+  { href: "/#integrations", label: "Integrations" },
+  { href: "/docs/", label: "Docs" },
+  { href: "/docs/quick-start/", label: "Install" },
+];
+---
+
+<header class="site-header">
+  <div class="vx-container bar">
+    <a class="home" href="/" aria-label="Voxos home"><Logo id="site-header" /></a>
+    <nav class="desktop-nav" aria-label="Main">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+    <div class="desktop-cta"><GitHubButton label="Star" /></div>
+    <button class="menu-button" type="button" popovertarget="site-menu" aria-label="Open menu">
+      <Menu size={22} aria-hidden="true" />
+    </button>
+  </div>
+  <div id="site-menu" class="menu" popover>
+    <div class="menu-head">
+      <Logo id="site-menu" size="sm" />
+      <button class="menu-button close" type="button" popovertarget="site-menu" popovertargetaction="hide" aria-label="Close menu">
+        <X size={22} aria-hidden="true" />
+      </button>
+    </div>
+    <nav aria-label="Main">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+    <GitHubButton />
+  </div>
+</header>
+
+<script>
+  // Close the mobile menu after following an in-page link.
+  const menu = document.getElementById("site-menu");
+  menu?.querySelectorAll("nav a").forEach((link) => {
+    link.addEventListener("click", () => menu.hidePopover());
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--vx-line);
+    background: rgb(255 255 255 / 88%);
+    backdrop-filter: saturate(160%) blur(10px);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 4.25rem;
+  }
+
+  .home {
+    text-decoration: none;
+    margin-inline-end: auto;
+  }
+
+  .desktop-nav {
+    display: flex;
+    gap: 1.75rem;
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+
+  .desktop-nav a,
+  .menu nav a {
+    text-decoration: none;
+    color: var(--vx-ink);
+  }
+
+  .desktop-nav a:hover {
+    color: var(--vx-violet);
+  }
+
+  .menu-button {
+    display: none;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: 12px;
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+    cursor: pointer;
+  }
+
+  .menu {
+    inset: 0.75rem 0.75rem auto;
+    width: auto;
+    margin: 0;
+    padding: 1rem 1.25rem 1.5rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+    box-shadow: var(--vx-shadow-pop);
+  }
+
+  .menu::backdrop {
+    background: rgb(23 33 28 / 35%);
+  }
+
+  .menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .menu nav {
+    display: grid;
+    margin-bottom: 1.25rem;
+  }
+
+  .menu nav a {
+    padding: 0.7rem 0;
+    border-bottom: 1px dashed var(--vx-line-strong);
+    font-family: var(--vx-font-display);
+    font-weight: 800;
+    font-size: 1.4rem;
+  }
+
+  @media (max-width: 52rem) {
+    .desktop-nav,
+    .desktop-cta {
+      display: none;
+    }
+
+    .menu-button {
+      display: grid;
+    }
+  }
+</style>

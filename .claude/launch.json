@@ -16,6 +16,22 @@
       "cwd": "frontend",
       "port": 5174,
       "autoPort": false
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--", "--port", "4321"],
+      "cwd": "web",
+      "port": 4321,
+      "autoPort": false
+    },
+    {
+      "name": "website-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview", "--", "--port", "4322"],
+      "cwd": "web",
+      "port": 4322,
+      "autoPort": false
     }
   ]
 }

@@ -36,6 +36,8 @@ sync with the Voxos codebase.
    - `make docs-manifest`
    - `make docs-validate`
    - `make docs-refresh-check`
+   - `make web-build` (the project website renders these pages and checks every
+     internal link and anchor)
 8. If the request includes refreshing the live product-doc index and the local
    database plus embedding key are configured, run `make docs-index`.
 9. Report changed pages, commands run, unresolved verification gaps, and whether

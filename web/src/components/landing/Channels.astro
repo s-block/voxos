@@ -1,0 +1,128 @@
+---
+import { ArrowRight, Check } from "@lucide/astro";
+import { channels } from "../../data/channels";
+import ChannelScene from "../scenes/ChannelScene.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+const tilts = [-1.2, 0.8, -0.6, 1];
+---
+
+<section class="channels" aria-labelledby="channels">
+  <div class="vx-container">
+    <SectionHeading id="channels" eyebrow="Voice first" title="Talk, call, text or WhatsApp. Same agent.">
+      One agent, one memory, one set of tools, whichever way you reach it. Start a thought on a call and finish it in a
+      text.
+    </SectionHeading>
+    <ul class="grid">
+      {
+        channels.map((channel, index) => (
+          <li class="card" style={`--tilt: ${tilts[index] ?? 0}deg`}>
+            <ChannelScene channel={channel.id} />
+            <h3>{channel.title}</h3>
+            <p>{channel.summary}</p>
+            <ul class="points">
+              {channel.points.map((point) => (
+                <li>
+                  <Check size={16} aria-hidden="true" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <a class="more" href={channel.href}>
+              {channel.linkLabel} <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .channels {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1rem 1rem 1.25rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius-lg);
+    background: var(--vx-paper);
+    box-shadow: 5px 5px 0 var(--vx-ink);
+    transform: rotate(var(--tilt));
+    transition: transform 200ms ease;
+  }
+
+  .card:hover {
+    transform: rotate(0) translateY(-4px);
+  }
+
+  h3 {
+    margin-top: 0.4rem;
+    font-size: 1.45rem;
+  }
+
+  .card > p {
+    color: var(--vx-ink-soft);
+    font-size: 0.97rem;
+  }
+
+  .points {
+    display: grid;
+    gap: 0.35rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+
+  .points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .points :global(svg) {
+    flex: none;
+    margin-top: 0.2rem;
+    color: var(--vx-teal-ink);
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 0.4rem;
+    color: var(--vx-violet-deep);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+
+  .more:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 70rem) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

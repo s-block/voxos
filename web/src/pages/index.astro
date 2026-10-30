@@ -1,0 +1,36 @@
+---
+import Apps from "../components/landing/Apps.astro";
+import Channels from "../components/landing/Channels.astro";
+import ClosingCta from "../components/landing/ClosingCta.astro";
+import Faq from "../components/landing/Faq.astro";
+import Features from "../components/landing/Features.astro";
+import GetStarted from "../components/landing/GetStarted.astro";
+import Hero from "../components/landing/Hero.astro";
+import HowItWorks from "../components/landing/HowItWorks.astro";
+import Integrations from "../components/landing/Integrations.astro";
+import { faqs } from "../data/faq";
+import LandingLayout from "../layouts/LandingLayout.astro";
+import { faqNode, graph, softwareNode, websiteNode } from "../seo/structured-data";
+import { configuredSite } from "../site-url";
+import { site } from "../site.config";
+
+const siteUrl = configuredSite(Astro.site);
+---
+
+<LandingLayout
+  title={site.title}
+  description={site.description}
+  image="/og/index.png"
+  imageAlt="Voxos: the open-source voice AI agent that picks up the phone"
+  structuredData={graph(websiteNode(siteUrl), softwareNode(siteUrl), faqNode(faqs))}
+>
+  <Hero />
+  <Channels />
+  <Features />
+  <Apps />
+  <Integrations />
+  <HowItWorks />
+  <GetStarted />
+  <Faq />
+  <ClosingCta />
+</LandingLayout>

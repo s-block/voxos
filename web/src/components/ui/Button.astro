@@ -1,0 +1,71 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"a"> {
+  href: string;
+  variant?: "primary" | "secondary";
+  size?: "md" | "lg";
+}
+
+const { href, variant = "primary", size = "md", class: className, ...rest } = Astro.props;
+---
+
+<a class:list={["button", variant, size, className]} href={href} {...rest}><slot /></a>
+
+<style>
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    padding: 0.7em 1.15em;
+    border: 2px solid var(--vx-ink);
+    border-radius: 999px;
+    font-family: var(--vx-font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: var(--vx-shadow-pop);
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .button:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 var(--vx-ink);
+  }
+
+  .button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--vx-ink);
+  }
+
+  .lg {
+    padding: 0.85em 1.4em;
+    font-size: 1.0625rem;
+  }
+
+  .primary {
+    background: var(--vx-ink);
+    color: var(--vx-paper);
+    box-shadow: 3px 3px 0 var(--vx-violet);
+  }
+
+  .primary:hover {
+    box-shadow: 5px 5px 0 var(--vx-violet);
+  }
+
+  .secondary {
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+  }
+
+  .button :global(svg) {
+    width: 1.15em;
+    height: 1.15em;
+    flex: none;
+  }
+</style>

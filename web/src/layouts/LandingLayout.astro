@@ -1,0 +1,42 @@
+---
+import "../styles/global.css";
+import Fonts from "../components/site/Fonts.astro";
+import SeoHead from "../components/site/SeoHead.astro";
+import SiteFooter from "../components/site/SiteFooter.astro";
+import SiteHeader from "../components/site/SiteHeader.astro";
+import { serializeJsonLd } from "../seo/structured-data";
+
+interface Props {
+  title: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  structuredData?: Record<string, unknown>;
+  noindex?: boolean;
+}
+
+const { structuredData, ...seo } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead {...seo} />
+    <Fonts />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#ffffff" />
+    {structuredData && <script is:inline type="application/ld+json" set:html={serializeJsonLd(structuredData)} />}
+  </head>
+  <body>
+    <a class="vx-skip-link" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

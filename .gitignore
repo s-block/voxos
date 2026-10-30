@@ -227,22 +227,23 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Terraform
-**/.terraform/*
+# Terraform: infrastructure code, state and plans are installation data
+# wherever they live
+terraform/
+.terraform/
+*.tf
+*.tf.json
+*.tfbackend
+backend.hcl
+.terraform.lock.hcl
+.terraformrc
+terraform.rc
 *.tfstate
 *.tfstate.*
 *.tfvars
 *.tfvars.json
 !*.tfvars.example
 *.tfplan
-.terraform.tfstate.lock.info
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-terraform/**/backend.hcl
-!terraform/**/backend.hcl.example
-terraform/bootstrap/backend.tf
 crash.log
 crash.*.log
 gha-creds-*.json
@@ -259,7 +260,6 @@ prompts/*
 /frontend/.dockerignore
 /frontend/Dockerfile.production
 /frontend/nginx.production.conf
-/terraform/
 
 # Installation data, credentials and recovery archives
 /.voxos/

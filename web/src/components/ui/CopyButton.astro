@@ -1,0 +1,84 @@
+---
+interface Props {
+  /** The exact text placed on the clipboard. */
+  text: string;
+  label?: string;
+}
+
+const { text, label = "Copy commands" } = Astro.props;
+---
+
+<button class="copy" type="button" data-copy={text} aria-label={label}>
+  <svg class="icon idle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>
+  <svg class="icon done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 6 9 17l-5-5"></path>
+  </svg>
+  <span class="status" aria-live="polite"></span>
+</button>
+
+<script>
+  for (const button of document.querySelectorAll<HTMLButtonElement>("button[data-copy]")) {
+    const status = button.querySelector(".status");
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.dataset.state = "copied";
+        if (status) status.textContent = "Copied";
+      } catch {
+        button.dataset.state = "failed";
+        if (status) status.textContent = "Copy failed. Select the text instead.";
+      }
+      setTimeout(() => {
+        delete button.dataset.state;
+        if (status) status.textContent = "";
+      }, 2000);
+    });
+  }
+</script>
+
+<style>
+  .copy {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 25%);
+    border-radius: 9px;
+    background: rgb(255 255 255 / 8%);
+    color: #e8eeeb;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+
+  .copy:hover {
+    background: rgb(255 255 255 / 16%);
+  }
+
+  .icon {
+    grid-area: 1 / 1;
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  .done,
+  .copy[data-state="copied"] .idle {
+    visibility: hidden;
+  }
+
+  .copy[data-state="copied"] .done {
+    visibility: visible;
+    color: var(--vx-mint);
+  }
+
+  .status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>

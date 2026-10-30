@@ -146,6 +146,42 @@ jobs:
         working-directory: whatsapp-bridge
         run: npm test
 
+  website:
+    name: Website
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: "1"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Set up Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install locked website dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Lint website
+        working-directory: web
+        run: npm run lint
+
+      - name: Typecheck website
+        working-directory: web
+        run: npm run check
+
+      - name: Test website
+        working-directory: web
+        run: npm test
+
+      - name: Build website from the repository docs and check links
+        working-directory: web
+        run: npm run build
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -278,7 +314,7 @@ jobs:
       - name: Audit locked JavaScript runtime and development dependencies
         run: |
           set -euo pipefail
-          for project in frontend browser-agent whatsapp-bridge helm/images/steel docker/codex-runner; do
+          for project in frontend browser-agent whatsapp-bridge helm/images/steel docker/codex-runner web; do
             npm audit --package-lock-only --prefix "$project"
           done
 

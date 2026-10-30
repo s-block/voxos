@@ -1,0 +1,78 @@
+---
+import { ArrowRight } from "@lucide/astro";
+import Button from "../ui/Button.astro";
+import GitHubButton from "../ui/GitHubButton.astro";
+import HandNote from "../ui/HandNote.astro";
+import Waveform from "../ui/Waveform.astro";
+---
+
+<section class="closing" aria-labelledby="closing-title">
+  <div class="vx-container">
+    <div class="panel">
+      <span class="wave"><Waveform talking /></span>
+      <h2 id="closing-title">Give your agent a voice.</h2>
+      <p>Self-host Voxos, connect a number, and say hello. The whole thing is MIT licensed and yours to change.</p>
+      <div class="ctas">
+        <Button href="/docs/quick-start/" size="lg">Read the Quick Start <ArrowRight aria-hidden="true" /></Button>
+        <GitHubButton size="lg" />
+      </div>
+      <HandNote arrow="up-left" class="closing-note">it's free, go on</HandNote>
+    </div>
+  </div>
+</section>
+
+<style>
+  .closing {
+    padding: clamp(2rem, 5vw, 4rem) 0 0;
+  }
+
+  .panel {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+    padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 3rem);
+    border: 2px solid var(--vx-ink);
+    border-radius: 2rem;
+    background:
+      radial-gradient(circle at 15% 20%, rgb(25 240 196 / 28%), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgb(102 87 255 / 22%), transparent 45%),
+      var(--vx-paper);
+    box-shadow: 10px 10px 0 var(--vx-ink);
+    text-align: center;
+  }
+
+  .wave {
+    font-size: 2.6rem;
+  }
+
+  h2 {
+    font-size: clamp(2.2rem, 4vw + 1rem, 4rem);
+  }
+
+  .panel > p {
+    max-width: 34rem;
+    color: var(--vx-ink-soft);
+    font-size: 1.15rem;
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .panel :global(.closing-note) {
+    position: absolute;
+    right: clamp(1rem, 6vw, 5rem);
+    bottom: 1.25rem;
+  }
+
+  @media (max-width: 48rem) {
+    .panel :global(.closing-note) {
+      display: none;
+    }
+  }
+</style>

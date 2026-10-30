@@ -8,7 +8,9 @@ import tomllib
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlsplit
 
-PRIVATE_ROOTS = frozenset({"terraform", "deploy", "private", ".voxos", ".secrets", ".aws", ".kube"})
+PRIVATE_ROOTS = frozenset({"deploy", "private", ".voxos", ".secrets", ".aws", ".kube"})
+# Terraform holds installation infrastructure and state, so it is private at any depth.
+PRIVATE_DIRECTORIES = frozenset({"terraform", ".terraform"})
 PRIVATE_NAMES = frozenset(
     {
         "compose.production.yml",
@@ -26,6 +28,10 @@ PRIVATE_NAMES = frozenset(
         "id_ecdsa",
         "id_ed25519",
         "id_dsa",
+        ".terraform.lock.hcl",
+        ".terraformrc",
+        "terraform.rc",
+        "backend.hcl",
     }
 )
 PRIVATE_PATTERNS = (
@@ -33,6 +39,9 @@ PRIVATE_PATTERNS = (
     ".env.*",
     "*.env",
     "*.env.*",
+    "*.tf",
+    "*.tf.json",
+    "*.tfbackend",
     "*.tfstate*",
     "*.tfvars*",
     "*.tfplan",
@@ -75,7 +84,7 @@ def git_executable() -> str:
 
 def is_private_path(filename: str) -> bool:
     path = PurePosixPath(filename)
-    if path.parts[0] in PRIVATE_ROOTS:
+    if path.parts[0] in PRIVATE_ROOTS or not PRIVATE_DIRECTORIES.isdisjoint(path.parts[:-1]):
         return True
     if path.name.endswith(".example"):
         return False

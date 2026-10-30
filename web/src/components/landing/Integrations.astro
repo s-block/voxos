@@ -1,0 +1,140 @@
+---
+import { integrationGroups } from "../../data/integrations";
+import BrandIcon from "../ui/BrandIcon.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+---
+
+<section class="integrations" aria-labelledby="integrations">
+  <div class="vx-container">
+    <SectionHeading id="integrations" eyebrow="Integrations" title="Plays nicely with the stuff you already use.">
+      Bring your own models, phone numbers and tools. Every chip links to its setup guide.
+    </SectionHeading>
+    <div class="groups">
+      {
+        integrationGroups.map((group) => (
+          <section class="group" aria-label={group.title}>
+            <h3>{group.title}</h3>
+            <p>{group.summary}</p>
+            <ul>
+              {group.items.map((item) => (
+                <li>
+                  <a href={item.href}>
+                    <BrandIcon name={item.name} icon={item.icon} />
+                    {item.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+    <p class="footnote">
+      Anything else that speaks MCP over Streamable HTTP or SSE works too. <a href="/docs/user-mcp-servers/"
+        >Add your own server</a
+      >.
+    </p>
+  </div>
+</section>
+
+<style>
+  .integrations {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+    background: var(--vx-paper-soft);
+    border-block: 2px solid var(--vx-ink);
+  }
+
+  .groups {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 1.25rem;
+  }
+
+  .group {
+    grid-column: 1;
+    padding: 1.5rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+  }
+
+  /* The MCP catalog is the longest list, so it takes the whole right column. */
+  .group:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+  }
+
+  h3 {
+    font-size: 1.35rem;
+  }
+
+  .group > p {
+    margin: 0.35rem 0 1.1rem;
+    color: var(--vx-ink-muted);
+    font-size: 0.95rem;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.85rem 0.45rem 0.5rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: 12px;
+    background: var(--vx-paper);
+    font-size: 0.93rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  a:hover {
+    border-color: var(--vx-ink);
+    box-shadow: 3px 3px 0 var(--vx-ink);
+    transform: translate(-1px, -2px) rotate(-1deg);
+  }
+
+  .footnote {
+    margin-top: 1.75rem;
+    color: var(--vx-ink-soft);
+    text-align: center;
+  }
+
+  .footnote a {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--vx-violet-deep);
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .footnote a:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  @media (max-width: 60rem) {
+    .groups {
+      grid-template-columns: 1fr;
+    }
+
+    .group,
+    .group:nth-child(3) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+  }
+</style>
