@@ -14,8 +14,11 @@ export interface WikiNavGroup {
   readonly links: readonly WikiNavLink[];
 }
 
-/** Reads the GitHub Wiki `_Sidebar.md` navigation: link list items, grouped by `##` headings. */
-export function parseWikiSidebar(markdown: string): WikiNavGroup[] {
+/**
+ * Reads a navigation page, such as the GitHub Wiki `_Sidebar.md` or the guides
+ * index: link list items, grouped by `##` headings.
+ */
+export function parseWikiSidebar(markdown: string, fileName = "_Sidebar.md"): WikiNavGroup[] {
   const groups: { label: string | undefined; links: WikiNavLink[] }[] = [
     { label: undefined, links: [] },
   ];
@@ -29,7 +32,7 @@ export function parseWikiSidebar(markdown: string): WikiNavGroup[] {
     const link = LINK_ITEM.exec(line);
     if (!link?.[1] || !link[2]) {
       throw new Error(
-        `_Sidebar.md:${index + 1}: list items must be single Markdown links, found "${line.trim()}"`,
+        `${fileName}:${index + 1}: list items must be single Markdown links, found "${line.trim()}"`,
       );
     }
     groups.at(-1)?.links.push({ label: link[1], target: link[2] });

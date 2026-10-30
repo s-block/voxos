@@ -11,7 +11,7 @@ interface Props {
 const { label = "Star on GitHub", size = "md" } = Astro.props;
 ---
 
-<Button href={repositoryUrl} variant="secondary" size={size}>
+<Button href={repositoryUrl} variant="secondary" size={size} data-analytics-event="github_click">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={siGithub.path} /></svg>
   {label}
 </Button>

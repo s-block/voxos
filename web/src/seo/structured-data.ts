@@ -64,14 +64,15 @@ export interface DocPageDetails {
   readonly url: URL;
   readonly image: URL;
   readonly lastUpdated: Date | undefined;
-  readonly isDocsHome: boolean;
+  /** The section the page sits in, such as Docs or Guides; omitted on that section's own home page. */
+  readonly section: { readonly name: string; readonly url: URL } | undefined;
 }
 
 export function docPageNodes(page: DocPageDetails): JsonLdNode[] {
   const home = new URL("/", page.url);
   const crumbs = [
     { name: site.name, item: home.href },
-    ...(page.isDocsHome ? [] : [{ name: "Docs", item: new URL("/docs/", home).href }]),
+    ...(page.section ? [{ name: page.section.name, item: page.section.url.href }] : []),
     { name: page.title, item: page.url.href },
   ];
   return [

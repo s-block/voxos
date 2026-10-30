@@ -31,6 +31,7 @@ the environment.
 | Setting | Used for |
 | --- | --- |
 | `WEB_SITE_URL` | The site's public URL, such as `https://example.com`. Canonical links, the sitemap, structured data and social cards are built from it. Without it, pages point at `http://localhost:4321`. |
+| `WEB_GA_MEASUREMENT_ID` | Optional Google Analytics 4 measurement ID, such as `G-ABC123`. Without it, the site loads no analytics. With it, Google Analytics loads only after a visitor allows it in the consent banner, and only on the host in `WEB_SITE_URL`. |
 | `WEB_S3_BUCKET` | The private bucket that `make web-deploy` uploads to. |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID` | The CloudFront distribution that serves the bucket. |
 | `AWS_PROFILE` | Optional AWS CLI profile for the upload. |
@@ -46,6 +47,9 @@ collection:
   `examples/skills/catalog.toml` appear under **Example skills**, and
   `MORE_PAGES` in `sources.ts` adds a few other repository files, such as the
   Helm chart guide.
+- **Guides.** `docs/guides/README.md` is the guides index at `/guides/`, and
+  every guide it links becomes a page at `/guides/<file-name>/`, listed under
+  **Guides** in the sidebar.
 - **Titles and metadata.** The first `# Heading` is the page title. A
   `Last updated: YYYY-MM-DD` line becomes the page's last-updated date. The first
   prose paragraph of at least 50 characters is the search description; skills
@@ -56,8 +60,8 @@ collection:
   `/docs/<page>.md`, and `llms.txt`, `llms-full.txt` and `llms-small.txt` list
   and bundle the docs for AI tools.
 
-To publish another repository file, link it from `docs/wiki/_Sidebar.md` or add
-it to `MORE_PAGES`. The build fails if a published file is missing, has no
+To publish another repository file, link it from `docs/wiki/_Sidebar.md` or
+`docs/guides/README.md`, or add it to `MORE_PAGES`. The build fails if a published file is missing, has no
 title heading or intro paragraph, or contains a link that leaves the
 repository.
 

@@ -1,0 +1,28 @@
+---
+import Default from "@astrojs/starlight/components/Footer.astro";
+import Analytics from "../site/Analytics.astro";
+import AnalyticsSettings from "../site/AnalyticsSettings.astro";
+---
+
+<Default />
+<p class="site-links">
+  <a href="/privacy/">Privacy</a>
+  <AnalyticsSettings />
+</p>
+<Analytics />
+
+<style>
+  .site-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 2rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+
+  .site-links a {
+    color: inherit;
+  }
+</style>

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { parseRepoDoc } from "./parse";
 import { repoFileUrl } from "./repo";
 import { parseSkillsCatalog } from "./skills-catalog";
-import { buildDocsSite, WIKI_SIDEBAR } from "./sources";
+import { buildDocsSite, GUIDES_INDEX, WIKI_SIDEBAR } from "./sources";
 import { parseWikiSidebar } from "./wiki-sidebar";
 
 const docs = buildDocsSite();
@@ -20,6 +20,21 @@ describe("buildDocsSite against this repository", () => {
     expect(docs.sidebar.slice(0, 2)).toEqual([
       { label: "Home", slug: "docs" },
       { label: "Quick Start", slug: "docs/quick-start" },
+    ]);
+  });
+
+  it("publishes the guides index at /guides/ and each guide it lists below it", () => {
+    const guideLinks = parseWikiSidebar(read(GUIDES_INDEX), GUIDES_INDEX).flatMap((group) => group.links);
+    const guidesGroup = docs.sidebar.find(
+      (item): item is { label: string; items: { label: string; slug: string }[] } =>
+        typeof item === "object" && item.label === "Guides",
+    );
+
+    expect(docs.routes.get(GUIDES_INDEX)).toBe("/guides/");
+    expect(docs.routes.get("docs/guides/Twilio-Phone-Agent.md")).toBe("/guides/twilio-phone-agent/");
+    expect(guidesGroup?.items.map((item) => item.label)).toEqual([
+      "All guides",
+      ...guideLinks.map((link) => link.label),
     ]);
   });
 
@@ -46,6 +61,8 @@ describe("buildDocsSite against this repository", () => {
   });
 
   it("covers every published folder for Starlight's Markdown processing", () => {
-    expect(docs.sourceDirs).toEqual(expect.arrayContaining(["docs/wiki", "docs", "examples/skills", "helm", "app", "."]));
+    expect(docs.sourceDirs).toEqual(
+      expect.arrayContaining(["docs/wiki", "docs", "docs/guides", "examples/skills", "helm", "app", "."]),
+    );
   });
 });

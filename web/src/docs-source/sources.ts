@@ -34,6 +34,7 @@ interface ExtraPage {
 }
 
 export const WIKI_SIDEBAR = "docs/wiki/_Sidebar.md";
+export const GUIDES_INDEX = "docs/guides/README.md";
 const WIKI_HOME = "docs/wiki/Home.md";
 const SKILLS_CATALOG = "examples/skills/catalog.toml";
 const SKILLS_OVERVIEW = "examples/skills/README.md";
@@ -47,7 +48,8 @@ const MORE_PAGES: readonly ExtraPage[] = [
 
 /**
  * Builds the published page list and the docs sidebar from the repository:
- * the wiki's `_Sidebar.md`, the curated skills catalog, and `MORE_PAGES`.
+ * the wiki's `_Sidebar.md`, the guides index, the curated skills catalog, and
+ * `MORE_PAGES`.
  */
 export function buildDocsSite(): DocsSite {
   const sources: DocSource[] = [];
@@ -62,17 +64,24 @@ export function buildDocsSite(): DocsSite {
 
   for (const group of parseWikiSidebar(readRepoText(WIKI_SIDEBAR))) {
     const items = group.links.map((link) => {
-      const repoPath = posix.normalize(
-        posix.join(posix.dirname(WIKI_SIDEBAR), link.target),
-      );
-      if (!repoPath.endsWith(".md")) {
-        throw new Error(`${WIKI_SIDEBAR}: "${link.target}" is not a Markdown page`);
-      }
+      const repoPath = linkedPage(WIKI_SIDEBAR, link.target);
       return add({ repoPath, id: wikiPageId(repoPath) }, link.label);
     });
     if (group.label) sidebar.push({ label: group.label, items });
     else sidebar.push(...items);
   }
+
+  const guides = parseWikiSidebar(readRepoText(GUIDES_INDEX), GUIDES_INDEX).flatMap((group) => group.links);
+  sidebar.push({
+    label: "Guides",
+    items: [
+      add({ repoPath: GUIDES_INDEX, id: "guides" }, "All guides"),
+      ...guides.map((link) => {
+        const repoPath = linkedPage(GUIDES_INDEX, link.target);
+        return add({ repoPath, id: `guides/${pageName(repoPath)}` }, link.label);
+      }),
+    ],
+  });
 
   const catalogDir = posix.dirname(SKILLS_CATALOG);
   const skills = parseSkillsCatalog(readRepoText(SKILLS_CATALOG));
@@ -108,14 +117,27 @@ export function buildDocsSite(): DocsSite {
     routes: new Map(sources.map((source) => [source.repoPath, `/${source.id}/`])),
     sidebar,
     sourceDirs: [...new Set(sources.map((source) => posix.dirname(source.repoPath)))],
-    navigationFiles: [WIKI_SIDEBAR, SKILLS_CATALOG],
+    navigationFiles: [WIKI_SIDEBAR, GUIDES_INDEX, SKILLS_CATALOG],
   };
+}
+
+/** The repository path of a Markdown page linked from a navigation file. */
+function linkedPage(navigationFile: string, target: string): string {
+  const repoPath = posix.normalize(posix.join(posix.dirname(navigationFile), target));
+  if (!repoPath.endsWith(".md")) {
+    throw new Error(`${navigationFile}: "${target}" is not a Markdown page`);
+  }
+  return repoPath;
 }
 
 /** `docs/wiki/Home.md` is the docs landing page; every other page is named after its file. */
 function wikiPageId(repoPath: string): string {
   if (repoPath === WIKI_HOME) return "docs";
-  return `docs/${posix.basename(repoPath, ".md").toLowerCase()}`;
+  return `docs/${pageName(repoPath)}`;
+}
+
+function pageName(repoPath: string): string {
+  return posix.basename(repoPath, ".md").toLowerCase();
 }
 
 function assertUnique(values: readonly string[], kind: string): void {

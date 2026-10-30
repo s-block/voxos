@@ -4,6 +4,11 @@ import { renderOgCard, type OgCard } from "../../seo/og-card";
 import { configuredSite } from "../../site-url";
 import { site } from "../../site.config";
 
+function eyebrow(id: string): string {
+  if (id === "guides" || id.startsWith("guides/")) return "Guide";
+  return id.startsWith("docs/skills/") ? "Example skill" : "Docs";
+}
+
 export const getStaticPaths = (async () => {
   const docs = await getCollection("docs");
   const landing: OgCard = {
@@ -17,7 +22,7 @@ export const getStaticPaths = (async () => {
       params: { id: entry.id },
       props: {
         card: {
-          eyebrow: entry.id.startsWith("docs/skills/") ? "Example skill" : "Docs",
+          eyebrow: eyebrow(entry.id),
           title: entry.data.title,
           description: entry.data.description ?? site.description,
         } satisfies OgCard,

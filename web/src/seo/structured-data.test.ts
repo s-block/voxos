@@ -21,7 +21,7 @@ describe("structured data URLs", () => {
       url: new URL("/docs/quick-start/", siteUrl),
       image: new URL("/og/docs/quick-start.png", siteUrl),
       lastUpdated: undefined,
-      isDocsHome: false,
+      section: { name: "Docs", url: new URL("/docs/", siteUrl) },
     });
 
     expect(websiteNode(siteUrl)).toMatchObject({ "@id": "https://example.com/#website", url: "https://example.com/" });

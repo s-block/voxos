@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { satteri } from "@astrojs/markdown-satteri";
 import starlight from "@astrojs/starlight";
-import { defineConfig, fontProviders } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 import starlightLlmsTxt from "starlight-llms-txt";
 import { repoLinksPlugin } from "./src/docs-source/link-plugin";
 import { llmsTxtDetails } from "./src/docs-source/llms";
@@ -44,6 +44,12 @@ export default defineConfig({
   build: { format: "directory" },
   // Keep a space where prose wraps onto a new line around inline elements (Astro 7's "jsx" default drops it).
   compressHTML: true,
+  env: {
+    schema: {
+      // Google Analytics stays off unless this is set, and then loads only after a visitor allows it.
+      WEB_GA_MEASUREMENT_ID: envField.string({ context: "server", access: "public", optional: true, startsWith: "G-" }),
+    },
+  },
   markdown: {
     processor: satteri({ hastPlugins: [repoLinksPlugin(docs)] }),
   },
@@ -70,6 +76,7 @@ export default defineConfig({
       sidebar: docs.sidebar,
       customCss: ["./src/styles/starlight.css"],
       components: {
+        Footer: "./src/components/starlight/Footer.astro",
         Head: "./src/components/starlight/Head.astro",
         SiteTitle: "./src/components/starlight/SiteTitle.astro",
         SocialIcons: "./src/components/starlight/SocialIcons.astro",

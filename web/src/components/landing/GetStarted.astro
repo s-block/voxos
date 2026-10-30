@@ -56,7 +56,11 @@ const guides = [
       <div class="term-bar">
         <span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
         <span class="term-title">~/code</span>
-        <CopyButton text={cloneCommands.join("\n")} label="Copy the clone commands" />
+        <CopyButton
+          text={cloneCommands.join("\n")}
+          label="Copy the clone commands"
+          analyticsEvent="copy_install_command"
+        />
       </div>
       <pre><code>{cloneCommands.map((command) => <span class="line"><span class="prompt" aria-hidden="true">$ </span>{command}</span>)}<span class="comment"># add the secrets from the Quick Start to .env</span></code></pre>
       <pre class="second"><code><span class="line"><span class="prompt" aria-hidden="true">$ </span>make up</span><span class="comment"># API, LiveKit, Postgres + pgvector and the workers</span><span class="comment"># then open the console at http://localhost:5173</span></code></pre>

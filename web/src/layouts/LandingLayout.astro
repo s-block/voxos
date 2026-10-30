@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Analytics from "../components/site/Analytics.astro";
 import Fonts from "../components/site/Fonts.astro";
 import SeoHead from "../components/site/SeoHead.astro";
 import SiteFooter from "../components/site/SiteFooter.astro";
@@ -38,5 +39,6 @@ const { structuredData, ...seo } = Astro.props;
       <slot />
     </main>
     <SiteFooter />
+    <Analytics />
   </body>
 </html>

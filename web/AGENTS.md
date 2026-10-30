@@ -14,6 +14,10 @@ These rules apply inside `web/`, in addition to the repository root
   `src/data/`, and each item links to the docs section that supports it. Check
   the source docs before adding or changing a capability. The post-build link
   check fails when a linked page or `#fragment` does not exist.
+- Guides in `docs/guides/` are task-first walkthroughs for a job people
+  actually search for. Check every step against the docs and code, link to the
+  reference docs instead of repeating them, and write one guide per task, never
+  one page per keyword variation. List each guide in `docs/guides/README.md`.
 - Do not state goals about stars or traffic on the site.
 - Use "Voxos" in prose. The VoxOS lockup is only the logo.
 - Keep the tone casual and plain. Use short sentences, and no marketing
@@ -28,6 +32,10 @@ These rules apply inside `web/`, in addition to the repository root
   the `WEB_SITE_URL` setting. The bucket, CloudFront distribution and AWS
   profile live in the ignored `web/.env`. Use `example.com` in docs and
   examples.
+- Analytics is opt-in. `src/components/site/analytics.ts` loads Google
+  Analytics only after a visitor allows it, and only on the configured site's
+  host. Track a click by adding `data-analytics-event="<event_name>"` to the
+  element; do not load other tracking scripts.
 - `infra/cloudfront-function.js` runs in CloudFront's `cloudfront-js-2.0`
   runtime. Keep it a plain script with no imports, and update its tests with
   it.

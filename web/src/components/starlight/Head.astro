@@ -8,6 +8,12 @@ const { entry } = Astro.locals.starlightRoute;
 const siteUrl = configuredSite(Astro.site);
 const url = new URL(Astro.url.pathname, siteUrl);
 const image = new URL(`/og/${entry.id}.png`, siteUrl);
+// Pages live under /docs/ or /guides/; each section's home page has no section crumb.
+const sectionId = entry.id.split("/")[0] ?? entry.id;
+const section =
+  entry.id === sectionId
+    ? undefined
+    : { name: sectionId === "guides" ? "Guides" : "Docs", url: new URL(`/${sectionId}/`, siteUrl) };
 const structuredData = graph(
   websiteNode(siteUrl),
   softwareNode(siteUrl),
@@ -17,7 +23,7 @@ const structuredData = graph(
     url,
     image,
     lastUpdated: entry.data.lastUpdated instanceof Date ? entry.data.lastUpdated : undefined,
-    isDocsHome: entry.id === "docs",
+    section,
   }),
 );
 ---
