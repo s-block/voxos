@@ -11,6 +11,8 @@ declare global {
   }
 }
 
+type GtagWindow = Pick<Window, "dataLayer" | "gtag">;
+
 const STORAGE_KEY = "voxos-analytics-consent";
 
 function readChoice(): Choice | undefined {
@@ -30,25 +32,42 @@ function saveChoice(choice: Choice): void {
   }
 }
 
-function loadGoogleAnalytics(measurementId: string): void {
-  if (window.gtag) return;
-  window.dataLayer = window.dataLayer ?? [];
-  window.gtag = function gtag() {
+/**
+ * Turns Google Analytics on. The first call queues the consent defaults and
+ * config and loads gtag.js; a later call, after the visitor declined in the
+ * meantime, grants consent again.
+ */
+export function enableGoogleAnalytics(page: GtagWindow, measurementId: string, loadScript: (src: string) => void): void {
+  if (page.gtag) {
+    page.gtag("consent", "update", { analytics_storage: "granted" });
+    return;
+  }
+  const dataLayer = (page.dataLayer ??= []);
+  page.gtag = function gtag() {
     // gtag.js expects each call's arguments object, not an array.
     // eslint-disable-next-line prefer-rest-params
-    window.dataLayer?.push(arguments);
+    dataLayer.push(arguments);
   };
-  window.gtag("consent", "default", {
+  page.gtag("consent", "default", {
     ad_storage: "denied",
     ad_user_data: "denied",
     ad_personalization: "denied",
     analytics_storage: "granted",
   });
-  window.gtag("js", new Date());
-  window.gtag("config", measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
+  page.gtag("js", new Date());
+  page.gtag("config", measurementId, { allow_google_signals: false, allow_ad_personalization_signals: false });
+  loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`);
+}
+
+/** Withdraws consent, so a loaded Google Analytics stops sending data and setting cookies. */
+export function disableGoogleAnalytics(page: GtagWindow): void {
+  page.gtag?.("consent", "update", { analytics_storage: "denied" });
+}
+
+function loadScript(src: string): void {
   const script = document.createElement("script");
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  script.src = src;
   document.head.append(script);
 }
 
@@ -59,8 +78,7 @@ export function cookieDomains(hostname: string): string[] {
   return labels.slice(0, -1).map((_, index) => labels.slice(index).join("."));
 }
 
-function stopGoogleAnalytics(): void {
-  window.gtag?.("consent", "update", { analytics_storage: "denied" });
+function deleteAnalyticsCookies(): void {
   const names = document.cookie.split(";").map((cookie) => cookie.split("=")[0]?.trim() ?? "");
   for (const name of names.filter((cookie) => cookie.startsWith("_ga"))) {
     document.cookie = `${name}=; Max-Age=0; path=/`;
@@ -80,7 +98,7 @@ export function initAnalytics(): void {
   if (!banner || !measurementId || location.host !== banner.dataset.siteHost) return;
 
   const choice = readChoice();
-  if (choice === "granted") loadGoogleAnalytics(measurementId);
+  if (choice === "granted") enableGoogleAnalytics(window, measurementId, loadScript);
   if (choice === undefined) banner.hidden = false;
 
   document.addEventListener("click", (event) => {
@@ -89,8 +107,12 @@ export function initAnalytics(): void {
     if (value === "granted" || value === "denied") {
       saveChoice(value);
       banner.hidden = true;
-      if (value === "granted") loadGoogleAnalytics(measurementId);
-      else stopGoogleAnalytics();
+      if (value === "granted") {
+        enableGoogleAnalytics(window, measurementId, loadScript);
+      } else {
+        disableGoogleAnalytics(window);
+        deleteAnalyticsCookies();
+      }
       return;
     }
     if (closest(event.target, "[data-consent-open]")) {
