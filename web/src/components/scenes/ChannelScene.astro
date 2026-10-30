@@ -1,0 +1,194 @@
+---
+import { Mic, PhoneIncoming } from "@lucide/astro";
+import { siWhatsapp } from "simple-icons";
+import type { ChannelId } from "../../data/channels";
+import Waveform from "../ui/Waveform.astro";
+import Bubble from "./Bubble.astro";
+
+interface Props {
+  channel: ChannelId;
+}
+
+const { channel } = Astro.props;
+---
+
+<div class:list={["mini", channel]} aria-hidden="true">
+  {
+    channel === "voice" && (
+      <>
+        <div class="mic-row">
+          <span class="mic">
+            <Mic size={22} />
+          </span>
+          <Waveform talking />
+        </div>
+        <Bubble from="you">What's on my calendar today?</Bubble>
+        <Bubble from="agent">A 10:30 dentist visit, then drinks with Alex at 7.</Bubble>
+      </>
+    )
+  }
+  {
+    channel === "phone" && (
+      <div class="incoming">
+        <span class="ring">
+          <PhoneIncoming size={22} />
+        </span>
+        <strong>Alex</strong>
+        <small>Incoming call · saved contact</small>
+        <span class="answered">
+          <Waveform talking /> Answered by Voxos
+        </span>
+      </div>
+    )
+  }
+  {
+    channel === "sms" && (
+      <>
+        <span class="label">SMS</span>
+        <Bubble from="you">Any new emails from Acme?</Bubble>
+        <Bubble from="agent">Two: their renewal draft and a meeting invite for Tuesday.</Bubble>
+      </>
+    )
+  }
+  {
+    channel === "whatsapp" && (
+      <>
+        <span class="wa-head">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d={siWhatsapp.path} />
+          </svg>
+          Voxos
+        </span>
+        <Bubble from="you">Find a quiet café near the office?</Bubble>
+        <Bubble from="agent">Three nearby. The closest is a 4 minute walk.</Bubble>
+      </>
+    )
+  }
+</div>
+
+<style>
+  .mini {
+    display: grid;
+    align-content: start;
+    gap: 0.55rem;
+    min-height: 11.5rem;
+    padding: 1rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    background:
+      radial-gradient(circle at 1px 1px, var(--vx-line) 1px, transparent 0) 0 0 / 16px 16px,
+      var(--vx-paper-soft);
+  }
+
+  .mic-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 1.6rem;
+  }
+
+  .mic {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--vx-ink);
+    color: var(--vx-mint);
+    animation: pulse 1.8s ease-out infinite;
+  }
+
+  .incoming {
+    display: grid;
+    justify-items: center;
+    gap: 0.2rem;
+    padding: 0.6rem 0;
+    text-align: center;
+  }
+
+  .ring {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.4rem;
+    border-radius: 50%;
+    background: var(--vx-mint);
+    color: var(--vx-ink);
+    animation: wiggle 1.6s ease-in-out infinite;
+  }
+
+  .incoming small {
+    color: var(--vx-ink-muted);
+    font-size: 0.8rem;
+  }
+
+  .answered {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 999px;
+    background: var(--vx-ink);
+    color: var(--vx-paper);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .label,
+  .wa-head {
+    justify-self: start;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--vx-ink-muted);
+  }
+
+  .wa-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #0b7a3b;
+  }
+
+  .wa-head svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .whatsapp :global(.you) {
+    background: #0b6b35;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgb(25 240 196 / 55%);
+    }
+
+    100% {
+      box-shadow: 0 0 0 14px rgb(25 240 196 / 0%);
+    }
+  }
+
+  @keyframes wiggle {
+    0%,
+    60%,
+    100% {
+      transform: rotate(0);
+    }
+
+    70% {
+      transform: rotate(-12deg);
+    }
+
+    80% {
+      transform: rotate(10deg);
+    }
+
+    90% {
+      transform: rotate(-6deg);
+    }
+  }
+</style>

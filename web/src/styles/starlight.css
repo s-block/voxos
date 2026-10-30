@@ -1,0 +1,97 @@
+@import "./tokens.css";
+
+/*
+ * Starlight theme. The site is light only, so these values apply whatever
+ * `data-theme` Starlight renders, including before its script runs or
+ * without JavaScript.
+ */
+:root,
+::backdrop {
+  --sl-font: var(--vx-font-body);
+  --sl-font-mono: var(--vx-font-mono);
+
+  --sl-color-white: var(--vx-ink);
+  --sl-color-gray-1: #24302a;
+  --sl-color-gray-2: var(--vx-ink-soft);
+  --sl-color-gray-3: var(--vx-ink-muted);
+  --sl-color-gray-4: #8e9a95;
+  --sl-color-gray-5: var(--vx-line-strong);
+  --sl-color-gray-6: var(--vx-line);
+  --sl-color-gray-7: var(--vx-paper-soft);
+  --sl-color-black: var(--vx-paper);
+
+  --sl-color-accent-low: var(--vx-tint-violet);
+  --sl-color-accent: var(--vx-violet);
+  --sl-color-accent-high: var(--vx-violet-deep);
+
+  --sl-color-orange-high: hsl(41, 80%, 25%);
+  --sl-color-orange: hsl(41, 90%, 60%);
+  --sl-color-orange-low: hsl(41, 90%, 90%);
+  --sl-color-green-high: #05604f;
+  --sl-color-green: var(--vx-teal-ink);
+  --sl-color-green-low: var(--vx-tint-mint);
+  --sl-color-blue-high: #034e60;
+  --sl-color-blue: #0a8fae;
+  --sl-color-blue-low: var(--vx-tint-cyan);
+  --sl-color-purple-high: var(--vx-violet-deep);
+  --sl-color-purple: var(--vx-violet);
+  --sl-color-purple-low: var(--vx-tint-violet);
+  --sl-color-red-high: hsl(339, 80%, 30%);
+  --sl-color-red: hsl(339, 90%, 60%);
+  --sl-color-red-low: hsl(339, 80%, 92%);
+
+  --sl-color-text: var(--vx-ink-soft);
+  --sl-color-text-accent: var(--vx-violet);
+  --sl-color-text-invert: var(--vx-paper);
+  --sl-color-bg: var(--vx-paper);
+  --sl-color-bg-nav: var(--vx-paper);
+  --sl-color-bg-sidebar: var(--vx-paper);
+  --sl-color-bg-inline-code: var(--vx-paper-soft);
+  --sl-color-bg-accent: var(--vx-violet);
+  --sl-color-hairline-light: var(--vx-line);
+  --sl-color-hairline: var(--vx-line);
+  --sl-color-hairline-shade: var(--vx-line);
+  --sl-color-backdrop-overlay: rgb(23 33 28 / 45%);
+
+  --sl-shadow-sm: var(--vx-shadow-sm);
+  --sl-shadow-md: var(--vx-shadow);
+  --sl-shadow-lg: var(--vx-shadow);
+}
+
+:root {
+  color-scheme: light;
+}
+
+.sl-markdown-content :is(h1, h2, h3, h4),
+h1#_top {
+  font-family: var(--vx-font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--vx-ink);
+}
+
+.sl-markdown-content a:not(:where(.not-content *)) {
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.sl-markdown-content code:not(:where(.not-content *, pre *)) {
+  border: 1px solid var(--vx-line);
+  border-radius: 6px;
+  padding: 0.1em 0.35em;
+}
+
+.sl-markdown-content table {
+  font-size: var(--sl-text-sm);
+}
+
+/* The active sidebar link gets a soft brand highlight rather than a solid block. */
+.sidebar-content a[aria-current="page"] {
+  background: var(--vx-tint-violet);
+  color: var(--vx-violet-deep);
+  font-weight: 600;
+}
+
+header.header {
+  border-bottom: 1px solid var(--vx-line);
+}

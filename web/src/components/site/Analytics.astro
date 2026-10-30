@@ -1,0 +1,90 @@
+---
+import { WEB_GA_MEASUREMENT_ID } from "astro:env/server";
+import { configuredSite } from "../../site-url";
+
+const siteHost = configuredSite(Astro.site).host;
+---
+
+{
+  WEB_GA_MEASUREMENT_ID && (
+    <aside
+      class="consent"
+      aria-label="Analytics choice"
+      data-analytics-consent
+      data-measurement-id={WEB_GA_MEASUREMENT_ID}
+      data-site-host={siteHost}
+      hidden
+    >
+      <p>
+        <strong>Mind if we count visits?</strong> With your OK, Google Analytics sets cookies so we can see which
+        pages help. Nothing loads until you choose. <a href="/privacy/">Privacy</a>
+      </p>
+      <div class="actions">
+        <button type="button" data-consent-choice="granted">Allow analytics</button>
+        <button type="button" data-consent-choice="denied">No thanks</button>
+      </div>
+    </aside>
+  )
+}
+
+<script>
+  import { initAnalytics } from "./analytics";
+
+  initAnalytics();
+</script>
+
+<style>
+  .consent {
+    position: fixed;
+    inset: auto 1rem 1rem;
+    z-index: 100;
+    max-width: 25rem;
+    padding: 1rem 1.1rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+    box-shadow: var(--vx-shadow-pop);
+    font-family: var(--vx-font-body);
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .consent[hidden] {
+    display: none;
+  }
+
+  p {
+    margin: 0 0 0.85rem;
+  }
+
+  a {
+    color: var(--vx-violet-deep);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  button {
+    padding: 0.5em 1em;
+    border: 2px solid var(--vx-ink);
+    border-radius: 999px;
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: var(--vx-tint-mint);
+  }
+
+  button:focus-visible {
+    outline: 3px solid var(--vx-violet);
+    outline-offset: 2px;
+  }
+</style>

@@ -1,0 +1,237 @@
+---
+import { ArrowRight } from "@lucide/astro";
+import catalogToml from "../../../../examples/skills/catalog.toml?raw";
+import { features } from "../../data/features";
+import { parseSkillsCatalog } from "../../docs-source/skills-catalog";
+import HandNote from "../ui/HandNote.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+const skills = parseSkillsCatalog(catalogToml);
+const tones = ["mint", "cyan", "violet", "sun"] as const;
+---
+
+<section class="features" aria-labelledby="features">
+  <div class="vx-container">
+    <SectionHeading id="features" eyebrow="Not just chat" title="It actually does stuff.">
+      Skills, schedules, tools and a memory, so your agent can carry real work from one conversation to the next.
+    </SectionHeading>
+    <ul class="grid">
+      {
+        features.map(({ icon: Icon, ...feature }, index) => (
+          <li class="card">
+            <span class="icon" data-tone={tones[index % tones.length]}>
+              <Icon size={22} aria-hidden="true" />
+            </span>
+            <span class="name">{feature.name}</span>
+            <h3>{feature.title}</h3>
+            <p>{feature.summary}</p>
+            <a class="more" href={feature.href}>
+              Learn more<span class="vx-visually-hidden"> about {feature.name.toLowerCase()}</span>
+              <ArrowRight size={15} aria-hidden="true" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="skills">
+      <div class="skills-intro">
+        <h3>Example skills to steal</h3>
+        <p>
+          {skills.length} curated skills, each a bounded playbook built around real MCP tools. Load them into your account
+          and edit them to taste.
+        </p>
+        <a class="more" href="/docs/skills/">Browse the skills <ArrowRight size={15} aria-hidden="true" /></a>
+        <HandNote arrow="left" class="skills-note">copy, tweak, done</HandNote>
+      </div>
+      <ul class="skill-list">
+        {
+          skills.map((skill) => (
+            <li>
+              <a href={`/docs/skills/${skill.slug}/`} title={skill.description}>
+                {skill.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .features {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+    background:
+      linear-gradient(var(--vx-paper), transparent 6rem),
+      radial-gradient(circle at 1px 1px, var(--vx-line) 1px, transparent 0) 0 0 / 22px 22px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.4rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      transform 150ms ease;
+  }
+
+  .card:hover {
+    border-color: var(--vx-ink);
+    box-shadow: 4px 4px 0 var(--vx-ink);
+    transform: translate(-2px, -2px);
+  }
+
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0.4rem;
+    border: 1.5px solid var(--vx-ink);
+    border-radius: 14px;
+    background: var(--vx-tint-mint);
+    transform: rotate(-4deg);
+  }
+
+  [data-tone="cyan"] {
+    background: var(--vx-tint-cyan);
+    transform: rotate(3deg);
+  }
+
+  [data-tone="violet"] {
+    background: var(--vx-tint-violet);
+  }
+
+  [data-tone="sun"] {
+    background: var(--vx-tint-sun);
+    transform: rotate(5deg);
+  }
+
+  .name {
+    color: var(--vx-teal-ink);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+  }
+
+  .card p {
+    color: var(--vx-ink-soft);
+    font-size: 0.95rem;
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    color: var(--vx-violet-deep);
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+  }
+
+  .more:hover {
+    text-decoration: underline;
+  }
+
+  .skills {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+    gap: 2rem;
+    margin-top: 2.5rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius-lg);
+    background: var(--vx-tint-sun);
+    box-shadow: 6px 6px 0 var(--vx-ink);
+  }
+
+  .skills-intro {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+  }
+
+  .skills-intro h3 {
+    font-size: 1.6rem;
+  }
+
+  .skills-intro p {
+    color: var(--vx-ink-soft);
+  }
+
+  .skills-intro :global(.skills-note) {
+    margin-top: 0.5rem;
+  }
+
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: 0.6rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .skill-list a {
+    display: inline-block;
+    padding: 0.45rem 0.9rem;
+    border: 1.5px solid var(--vx-ink);
+    border-radius: 999px;
+    background: var(--vx-paper);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 150ms ease;
+  }
+
+  .skill-list li:nth-child(odd) a {
+    transform: rotate(-1.5deg);
+  }
+
+  .skill-list li:nth-child(even) a {
+    transform: rotate(1.2deg);
+  }
+
+  .skill-list a:hover {
+    transform: rotate(0) scale(1.04);
+    background: var(--vx-tint-violet);
+  }
+
+  @media (max-width: 70rem) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .skills {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

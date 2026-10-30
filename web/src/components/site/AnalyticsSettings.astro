@@ -1,0 +1,24 @@
+---
+import { WEB_GA_MEASUREMENT_ID } from "astro:env/server";
+---
+
+{
+  WEB_GA_MEASUREMENT_ID && (
+    <button type="button" class="settings" data-consent-open>
+      Analytics settings
+    </button>
+  )
+}
+
+<style>
+  .settings {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+</style>

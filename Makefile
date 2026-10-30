@@ -1,6 +1,7 @@
 .PHONY: help install install-dev pre-commit-install pre-commit secrets secrets-all secrets-baseline lint format type-check mypy frontend-lint whatsapp-bridge-install whatsapp-bridge-build whatsapp-bridge-check codex-runner-build docs-validate docs-manifest docs-index docs-refresh-check example-skills-list example-skills-load db-enable-vector up restart compose-up compose-restart mcp-stack-up mcp-stack-down mcp-stack-logs mcp-stack-config monzo-mcp-restart monzo-mcp-package-check test test-cov test-bills test-bills-inconclusive-artifacts clean build run ngrok worker worker-runs worker-codex worker-whatsapp scheduler frontend app-get app-devices app-format app-analyze app-test run-ios run-ios-device deploy-ios-device build-prod-ipa deploy-testflight app-run-ios app-run-android app-build-ios app-build-android app-open-ios
 .DEFAULT_GOAL := help
 .PHONY: helm-check publication-check
+.PHONY: web-install web-dev web-check web-build web-preview web-deploy
 
 -include app/.env
 
@@ -260,6 +261,33 @@ run-prod: ## Run FastAPI server in production mode on port 8000 (no reload)
 
 frontend: ## Run the local LiveKit test frontend
 	cd frontend && npm install && npm run dev -- --host 0.0.0.0
+
+# Project Website (web/, built from docs/wiki and other repo Markdown).
+# Settings such as WEB_SITE_URL come from the ignored web/.env or the environment.
+WEB_ENV = set -a; [ ! -f web/.env ] || . web/.env; set +a;
+WEB_NPM = $(WEB_ENV) cd web && ASTRO_TELEMETRY_DISABLED=1 npm
+
+web/node_modules/.package-lock.json: web/package.json web/package-lock.json
+	cd web && npm ci
+
+web-install: web/node_modules/.package-lock.json ## Install the locked website dependencies
+
+web-dev: web-install ## Run the website dev server on http://localhost:4321
+	$(WEB_NPM) run dev
+
+web-check: web-install ## Lint, typecheck, and unit test the website
+	$(WEB_NPM) run lint
+	$(WEB_NPM) run check
+	$(WEB_NPM) test
+
+web-build: web-check ## Build the static website into web/dist and check its links
+	$(WEB_NPM) run build
+
+web-preview: ## Serve the built website on http://localhost:4322
+	$(WEB_NPM) run preview -- --port 4322
+
+web-deploy: web-build ## Upload web/dist to WEB_S3_BUCKET and invalidate its CloudFront distribution
+	@$(WEB_ENV) web/scripts/deploy.sh
 
 # Flutter Mobile App
 app-get: ## Install Flutter mobile app dependencies

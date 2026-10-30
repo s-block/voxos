@@ -1,0 +1,45 @@
+/*
+ * Design tokens shared by the landing pages and the Starlight docs.
+ * Brand colours come from docs/design/README.md. The bright gradient stops
+ * are decorative: text on white uses the ink colours or --vx-violet, which
+ * pass WCAG AA.
+ */
+:root {
+  --vx-mint: #19f0c4;
+  --vx-cyan: #16cfea;
+  --vx-violet: #6657ff;
+  --vx-violet-deep: #4b3fd8;
+  --vx-teal-ink: #07806a;
+  --vx-gradient: linear-gradient(115deg, var(--vx-mint) 0%, var(--vx-cyan) 46%, var(--vx-violet) 100%);
+
+  --vx-ink: #17211c;
+  --vx-ink-soft: #3d4a44;
+  --vx-ink-muted: #66736d;
+
+  --vx-paper: #ffffff;
+  --vx-paper-soft: #f6f8f7;
+  --vx-line: #e3e8e6;
+  --vx-line-strong: #c9d2ce;
+
+  --vx-tint-mint: #e3fcf5;
+  --vx-tint-cyan: #e2f7fc;
+  --vx-tint-violet: #edebff;
+  --vx-tint-sun: #fff3c4;
+  --vx-sun: #ffd84d;
+  --vx-coral: #ff8a65;
+
+  --vx-font-display: var(--font-display, system-ui), system-ui, sans-serif;
+  --vx-font-body: var(--font-body, system-ui), system-ui, sans-serif;
+  --vx-font-mono: var(--font-mono, ui-monospace), ui-monospace, monospace;
+  --vx-font-hand: var(--font-hand, cursive), cursive;
+
+  --vx-radius-sm: 10px;
+  --vx-radius: 18px;
+  --vx-radius-lg: 28px;
+  --vx-shadow-sm: 0 1px 2px rgb(23 33 28 / 6%), 0 2px 6px rgb(23 33 28 / 5%);
+  --vx-shadow: 0 2px 4px rgb(23 33 28 / 4%), 0 14px 34px rgb(23 33 28 / 9%);
+  --vx-shadow-pop: 3px 3px 0 var(--vx-ink);
+
+  --vx-container: 74rem;
+  --vx-gutter: clamp(1rem, 4vw, 2rem);
+}

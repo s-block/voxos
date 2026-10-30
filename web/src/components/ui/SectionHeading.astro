@@ -1,0 +1,57 @@
+---
+interface Props {
+  /** Anchor id for the section heading. */
+  id: string;
+  eyebrow: string;
+  title: string;
+  align?: "start" | "center";
+}
+
+const { id, eyebrow, title, align = "start" } = Astro.props;
+---
+
+<header class="heading" data-align={align}>
+  <span class="eyebrow">{eyebrow}</span>
+  <h2 id={id}>{title}</h2>
+  {Astro.slots.has("default") && <p class="lede"><slot /></p>}
+</header>
+
+<style>
+  .heading {
+    display: grid;
+    gap: 0.9rem;
+    max-width: 46rem;
+    margin-bottom: 2.75rem;
+  }
+
+  [data-align="center"] {
+    margin-inline: auto;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .eyebrow {
+    justify-self: start;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: var(--vx-tint-violet);
+    color: var(--vx-violet-deep);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  [data-align="center"] .eyebrow {
+    justify-self: center;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 2.6vw + 1.2rem, 3.1rem);
+  }
+
+  .lede {
+    color: var(--vx-ink-soft);
+    font-size: 1.15rem;
+  }
+</style>

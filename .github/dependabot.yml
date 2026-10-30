@@ -38,6 +38,24 @@ updates:
           - "version-update:semver-major"
 
   - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "quarterly"
+    cooldown:
+      default-days: 90
+    groups:
+      web-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  - package-ecosystem: "npm"
     directory: "/whatsapp-bridge"
     schedule:
       interval: "quarterly"

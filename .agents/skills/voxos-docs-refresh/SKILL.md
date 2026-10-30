@@ -32,10 +32,14 @@ sync with the Voxos codebase.
    `voxos-local-login` plus browser verification when local services can run.
 6. Edit only affected docs pages, update their `Last updated` date, and avoid
    adding secrets, tokens, private user data, or speculative provider claims.
+   Also check the walkthroughs in `docs/guides/` whose steps use a changed
+   page, setting or screen, and update them the same way.
 7. Regenerate and validate docs:
    - `make docs-manifest`
    - `make docs-validate`
    - `make docs-refresh-check`
+   - `make web-build` (the project website renders these pages and checks every
+     internal link and anchor)
 8. If the request includes refreshing the live product-doc index and the local
    database plus embedding key are configured, run `make docs-index`.
 9. Report changed pages, commands run, unresolved verification gaps, and whether

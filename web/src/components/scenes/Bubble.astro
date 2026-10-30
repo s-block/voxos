@@ -1,0 +1,51 @@
+---
+interface Props {
+  from: "you" | "agent" | "other";
+  name?: string;
+}
+
+const { from, name } = Astro.props;
+---
+
+<div class:list={["bubble", from]}>
+  {name && <span class="name">{name}</span>}
+  <p><slot /></p>
+</div>
+
+<style>
+  .bubble {
+    max-width: 85%;
+    padding: 0.6rem 0.85rem;
+    border-radius: 16px;
+    font-size: 0.93rem;
+    line-height: 1.4;
+  }
+
+  .you {
+    margin-inline-start: auto;
+    border-end-end-radius: 5px;
+    background: var(--vx-ink);
+    color: var(--vx-paper);
+  }
+
+  .agent {
+    border: 1.5px solid var(--vx-line-strong);
+    border-end-start-radius: 5px;
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+  }
+
+  .other {
+    border-end-start-radius: 5px;
+    background: var(--vx-tint-cyan);
+    color: var(--vx-ink);
+  }
+
+  .name {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--vx-teal-ink);
+  }
+</style>

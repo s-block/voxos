@@ -1,0 +1,98 @@
+---
+import { Plus } from "@lucide/astro";
+import { faqs } from "../../data/faq";
+import SectionHeading from "../ui/SectionHeading.astro";
+---
+
+<section class="faq" aria-labelledby="faq">
+  <div class="vx-container narrow">
+    <SectionHeading id="faq" eyebrow="FAQ" title="Questions people actually ask." align="center" />
+    <div class="list">
+      {
+        faqs.map((faq) => (
+          <details>
+            <summary>
+              <h3>{faq.question}</h3>
+              <Plus size={20} aria-hidden="true" class="toggle" />
+            </summary>
+            <div class="answer">
+              <p>{faq.answer}</p>
+              <a href={faq.link.href}>{faq.link.label} →</a>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+  }
+
+  .narrow {
+    max-width: 50rem;
+  }
+
+  .list {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  details {
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+    transition: border-color 150ms ease;
+  }
+
+  details[open] {
+    border-color: var(--vx-ink);
+    box-shadow: 4px 4px 0 var(--vx-ink);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.3rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  h3 {
+    font-family: var(--vx-font-body);
+    font-weight: 700;
+    font-size: 1.08rem;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+
+  summary :global(.toggle) {
+    flex: none;
+    transition: transform 200ms ease;
+  }
+
+  details[open] summary :global(.toggle) {
+    transform: rotate(45deg);
+  }
+
+  .answer {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0 1.3rem 1.2rem;
+    color: var(--vx-ink-soft);
+  }
+
+  .answer a {
+    justify-self: start;
+    color: var(--vx-violet-deep);
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import type { SimpleIcon } from "simple-icons";
+
+interface Props {
+  name: string;
+  /** Omitted for brands whose logos are not published in the simple-icons package. */
+  icon?: SimpleIcon | undefined;
+}
+
+const { name, icon } = Astro.props;
+const monogram = name.replace(/[^A-Za-z\d]/g, "").slice(0, 1).toUpperCase();
+---
+
+{
+  icon ? (
+    <svg class="brand-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d={icon.path} />
+    </svg>
+  ) : (
+    <span class="brand-icon monogram" aria-hidden="true">
+      {monogram}
+    </span>
+  )
+}
+
+<style>
+  .brand-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+  }
+
+  .monogram {
+    display: inline-grid;
+    place-items: center;
+    border-radius: 7px;
+    background: var(--vx-ink);
+    color: var(--vx-paper);
+    font-family: var(--vx-font-display);
+    font-weight: 800;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+</style>

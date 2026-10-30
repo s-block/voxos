@@ -1,0 +1,63 @@
+---
+interface Props {
+  /** Which way the doodled arrow points from the note. */
+  arrow?: "down-left" | "up-left" | "left";
+  class?: string;
+}
+
+const { arrow = "down-left", class: className } = Astro.props;
+---
+
+<span class:list={["note", `arrow-${arrow}`, className]} aria-hidden="true">
+  <span class="text"><slot /></span>
+  <svg class="arrow" viewBox="0 0 60 50" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M52 6 C 40 10, 22 18, 12 40"></path>
+    <path d="M6 30 L 12 41 L 23 36"></path>
+  </svg>
+</span>
+
+<style>
+  .note {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.2rem;
+    font-family: var(--vx-font-hand);
+    font-weight: 600;
+    font-size: 1.45rem;
+    line-height: 1.05;
+    color: var(--vx-violet-deep);
+    pointer-events: none;
+  }
+
+  .text {
+    transform: rotate(-4deg);
+  }
+
+  .arrow {
+    width: 2.6rem;
+    height: 2.2rem;
+    flex: none;
+  }
+
+  .arrow-down-left {
+    flex-direction: row-reverse;
+  }
+
+  .arrow-up-left {
+    flex-direction: row-reverse;
+    align-items: flex-end;
+  }
+
+  .arrow-up-left .arrow {
+    transform: scaleY(-1);
+  }
+
+  .arrow-left {
+    flex-direction: row-reverse;
+    align-items: center;
+  }
+
+  .arrow-left .arrow {
+    transform: rotate(40deg);
+  }
+</style>

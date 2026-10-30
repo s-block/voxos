@@ -1,0 +1,56 @@
+---
+interface Props {
+  /** Bounce the bars as if speaking. */
+  talking?: boolean;
+  label?: string;
+}
+
+const { talking = false, label } = Astro.props;
+
+/** Relative bar heights from the five voice bars in docs/design/voxos-mark.svg. */
+const bars = [29.5, 39.25, 50.5, 37.5, 24].map((height) => height / 50.5);
+---
+
+<span
+  class:list={["waveform", { talking }]}
+  role={label ? "img" : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : "true"}
+>
+  {bars.map((scale, index) => <span style={`--scale: ${scale}; --i: ${index}`} />)}
+</span>
+
+<style>
+  .waveform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.18em;
+    height: 1.1em;
+  }
+
+  .waveform span {
+    width: 0.22em;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--vx-gradient);
+    background-size: 600% 100%;
+    background-position: calc(var(--i) * 25%) 0;
+    transform: scaleY(var(--scale));
+  }
+
+  .talking span {
+    animation: talk 1.1s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.18s);
+  }
+
+  @keyframes talk {
+    0%,
+    100% {
+      transform: scaleY(calc(var(--scale) * 0.45));
+    }
+
+    50% {
+      transform: scaleY(var(--scale));
+    }
+  }
+</style>

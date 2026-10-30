@@ -77,6 +77,7 @@ docs/               Focused operational docs
 frontend/           React/Vite local test console
 scripts/            Deployment and repo utility scripts
 tests/              Python unit and API tests
+web/                Project website and docs site, built from this Markdown
 ```
 
 ## Prerequisites
@@ -569,6 +570,8 @@ make lint              # Ruff checks
 make mypy              # mypy over src/voxos
 make frontend-lint     # ESLint for frontend
 make docs-validate     # validate wiki docs and manifest
+make web-dev           # run the project website locally
+make web-build         # build the website from the docs and check its links
 make docs-index        # index wiki docs into local product-doc search
 make secrets           # scan staged files for secrets
 make secrets-all       # scan tracked files for secrets

@@ -1,0 +1,84 @@
+---
+/**
+ * A hand-drawn underline, drawn on with the brand gradient. Wrap the words it
+ * underlines in the slot and pass trailing punctuation as `tail`, so it never
+ * wraps onto a line of its own. Narrow screens get a wavy underline that wraps
+ * with the text instead.
+ */
+interface Props {
+  /** Gradient id; must be unique on the page. */
+  id: string;
+  tail?: string;
+}
+
+const { id, tail = "" } = Astro.props;
+---
+
+<span class="group"
+  ><span class="squiggled"
+    ><slot /><svg class="squiggle" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={id} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stop-color="#19f0c4"></stop>
+          <stop offset="46%" stop-color="#16cfea"></stop>
+          <stop offset="100%" stop-color="#6657ff"></stop>
+        </linearGradient>
+      </defs>
+      <path
+        d="M3 12 C 40 4, 70 16, 105 9 S 170 4, 205 11 S 265 15, 297 6"
+        fill="none"
+        stroke={`url(#${id})`}
+        stroke-width="6"
+        stroke-linecap="round"></path>
+    </svg></span
+  >{tail}</span
+>
+
+<style>
+  .group {
+    white-space: nowrap;
+  }
+
+  .squiggled {
+    position: relative;
+    display: inline-block;
+  }
+
+  .squiggle {
+    position: absolute;
+    left: -0.04em;
+    bottom: -0.16em;
+    width: calc(100% + 0.08em);
+    height: 0.32em;
+    overflow: visible;
+  }
+
+  .squiggle path {
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    animation: draw 900ms 300ms ease-out forwards;
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (max-width: 40rem) {
+    .group {
+      white-space: normal;
+    }
+
+    .squiggled {
+      display: inline;
+      text-decoration: underline wavy var(--vx-cyan) 0.09em;
+      text-decoration-skip-ink: none;
+      text-underline-offset: 0.18em;
+    }
+
+    .squiggle {
+      display: none;
+    }
+  }
+</style>

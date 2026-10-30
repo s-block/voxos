@@ -1,0 +1,80 @@
+---
+import { WEB_GA_MEASUREMENT_ID } from "astro:env/server";
+import AnalyticsSettings from "../components/site/AnalyticsSettings.astro";
+import LandingLayout from "../layouts/LandingLayout.astro";
+import { site } from "../site.config";
+---
+
+<LandingLayout
+  title={`Privacy | ${site.name}`}
+  description="Which cookies this website can set, what its optional analytics records, and how to change your choice."
+  image="/og/index.png"
+  imageAlt={site.name}
+>
+  <article class="privacy vx-container">
+    <h1>Privacy</h1>
+    <p>
+      This website is a set of static pages about the Voxos open-source project. It has no accounts, forms or comments,
+      and it never asks for your personal details.
+    </p>
+    {
+      WEB_GA_MEASUREMENT_ID ? (
+        <>
+          <h2>Analytics</h2>
+          <p>
+            If you allow it, the site loads Google Analytics to count visits and to see which pages people read and which
+            links they follow, such as the link to GitHub. Nothing from Google loads until you choose, and advertising
+            features stay off.
+          </p>
+          <p>
+            Google Analytics then sets cookies whose names start with <code>_ga</code>, which last up to two years. Google
+            handles the data as described in{" "}
+            <a href="https://policies.google.com/technologies/partner-sites">How Google uses information from sites or apps that use our services</a>.
+          </p>
+          <h2>Your choice</h2>
+          <p>
+            Your browser keeps your choice in local storage. Change it at any time with <AnalyticsSettings />. Turning
+            analytics off deletes the <code>_ga</code> cookies and, if Google Analytics had loaded, reloads the page so it
+            stops completely.
+          </p>
+        </>
+      ) : (
+        <p>The site uses no analytics and sets no cookies.</p>
+      )
+    }
+  </article>
+</LandingLayout>
+
+<style>
+  .privacy {
+    max-width: 44rem;
+    padding-block: 4rem 1rem;
+  }
+
+  h1 {
+    margin-bottom: 1.25rem;
+    font-family: var(--vx-font-display);
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    line-height: 1.05;
+  }
+
+  h2 {
+    margin: 2.25rem 0 0.6rem;
+    font-size: 1.35rem;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--vx-ink-soft);
+    line-height: 1.65;
+  }
+
+  a {
+    color: var(--vx-violet-deep);
+  }
+
+  code {
+    font-family: var(--vx-font-mono);
+    font-size: 0.9em;
+  }
+</style>

@@ -1,0 +1,29 @@
+---
+import GitHubButton from "../ui/GitHubButton.astro";
+---
+
+<nav class="links" aria-label="Site">
+  <a href="/">Home</a>
+  <a href="/guides/">Guides</a>
+  <a href="/docs/skills/">Skills</a>
+  <GitHubButton label="Star" />
+</nav>
+
+<style>
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .links > a {
+    color: var(--vx-ink);
+    text-decoration: none;
+  }
+
+  .links > a:hover {
+    color: var(--vx-violet);
+  }
+</style>

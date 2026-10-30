@@ -1,0 +1,71 @@
+---
+import { PhoneOff } from "@lucide/astro";
+import Button from "../components/ui/Button.astro";
+import Sticker from "../components/ui/Sticker.astro";
+import LandingLayout from "../layouts/LandingLayout.astro";
+---
+
+<LandingLayout
+  title="Page not found | Voxos"
+  description="This page does not exist. Head back to the Voxos home page or the docs."
+  image="/og/index.png"
+  imageAlt="Voxos"
+  noindex
+>
+  <section class="lost vx-container">
+    <span class="icon"><PhoneOff size={40} aria-hidden="true" /></span>
+    <Sticker tone="mint" tilt={2}>Error 404</Sticker>
+    <h1>The number you have dialed is not in service.</h1>
+    <p>Please check the link and try again, or let one of these put you through.</p>
+    <div class="ctas">
+      <Button href="/">Back to the home page</Button>
+      <Button href="/docs/" variant="secondary">Browse the docs</Button>
+    </div>
+    <span class="flatline" aria-hidden="true"></span>
+  </section>
+</LandingLayout>
+
+<style>
+  .lost {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+    padding: clamp(4rem, 10vw, 8rem) 0 2rem;
+    text-align: center;
+  }
+
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 5rem;
+    height: 5rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: 50%;
+    background: var(--vx-tint-violet);
+    box-shadow: var(--vx-shadow-pop);
+  }
+
+  h1 {
+    max-width: 18ch;
+    font-size: clamp(2.2rem, 4vw + 1rem, 3.6rem);
+  }
+
+  p {
+    color: var(--vx-ink-soft);
+    font-size: 1.15rem;
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+  }
+
+  .flatline {
+    width: min(28rem, 100%);
+    height: 2px;
+    margin-top: 2rem;
+    background: var(--vx-gradient);
+  }
+</style>

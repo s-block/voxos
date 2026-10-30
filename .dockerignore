@@ -70,3 +70,4 @@ private
 **/*.sqlite
 **/*.sqlite3
 **/*.db
+web

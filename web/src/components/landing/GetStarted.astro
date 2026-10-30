@@ -1,0 +1,215 @@
+---
+import { ArrowRight, BookOpen, Container, Laptop } from "@lucide/astro";
+import { repositoryUrl } from "../../site.config";
+import CopyButton from "../ui/CopyButton.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+const cloneCommands = [`git clone ${repositoryUrl}.git`, "cd voxos", "cp .env.example .env"];
+
+const guides = [
+  {
+    icon: BookOpen,
+    title: "Quick Start",
+    text: "The full Docker Compose walkthrough, including the secrets to generate.",
+    href: "/docs/quick-start/",
+  },
+  {
+    icon: Laptop,
+    title: "Developer setup",
+    text: "Hot reload, workers, tests and migrations for hacking on Voxos.",
+    href: "/docs/developer-setup/",
+  },
+  {
+    icon: Container,
+    title: "Kubernetes",
+    text: "Separate database and application releases with the Helm chart.",
+    href: "/docs/helm/",
+  },
+];
+---
+
+<section class="start" aria-labelledby="get-started">
+  <div class="vx-container grid">
+    <div>
+      <SectionHeading id="get-started" eyebrow="Get started" title="Up and running in a coffee break.">
+        Clone the repo, add a few secrets to <code>.env</code>, and bring up the whole stack with Docker Compose.
+      </SectionHeading>
+      <ul class="guides">
+        {
+          guides.map(({ icon: Icon, ...guide }) => (
+            <li>
+              <a href={guide.href}>
+                <Icon size={22} aria-hidden="true" />
+                <span>
+                  <strong>{guide.title}</strong>
+                  <small>{guide.text}</small>
+                </span>
+                <ArrowRight size={18} aria-hidden="true" class="arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="terminal" role="group" aria-label="Install commands">
+      <div class="term-bar">
+        <span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="term-title">~/code</span>
+        <CopyButton
+          text={cloneCommands.join("\n")}
+          label="Copy the clone commands"
+          analyticsEvent="copy_install_command"
+        />
+      </div>
+      <pre><code>{cloneCommands.map((command) => <span class="line"><span class="prompt" aria-hidden="true">$ </span>{command}</span>)}<span class="comment"># add the secrets from the Quick Start to .env</span></code></pre>
+      <pre class="second"><code><span class="line"><span class="prompt" aria-hidden="true">$ </span>make up</span><span class="comment"># API, LiveKit, Postgres + pgvector and the workers</span><span class="comment"># then open the console at http://localhost:5173</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .start {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .start :global(.lede code) {
+    padding: 0.1em 0.35em;
+    border-radius: 6px;
+    background: var(--vx-paper-soft);
+  }
+
+  .guides {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .guides a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1.5px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    text-decoration: none;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .guides a:hover {
+    border-color: var(--vx-ink);
+    box-shadow: 4px 4px 0 var(--vx-ink);
+  }
+
+  .guides a > :global(svg:first-child) {
+    flex: none;
+    color: var(--vx-violet);
+  }
+
+  .guides span {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .guides small {
+    color: var(--vx-ink-muted);
+    font-size: 0.9rem;
+  }
+
+  .guides :global(.arrow) {
+    flex: none;
+    margin-inline-start: auto;
+  }
+
+  .terminal {
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius-lg);
+    background: #101814;
+    color: #e8eeeb;
+    box-shadow: 8px 8px 0 var(--vx-violet);
+    transform: rotate(1deg);
+    overflow: hidden;
+  }
+
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.6rem 0.7rem 0.6rem 1rem;
+    border-bottom: 1px solid rgb(255 255 255 / 12%);
+  }
+
+  .dots {
+    display: inline-flex;
+    gap: 0.4rem;
+  }
+
+  .dots span {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--vx-coral);
+  }
+
+  .dots span:nth-child(2) {
+    background: var(--vx-sun);
+  }
+
+  .dots span:nth-child(3) {
+    background: var(--vx-mint);
+  }
+
+  .term-title {
+    margin-inline-end: auto;
+    color: #9fb0a8;
+    font-family: var(--vx-font-mono);
+    font-size: 0.8rem;
+  }
+
+  pre {
+    margin: 0;
+    padding: 1.1rem 1.25rem 0.6rem;
+    overflow-x: auto;
+    font-size: 0.92rem;
+    line-height: 1.75;
+  }
+
+  pre.second {
+    padding-top: 0.4rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .line,
+  .comment {
+    display: block;
+  }
+
+  .prompt {
+    color: var(--vx-mint);
+    user-select: none;
+  }
+
+  .comment {
+    color: #8a9a93;
+  }
+
+  @media (max-width: 60rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .terminal {
+      transform: none;
+    }
+  }
+</style>
