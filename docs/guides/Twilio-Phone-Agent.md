@@ -49,9 +49,26 @@ compares the models.
 
 ## 3. Connect LiveKit
 
-Every call runs in a LiveKit room. Open **Connection** and save your LiveKit
-details. The local stack runs a LiveKit dev server on `ws://localhost:7880`,
-with the API key `devkey` and the secret `secret`.
+Every call runs in a LiveKit room. With `make up`, the API and the voice
+worker run in containers, so the LiveKit address you save must resolve inside
+them, and in your browser too if you use in-app voice. `ws://localhost:7880`
+points each container back at itself, and `ws://livekit:7880` only resolves
+inside Compose.
+
+Give the bundled LiveKit dev server one name that works everywhere by adding
+this line to your machine's `/etc/hosts`:
+
+```text
+127.0.0.1 livekit
+```
+
+Then open **Connection** and save `ws://livekit:7880`, with the dev server's
+API key `devkey` and secret `secret`. A public LiveKit endpoint, such as a
+LiveKit Cloud project, works too; see the
+[Docker Compose notes](../../README.md#quick-start-with-docker-compose). If you
+run the API and the worker directly on your machine instead, as in
+[local Python development](../wiki/Quick-Start.md#local-python-development),
+`ws://localhost:7880` works as it is.
 
 ## 4. Connect the Twilio number
 
