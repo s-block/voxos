@@ -10,6 +10,16 @@ ROOT = Path(__file__).resolve().parents[2]
 GITLEAKS = shutil.which("gitleaks")
 
 
+def synthetic_credential() -> str:
+    """A random credential that Gitleaks must always report.
+
+    Gitleaks ignores generic keys that contain a stopword, such as "dead" or
+    "feed", or that fall below its entropy threshold. Alternating letters and
+    digits spells no words, and 96 characters keep the entropy well above it.
+    """
+    return "".join(secrets.choice("abcdefABCDEF") + secrets.choice("0123456789") for _ in range(48))
+
+
 @unittest.skipUnless(GITLEAKS, "Gitleaks is required")
 class SecretScanningTests(unittest.TestCase):
     def _scan(self, directory: Path) -> subprocess.CompletedProcess[str]:
@@ -27,7 +37,7 @@ class SecretScanningTests(unittest.TestCase):
                 directory = Path(temporary)
                 path = directory / filename
                 path.parent.mkdir(parents=True, exist_ok=True)
-                credential = secrets.token_hex(32)
+                credential = synthetic_credential()
                 path.write_text(f'api_key = "{credential}"\n')
                 result = self._scan(directory)
                 self.assertEqual(result.returncode, 1)
