@@ -193,5 +193,17 @@ branch, which holds the deploy settings:
 
 Give the deploy role the permissions from step 5, and a trust policy for
 `token.actions.githubusercontent.com` that accepts only the audience
-`sts.amazonaws.com` and the subject
-`repo:<owner>/<repository>:environment:website`.
+`sts.amazonaws.com` and the subject `<prefix>:environment:website`. This
+command shows the repository's subject settings:
+
+```bash
+gh api repos/<owner>/<repository>/actions/oidc/customization/sub
+```
+
+If `use_immutable_subject` is `true`, the prefix is `sub_claim_prefix`, such as
+`repo:octo-org@123/octo-repo@456`, which includes the owner and repository IDs.
+Otherwise, with the default template, it is `repo:<owner>/<repository>`. If the
+sign-in step fails with
+`Not authorized to perform sts:AssumeRoleWithWebIdentity`, CloudTrail's
+`AssumeRoleWithWebIdentity` event in the `WEB_AWS_REGION` region shows the
+subject GitHub sent.
