@@ -9,7 +9,7 @@ JIDs, numbers, challenges, message bodies, or upstream errors.
 ## Runtime
 
 - Node.js 20 or newer.
-- Exactly pinned `baileys@7.0.0-rc13`.
+- Exactly pinned `baileys@7.0.0-rc14`.
 - `npm ci` and `npm run build` happen when the image is built, never when a
   worker starts.
 - Start the compiled bridge with `npm start` or `node dist/index.js`.

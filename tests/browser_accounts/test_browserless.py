@@ -114,9 +114,11 @@ async def test_browserless_agent_receives_credentials_and_redacts_output(
     connection = FakeBrowserlessConnection(
         (
             '{"type":"data","text":"Checking the billing account"}',
-            '{"type":"end","result":{"success":true,"reason_code":"completed",'
-            '"final_url":"https://billing.example.com/account",'
-            '"evidence":"Invoice: £42 for user@example.com using password-123"}}',
+            (
+                '{"type":"end","result":{"success":true,"reason_code":"completed",'
+                '"final_url":"https://billing.example.com/account",'
+                '"evidence":"Invoice: £42 for user@example.com using password-123"}}'
+            ),
         ),
     )
     captured_url: list[str] = []
@@ -175,9 +177,11 @@ async def test_browserless_agent_uses_structured_failure_result(
     result = await run_browserless_messages(
         monkeypatch,
         (
-            '{"type":"end","result":{"success":false,'
-            '"reason_code":"invalid_credentials",'
-            '"evidence":"Login failed for user@example.com with password-123"}}',
+            (
+                '{"type":"end","result":{"success":false,'
+                '"reason_code":"invalid_credentials",'
+                '"evidence":"Login failed for user@example.com with password-123"}}'
+            ),
         ),
     )
 

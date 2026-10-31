@@ -1,8 +1,8 @@
 {
   "baileys": {
-    "version": "7.0.0-rc13",
-    "url": "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/8053b086ecc97ec3f78299561de11959bab05d39",
-    "sha256": "345fa4d8ba33c98f4fca82dd7691b3f9d00af2a944f9cfb53917721998b1d9d8",
+    "version": "7.0.0-rc14",
+    "url": "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/7e7b0757e3f9f3c7789fb1cfd2f241d5002a199a",
+    "sha256": "e768616335cdeac4e853f72d36329381527c3166099c614601cc5317c94b6713",
     "license": "MIT"
   },
   "libsignal": {

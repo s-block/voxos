@@ -4,7 +4,7 @@ import { decodeTagged, encodeTagged, TaggedJsonError } from "./tagged-json.js";
 
 export const PROTOCOL_VERSION = 2;
 export const BRIDGE_VERSION = "0.1.0";
-export const BAILEYS_VERSION = "7.0.0-rc13";
+export const BAILEYS_VERSION = "7.0.0-rc14";
 export const BRIDGE_SESSION_HANDLE = "bridge";
 export const MAX_FRAME_BYTES = 1024 * 1024;
 export const MAX_TEXT_BYTES = 16 * 1024;

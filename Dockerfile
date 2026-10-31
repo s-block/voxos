@@ -10,7 +10,7 @@ COPY whatsapp-bridge/src/ src/
 RUN npm run build \
     && npm prune --omit=dev
 
-FROM --platform=$BUILDPLATFORM rust:1.92.0-slim-bookworm@sha256:f1f73538ebe623fd3673a35aff3df358ae1084c64c55646516e5b17b321b6c9b AS librsvg-rust-source
+FROM --platform=$BUILDPLATFORM rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d AS librsvg-rust-source
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends xz-utils \
@@ -43,7 +43,7 @@ for (const [library, version] of Object.entries(versions)) {
 NODE
 RUN mkdir /sources \
     && tar -czf /sources/voxos-whatsapp-source.tar.gz .
-ADD --checksum=sha256:345fa4d8ba33c98f4fca82dd7691b3f9d00af2a944f9cfb53917721998b1d9d8 https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/8053b086ecc97ec3f78299561de11959bab05d39 /sources/baileys-7.0.0-rc13.tar.gz
+ADD --checksum=sha256:e768616335cdeac4e853f72d36329381527c3166099c614601cc5317c94b6713 https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/7e7b0757e3f9f3c7789fb1cfd2f241d5002a199a /sources/baileys-7.0.0-rc14.tar.gz
 ADD --checksum=sha256:e8237ac721bdf8c622d2f13a4035b69acccb9f0c5999aa5e88944c4f171dd174 https://codeload.github.com/WhiskeySockets/libsignal-node/tar.gz/bcea72df9ec34d9d9140ab30619cf479c7c144c7 /sources/libsignal-6.0.0.tar.gz
 ADD --checksum=sha256:5baaead3b0bb20ffdb9e9ff09aa9fda08620923df77b63b436654cb5e0b3bf94 https://github.com/libvips/libvips/releases/download/v8.18.7/vips-8.18.7.tar.xz /sources/libvips-8.18.7.tar.xz
 ADD --checksum=sha256:a8e96acb479c9bc1a5b7950f8f25aa6c8e1ef3a19755b45cf2f00d506aeaccc0 https://codeload.github.com/lovell/sharp-libvips/tar.gz/v1.3.4 /sources/sharp-libvips-1.3.4.tar.gz
