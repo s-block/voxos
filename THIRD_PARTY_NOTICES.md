@@ -6,7 +6,7 @@ Their copyright notices and license terms apply to those components.
 
 ## WhatsApp bridge
 
-The API image includes the WhatsApp bridge, Baileys 7.0.0-rc13 (MIT), and
+The API image includes the WhatsApp bridge, Baileys 7.0.0-rc14 (MIT), and
 libsignal 6.0.0 (GPLv3). The combined WhatsApp program is distributed under
 GPLv3 terms; the MIT notices on its MIT-licensed portions remain in force.
 Its source, build configuration, and the exact upstream Baileys and libsignal
