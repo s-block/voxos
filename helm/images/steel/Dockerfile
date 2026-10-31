@@ -15,7 +15,9 @@ RUN mkdir /sources \
     && tar --exclude='*/__tests__' --exclude='*/tests' --exclude='*/test' \
       --exclude='*/node_modules' --exclude='./api/selenium' --exclude='./images' \
       --exclude='.git' -czf /sources/steel-source.tar.gz -C /source .
-ADD --checksum=sha256:dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3 https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz /sources/mupdf-1.28.1-source.tar.gz
+# An unmodified copy of https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz,
+# so builds do not depend on Artifex's single download host.
+ADD --checksum=sha256:dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3 https://github.com/s-block/voxos/releases/download/mupdf-1.28.1-source/mupdf-1.28.1-source.tar.gz /sources/mupdf-1.28.1-source.tar.gz
 COPY SOURCE.md AGPL-3.0.txt /sources/
 RUN chmod 0644 /sources/*
 

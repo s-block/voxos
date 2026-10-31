@@ -532,13 +532,15 @@ credentials and gates API image publication.
 JavaScript audit CI uses. It fails on any advisory missing from
 `scripts/npm-audit-exceptions.json`, and on a listed advisory after its expiry
 date. List an advisory there only when no compatible patched release exists,
-with the reason it cannot affect Voxos and an expiry date a few weeks out, and
-remove the entry once a fix is available.
+with its CVE when it has one, the reason it cannot affect Voxos and an expiry
+date a few weeks out, and remove the entry once a fix is available.
 
 Published API, frontend, browser service and Steel images also receive Trivy
 runtime vulnerability checks, including packaged Java libraries and
-operating-system packages. Review security updates with the SDK integration
-tests and rebuild the affected images before release.
+operating-system packages. The frontend, browser service and Steel image checks
+skip the same reviewed advisories, by CVE, until they expire. Review security
+updates with the SDK integration tests and rebuild the affected images before
+release.
 
 The `Secret scan` CI check fetches complete branch, tag and historical
 pull-request heads, then runs pinned Gitleaks with archive decoding and

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { advisories, checkAdvisories } from "./npm-audit.mjs";
+import { advisories, checkAdvisories, trivyIgnore } from "./npm-audit.mjs";
 
 const report = {
   vulnerabilities: {
@@ -63,8 +63,28 @@ test("each reviewed exception names its package, reason and expiry date", () => 
   const exceptions = JSON.parse(readFileSync(new URL("./npm-audit-exceptions.json", import.meta.url), "utf8"));
   for (const [id, exception] of Object.entries(exceptions)) {
     assert.match(id, /^GHSA(-[0-9a-z]{4}){3}$/);
-    assert.deepEqual(Object.keys(exception).sort(), ["expires", "package", "reason"]);
+    const { cve, ...required } = exception;
+    assert.deepEqual(Object.keys(required).sort(), ["expires", "package", "reason"]);
+    if (cve !== undefined) {
+      assert.match(cve, /^CVE-\d{4}-\d{4,}$/);
+    }
     assert.match(exception.expires, /^\d{4}-\d{2}-\d{2}$/);
     assert.ok(exception.package.length > 0 && exception.reason.length > 0);
   }
+});
+
+test("Trivy ignores each advisory by CVE, or by GHSA without one, through its expiry date", () => {
+  const exceptions = {
+    "GHSA-aaaa-bbbb-cccc": { package: "minimatch", cve: "CVE-2026-1234", expires: "2026-11-14", reason: "r" },
+    "GHSA-dddd-eeee-ffff": { package: "glob", expires: "2026-12-31", reason: "r" },
+  };
+  assert.equal(
+    trivyIgnore(exceptions),
+    [
+      "# Generated from scripts/npm-audit-exceptions.json by scripts/npm-audit.mjs.",
+      "CVE-2026-1234 exp:2026-11-15",
+      "GHSA-dddd-eeee-ffff exp:2027-01-01",
+      "",
+    ].join("\n"),
+  );
 });

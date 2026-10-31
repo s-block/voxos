@@ -98,6 +98,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions: {contents: read, packages: write}
     strategy:
+      # Each image builds from its own sources, so one image's failure does not stop the others.
+      fail-fast: false
       matrix:
         include:
           - {component: frontend, context: frontend, dockerfile: frontend/Dockerfile.production}
@@ -125,10 +127,16 @@ jobs:
             --label "org.opencontainers.image.source=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
             --file "$DOCKERFILE" --tag "$image" --push "$BUILD_CONTEXT"
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24"
+      - name: List reviewed advisory exceptions
+        run: node scripts/npm-audit.mjs --trivyignore .trivyignore
       - name: Scan published runtime dependencies
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: ${{ env.PUBLISHED_IMAGE }}
+          trivyignores: .trivyignore
           scanners: vuln
           severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
           ignore-unfixed: true
