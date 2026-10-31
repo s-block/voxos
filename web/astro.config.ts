@@ -48,6 +48,8 @@ export default defineConfig({
     schema: {
       // Google Analytics stays off unless this is set, and then loads only after a visitor allows it.
       WEB_GA_MEASUREMENT_ID: envField.string({ context: "server", access: "public", optional: true, startsWith: "G-" }),
+      // IndexNow stays off unless this is set; then the site serves the key file and deploys submit changed pages.
+      WEB_INDEXNOW_KEY: envField.string({ context: "server", access: "public", optional: true }),
     },
   },
   markdown: {

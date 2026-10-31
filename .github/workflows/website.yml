@@ -51,6 +51,7 @@ jobs:
         env:
           WEB_SITE_URL: ${{ vars.WEB_SITE_URL }}
           WEB_GA_MEASUREMENT_ID: ${{ vars.WEB_GA_MEASUREMENT_ID }}
+          WEB_INDEXNOW_KEY: ${{ vars.WEB_INDEXNOW_KEY }}
         run: npm run build
 
       - name: Sign in to AWS with the deploy role
@@ -60,9 +61,10 @@ jobs:
           aws-region: ${{ vars.WEB_AWS_REGION }}
           mask-aws-account-id: true
 
-      - name: Upload the site and invalidate CloudFront
+      - name: Upload the site, invalidate CloudFront and notify IndexNow
         env:
           WEB_SITE_URL: ${{ vars.WEB_SITE_URL }}
           WEB_S3_BUCKET: ${{ vars.WEB_S3_BUCKET }}
           WEB_CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.WEB_CLOUDFRONT_DISTRIBUTION_ID }}
+          WEB_INDEXNOW_KEY: ${{ vars.WEB_INDEXNOW_KEY }}
         run: web/scripts/deploy.sh

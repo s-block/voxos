@@ -19,7 +19,7 @@ recommended).
 | `make web-check` | ESLint, `astro check` and the Vitest unit tests. |
 | `make web-build` | `web-check`, then a static build into `web/dist/` and a check of every internal link and `#fragment`. |
 | `make web-preview` | Serves the last build on `http://localhost:4322`. |
-| `make web-deploy` | Builds, then uploads `web/dist/` to S3 and invalidates the CloudFront cache. |
+| `make web-deploy` | Builds, then uploads `web/dist/` to S3, invalidates the CloudFront cache and, with `WEB_INDEXNOW_KEY`, submits the changed pages to IndexNow. |
 
 ## Settings
 
@@ -32,6 +32,7 @@ the environment.
 | --- | --- |
 | `WEB_SITE_URL` | The site's public URL, such as `https://example.com`. Canonical links, the sitemap, structured data and social cards are built from it. Without it, pages point at `http://localhost:4321`. |
 | `WEB_GA_MEASUREMENT_ID` | Optional Google Analytics 4 measurement ID, such as `G-ABC123`. Without it, the site loads no analytics. With it, Google Analytics loads only after a visitor allows it in the consent banner, and only on the host in `WEB_SITE_URL`. |
+| `WEB_INDEXNOW_KEY` | Optional [IndexNow](https://www.indexnow.org) key: 8 to 128 letters, digits or dashes, such as the output of `openssl rand -hex 16`. Without it, the site has no key file and deploys submit nothing. With it, the site serves the key at `/<key>.txt`, and each deploy submits the pages it added, changed or removed, so Bing and the other IndexNow search engines recrawl them. See [IndexNow](#indexnow). |
 | `WEB_S3_BUCKET` | The private bucket that `make web-deploy` uploads to. |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID` | The CloudFront distribution that serves the bucket. |
 | `AWS_PROFILE` | Optional AWS CLI profile for the upload. |
@@ -77,11 +78,11 @@ web/
   src/docs-source/       repository Markdown loader, link rewriting, sidebar
   src/data/              landing page copy: channels, features, integrations, FAQ
   src/components/        landing sections, shared UI, Starlight overrides
-  src/pages/             landing page, 404, robots.txt, icons, social cards, .md copies
-  src/seo/               structured data and social card rendering
+  src/pages/             landing page, 404, robots.txt, IndexNow key, icons, social cards, .md copies
+  src/seo/               structured data, social cards and IndexNow page selection
   src/styles/            design tokens, landing styles, Starlight theme
   infra/                 CloudFront Function for directory URLs and the www redirect
-  scripts/               post-build link check and deploy
+  scripts/               post-build link check, deploy and IndexNow submission
 ```
 
 Brand artwork is imported from `docs/design/`. Social cards (`/og/*.png`), the
@@ -107,8 +108,9 @@ set -a; . web/.env; set +a
 
 ### One-time AWS setup
 
-1. Create the bucket named in `WEB_S3_BUCKET`, with Block Public Access on and
-   static website hosting off.
+1. Create the bucket named in `WEB_S3_BUCKET`, with Block Public Access on,
+   static website hosting off, and the default S3-managed encryption (SSE-S3),
+   which [IndexNow](#indexnow) submissions rely on.
 2. Request an ACM certificate in `us-east-1` for the site's domain and its `www`
    name, with DNS validation. On the certificate's page, **Create records in
    Route 53** adds the validation records to the domain's hosted zone.
@@ -172,6 +174,28 @@ uploading or invalidating anything.
 | Pages and other files | `public, max-age=300, s-maxage=86400`: five minutes in browsers, and a day at CloudFront until the next deploy invalidates them |
 | `*.md` page copies | Same as pages, with `Content-Type: text/markdown; charset=utf-8` |
 
+### IndexNow
+
+With `WEB_INDEXNOW_KEY` set, the build serves the key at `/<key>.txt`, and the
+deploy checks that `web/dist/` holds that file before it uploads anything.
+After the CloudFront invalidation, the deploy sends IndexNow the URLs of the
+pages it added, changed or removed, in one request. IndexNow shares them with
+Bing and the other participating search engines.
+
+Before the upload, the deploy lists the ETags of the pages already in the
+bucket, which needs only the `s3:ListBucket` permission from step 5. A page
+counts as changed when the MD5 checksum of its `index.html` differs from that
+ETag; with S3-managed encryption, S3 sets the ETag to the object's MD5
+checksum. A change that reaches every page, such as a new sidebar entry or a
+style change, submits every page. Only pages are submitted, not the 404 page,
+the Markdown copies or other files.
+
+The deploy logs only the number of pages and IndexNow's response status, never
+the key. If IndexNow cannot be reached or rejects the request, the deploy logs
+a warning, which GitHub Actions shows on the run, and still succeeds: the site
+is already live, and search engines also find changes through the sitemap. A
+dry run prints how many pages it would submit.
+
 ### Deploy on merge
 
 `.github/workflows/website.yml` deploys `main` on every push. It runs the same
@@ -186,6 +210,7 @@ branch, which holds the deploy settings:
 | --- | --- | --- |
 | `WEB_SITE_URL` | variable | The site's public URL |
 | `WEB_GA_MEASUREMENT_ID` | variable | Optional Google Analytics 4 measurement ID |
+| `WEB_INDEXNOW_KEY` | variable | Optional IndexNow key |
 | `WEB_S3_BUCKET` | variable | The site's bucket |
 | `WEB_CLOUDFRONT_DISTRIBUTION_ID` | variable | The distribution that serves it |
 | `WEB_AWS_REGION` | variable | The bucket's region |
