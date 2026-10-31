@@ -1,8 +1,10 @@
 # Quick Start
 
-Last updated: 2026-10-26
+Last updated: 2026-10-31
 
-Use this page to run Voxos locally and reach the frontend console.
+Run Voxos on your own machine: `make up` starts the API, workers, LiveKit and
+Postgres with pgvector in Docker Compose, then you sign in to the frontend
+console.
 
 ## Prerequisites
 
