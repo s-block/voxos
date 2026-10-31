@@ -1,6 +1,9 @@
 # Troubleshooting
 
-Last updated: 2026-08-25
+Last updated: 2026-10-31
+
+Fixes for common Voxos problems, from the API, database migrations and sign-in
+to voice, MCP servers, webhooks, and phone, SMS and WhatsApp channels.
 
 ## API Is Down
 

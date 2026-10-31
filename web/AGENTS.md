@@ -65,4 +65,5 @@ These rules apply inside `web/`, in addition to the repository root
   root.
 - For visual changes, preview with `make web-dev` or `make web-preview`, and
   check desktop, tablet and 375px mobile widths without horizontal scrolling.
-- Never run `make web-deploy` unless the user explicitly asks for a deploy.
+- Merging to `main` deploys the site through `.github/workflows/website.yml`.
+  Never run `make web-deploy` unless the user explicitly asks for a deploy.

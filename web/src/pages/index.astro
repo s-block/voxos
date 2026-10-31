@@ -10,7 +10,7 @@ import HowItWorks from "../components/landing/HowItWorks.astro";
 import Integrations from "../components/landing/Integrations.astro";
 import { faqs } from "../data/faq";
 import LandingLayout from "../layouts/LandingLayout.astro";
-import { faqNode, graph, softwareNode, websiteNode } from "../seo/structured-data";
+import { faqNode, graph, organizationNode, softwareNode, websiteNode } from "../seo/structured-data";
 import { configuredSite } from "../site-url";
 import { site } from "../site.config";
 
@@ -22,7 +22,7 @@ const siteUrl = configuredSite(Astro.site);
   description={site.description}
   image="/og/index.png"
   imageAlt="Voxos: the open-source voice AI agent that picks up the phone"
-  structuredData={graph(websiteNode(siteUrl), softwareNode(siteUrl), faqNode(faqs))}
+  structuredData={graph(websiteNode(siteUrl), organizationNode(siteUrl), softwareNode(siteUrl), faqNode(faqs))}
 >
   <Hero />
   <Channels />

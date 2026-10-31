@@ -13,6 +13,9 @@ Rebuild with the files under `voxos-build` as the Docker build context.
 The MuPDF archive includes its C engine, WebAssembly bindings, build scripts,
 and bundled third-party source. Its release commit is
 `20061bd45183f5a2bff8f43675e4da91e5ac2901`, matching the npm 1.28.1 package.
+It is Artifex's unmodified `mupdf-1.28.1-source.tar.gz`; the image build
+downloads a copy from the Voxos repository's `mupdf-1.28.1-source` release and
+checks its SHA-256.
 
 Voxos changes enforce bearer authentication, Chromium origin/site isolation,
 bounded logging, supported dependency APIs, minimal runtime packaging, and
