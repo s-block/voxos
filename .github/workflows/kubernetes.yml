@@ -89,9 +89,7 @@ jobs:
       - name: Verify Steel runtime packaging
         run: node --test helm/images/steel/prepare-runtime.test.mjs
       - name: Audit browser dependencies
-        run: |
-          npm audit --package-lock-only --prefix browser-agent
-          npm audit --package-lock-only --prefix helm/images/steel
+        run: node scripts/npm-audit.mjs browser-agent helm/images/steel
 
   images:
     name: Publish portable images
