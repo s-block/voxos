@@ -145,7 +145,8 @@ set -a; . web/.env; set +a
    Set `WEB_CLOUDFRONT_DISTRIBUTION_ID` to the distribution's ID.
 5. Give the deploy credentials `s3:ListBucket` on the bucket, `s3:PutObject`
    and `s3:DeleteObject` on its objects, and `cloudfront:CreateInvalidation` on
-   the distribution.
+   the distribution. [IndexNow](#indexnow) submissions also need
+   `cloudfront:GetInvalidation` on the distribution.
 
 ### DNS in Route 53
 
@@ -180,9 +181,12 @@ uploading or invalidating anything.
 
 With `WEB_INDEXNOW_KEY` set, the build serves the key at `/<key>.txt`, and the
 deploy checks that `web/dist/` holds that file before it uploads anything.
-After the CloudFront invalidation, the deploy sends IndexNow the URLs of the
-pages it added, changed or removed, in one request. IndexNow shares them with
-Bing and the other participating search engines.
+Once the CloudFront invalidation completes, the deploy sends IndexNow the URLs
+of the pages it added, changed or removed, in one request, so search engines
+that recrawl them straight away get the new pages rather than CloudFront's
+cached copies. IndexNow shares them with Bing and the other participating
+search engines. Waiting for the invalidation needs the
+`cloudfront:GetInvalidation` permission from step 5.
 
 Before the upload, the deploy lists the ETags of the pages already in the
 bucket, which needs only the `s3:ListBucket` permission from step 5. A page
@@ -193,10 +197,12 @@ style change, submits every page. Only pages are submitted, not the 404 page,
 the Markdown copies or other files.
 
 The deploy logs only the number of pages and IndexNow's response status, never
-the key. If IndexNow cannot be reached or rejects the request, the deploy logs
-a warning, which GitHub Actions shows on the run, and still succeeds: the site
-is already live, and search engines also find changes through the sitemap. A
-dry run prints how many pages it would submit.
+the key. If the invalidation does not complete within 10 minutes, or the
+deploy cannot check on it, the deploy submits nothing. In that case, and when
+IndexNow cannot be reached or rejects the request, the deploy logs a warning,
+which GitHub Actions shows on the run, and still succeeds: the site is already
+live, and search engines also find changes through the sitemap. A dry run
+prints how many pages it would submit.
 
 ### Deploy on merge
 

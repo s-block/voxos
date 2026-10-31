@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Uploads the built website in web/dist to its S3 bucket, then invalidates the
-# CloudFront distribution that serves it. With WEB_INDEXNOW_KEY, it then submits
-# the pages the upload added, changed or removed to IndexNow.
+# CloudFront distribution that serves it. With WEB_INDEXNOW_KEY, it waits for the
+# invalidation to complete, then submits the pages the upload added, changed or
+# removed to IndexNow.
 #
 #   WEB_SITE_URL                     required: the site's public URL, such as https://example.com
 #   WEB_S3_BUCKET                    required: private bucket that holds the site
@@ -60,6 +61,15 @@ submit_to_indexnow() {
   fi
 }
 
+# Prints a warning, as an annotation on GitHub Actions runs.
+warn() {
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::warning title=IndexNow::$1"
+  else
+    echo "$1" >&2
+  fi
+}
+
 page_cache="public, max-age=300, s-maxage=86400"
 
 # The ETags of the pages already in the bucket show which pages the upload
@@ -96,6 +106,14 @@ if ! invalidation_id="$(aws cloudfront create-invalidation --distribution-id "${
 fi
 echo "Website uploaded to s3://${bucket} for ${site_origin}; requested CloudFront invalidation ${invalidation_id}."
 
-# After the invalidation, so search engines recrawl the new pages rather than
-# CloudFront's cached copies.
-submit_to_indexnow
+if [[ -n "${indexnow_key}" ]]; then
+  # A search engine may recrawl a submitted page straight away, so submit only
+  # once CloudFront has dropped its cached copies. The site is already live, so
+  # an invalidation that does not complete is a warning, like a failed submission.
+  echo "Waiting for CloudFront invalidation ${invalidation_id} to complete before notifying IndexNow."
+  if aws cloudfront wait invalidation-completed --distribution-id "${distribution_id}" --id "${invalidation_id}"; then
+    submit_to_indexnow
+  else
+    warn "CloudFront invalidation ${invalidation_id} did not complete, so no pages were submitted to IndexNow."
+  fi
+fi
