@@ -10,6 +10,7 @@ export interface FaqEntry {
 
 const websiteId = (siteUrl: URL): string => new URL("/#website", siteUrl).href;
 const softwareId = (siteUrl: URL): string => new URL("/#software", siteUrl).href;
+const organizationId = (siteUrl: URL): string => new URL("/#organization", siteUrl).href;
 
 /** Wraps nodes in one JSON-LD document. */
 export function graph(...nodes: JsonLdNode[]): JsonLdNode {
@@ -24,6 +25,19 @@ export function websiteNode(siteUrl: URL): JsonLdNode {
     name: site.name,
     description: site.description,
     inLanguage: "en",
+    publisher: { "@id": organizationId(siteUrl) },
+  };
+}
+
+/** The Voxos project, which publishes the site and writes its docs. */
+export function organizationNode(siteUrl: URL): JsonLdNode {
+  return {
+    "@type": "Organization",
+    "@id": organizationId(siteUrl),
+    name: site.name,
+    url: new URL("/", siteUrl).href,
+    logo: new URL("/apple-touch-icon.png", siteUrl).href,
+    sameAs: [repositoryUrl],
   };
 }
 
@@ -83,7 +97,10 @@ export function docPageNodes(page: DocPageDetails): JsonLdNode[] {
       url: page.url.href,
       image: page.image.href,
       inLanguage: "en",
-      ...(page.lastUpdated ? { dateModified: page.lastUpdated.toISOString().slice(0, 10) } : {}),
+      // A full timestamp with its time zone; Google reports date-only values as invalid.
+      ...(page.lastUpdated ? { dateModified: page.lastUpdated.toISOString() } : {}),
+      author: { "@id": organizationId(home) },
+      publisher: { "@id": organizationId(home) },
       isPartOf: { "@id": websiteId(home) },
       about: { "@id": softwareId(home) },
     },
