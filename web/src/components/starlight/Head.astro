@@ -1,6 +1,13 @@
 ---
 import Default from "@astrojs/starlight/components/Head.astro";
-import { docPageNodes, graph, serializeJsonLd, softwareNode, websiteNode } from "../../seo/structured-data";
+import {
+  docPageNodes,
+  graph,
+  organizationNode,
+  serializeJsonLd,
+  softwareNode,
+  websiteNode,
+} from "../../seo/structured-data";
 import { configuredSite } from "../../site-url";
 import Fonts from "../site/Fonts.astro";
 
@@ -16,6 +23,7 @@ const section =
     : { name: sectionId === "guides" ? "Guides" : "Docs", url: new URL(`/${sectionId}/`, siteUrl) };
 const structuredData = graph(
   websiteNode(siteUrl),
+  organizationNode(siteUrl),
   softwareNode(siteUrl),
   ...docPageNodes({
     title: entry.data.title,

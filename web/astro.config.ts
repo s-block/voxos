@@ -1,11 +1,13 @@
 import { fileURLToPath } from "node:url";
 import { satteri } from "@astrojs/markdown-satteri";
+import sitemap from "@astrojs/sitemap";
 import starlight from "@astrojs/starlight";
 import { defineConfig, envField, fontProviders } from "astro/config";
 import starlightLlmsTxt from "starlight-llms-txt";
 import { repoLinksPlugin } from "./src/docs-source/link-plugin";
 import { llmsTxtDetails } from "./src/docs-source/llms";
 import { repoFileUrl } from "./src/docs-source/repo";
+import { sitemapLastmod } from "./src/docs-source/sitemap";
 import { buildDocsSite } from "./src/docs-source/sources";
 import { siteUrlFromEnv } from "./src/site-url";
 import { githubUrls, repositoryUrl, site } from "./src/site.config";
@@ -71,6 +73,8 @@ export default defineConfig({
         },
       },
     },
+    // Starlight adds a plain sitemap only when none is configured; this one dates docs pages.
+    sitemap({ serialize: sitemapLastmod(docs) }),
     starlight({
       title: site.name,
       description: site.description,
