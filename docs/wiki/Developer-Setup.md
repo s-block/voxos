@@ -1,6 +1,6 @@
 # Developer Setup
 
-Last updated: 2026-10-29
+Last updated: 2026-10-31
 
 This page collects development commands and repo conventions for contributors.
 
@@ -526,11 +526,19 @@ from public PyPI with `uv sync --frozen`; image builds need no private index.
 
 CI audits the locked Python and JavaScript runtime and development dependencies
 using `pip-audit` and `npm audit`. The dependency audit requires no maintainer
-credentials and gates API image publication. Published API, frontend, browser
-service and Steel images also receive Trivy runtime vulnerability checks,
-including packaged Java libraries and operating-system packages. Review
-security updates with the SDK integration tests and rebuild the affected
-images before release.
+credentials and gates API image publication.
+
+`node scripts/npm-audit.mjs <project>...`, run from the repository root, is the
+JavaScript audit CI uses. It fails on any advisory missing from
+`scripts/npm-audit-exceptions.json`, and on a listed advisory after its expiry
+date. List an advisory there only when no compatible patched release exists,
+with the reason it cannot affect Voxos and an expiry date a few weeks out, and
+remove the entry once a fix is available.
+
+Published API, frontend, browser service and Steel images also receive Trivy
+runtime vulnerability checks, including packaged Java libraries and
+operating-system packages. Review security updates with the SDK integration
+tests and rebuild the affected images before release.
 
 The `Secret scan` CI check fetches complete branch, tag and historical
 pull-request heads, then runs pinned Gitleaks with archive decoding and
