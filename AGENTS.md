@@ -10,8 +10,9 @@ Keep changes safe, typed, minimal, and easy to review.
 - Frontend test app: `frontend/` (`make frontend`, `make frontend-lint`).
 - Project website: `web/` (Astro + Starlight), built from `docs/wiki/` and other
   repository Markdown without copying it (`make web-dev`, `make web-check`,
-  `make web-build`). Follow `web/AGENTS.md` there; run `make web-deploy` only
-  when a deploy is explicitly requested.
+  `make web-build`). Follow `web/AGENTS.md` there. Merges to `main` deploy it
+  through `.github/workflows/website.yml`; run `make web-deploy` only when a
+  deploy is explicitly requested.
 - Tooling: `uv`, Ruff, mypy, pytest, Alembic, and Docker.
 - Portable Kubernetes deployment: root `helm/` chart, with separate database
   and application releases. Create referenced Secrets and the database before

@@ -127,6 +127,7 @@ opentelemetry-api = "2026-10-28T00:00:00Z"
 opentelemetry-sdk = "2026-10-28T00:00:00Z"
 opentelemetry-semantic-conventions = "2026-10-28T00:00:00Z"
 pillow = "2026-10-28T00:00:00Z"
+pyasn1 = "2026-10-28T00:00:00Z"
 pyjwt = "2026-10-28T00:00:00Z"
 virtualenv = "2026-10-28T00:00:00Z"
 

@@ -1,0 +1,14 @@
+{
+  "GHSA-g3hv-75wg-m249": {
+    "package": "minimatch",
+    "cve": "CVE-2026-118764",
+    "expires": "2026-11-14",
+    "reason": "Only minimatch 11.0.1 is patched, a new major that removes APIs that ESLint 10, typescript-eslint and the Steel image's glob 7, 8, 10 and 13 still use. The affected copies match patterns written in repository configuration or dependency code, not user input."
+  },
+  "GHSA-3g3m-2fjr-6pw4": {
+    "package": "glob",
+    "cve": "CVE-2026-118773",
+    "expires": "2026-11-14",
+    "reason": "Only glob 14.0.2 is patched, and it requires minimatch 11. In the Steel image, @fastify/static calls its glob 13 only when wildcard routing is off, and Steel keeps it on; archiver-utils' glob 10 serves archive.glob(), which Steel does not call."
+  }
+}
