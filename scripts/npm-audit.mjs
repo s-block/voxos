@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -38,6 +38,19 @@ export function checkAdvisories(found, exceptions, today) {
   return { failures, excepted };
 }
 
+/**
+ * Render the exceptions as a Trivy ignore file. Trivy reports advisories by CVE and stops
+ * ignoring an entry when its `exp` date begins, so each entry lasts through its expiry date.
+ */
+export function trivyIgnore(exceptions) {
+  const lines = ["# Generated from scripts/npm-audit-exceptions.json by scripts/npm-audit.mjs."];
+  for (const [id, { cve, expires }] of Object.entries(exceptions)) {
+    const nextDay = new Date(Date.parse(`${expires}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+    lines.push(`${cve ?? id} exp:${nextDay}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 function auditProject(project) {
   const result = spawnSync("npm", ["audit", "--package-lock-only", "--json", "--prefix", project], {
     encoding: "utf8",
@@ -52,12 +65,10 @@ function auditProject(project) {
   return report;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const projects = process.argv.slice(2);
+function auditProjects(projects, exceptions) {
   if (projects.length === 0) {
     throw new Error("Pass the directories of the npm projects to audit");
   }
-  const exceptions = JSON.parse(readFileSync(exceptionsFile, "utf8"));
   const today = new Date().toISOString().slice(0, 10);
   for (const project of projects) {
     const { failures, excepted } = checkAdvisories(advisories(auditProject(project)), exceptions, today);
@@ -72,5 +83,18 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     } else {
       console.log(`${project}: no unexcepted advisories`);
     }
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const exceptions = JSON.parse(readFileSync(exceptionsFile, "utf8"));
+  const [first, ...rest] = process.argv.slice(2);
+  if (first === "--trivyignore") {
+    if (rest.length !== 1) {
+      throw new Error("Pass the path of the Trivy ignore file to write");
+    }
+    writeFileSync(rest[0], trivyIgnore(exceptions));
+  } else {
+    auditProjects(process.argv.slice(2), exceptions);
   }
 }
