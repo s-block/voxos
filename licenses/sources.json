@@ -1,8 +1,8 @@
 {
   "baileys": {
-    "version": "7.0.0-rc13",
-    "url": "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/8053b086ecc97ec3f78299561de11959bab05d39",
-    "sha256": "345fa4d8ba33c98f4fca82dd7691b3f9d00af2a944f9cfb53917721998b1d9d8",
+    "version": "7.0.0-rc14",
+    "url": "https://codeload.github.com/WhiskeySockets/Baileys/tar.gz/7e7b0757e3f9f3c7789fb1cfd2f241d5002a199a",
+    "sha256": "e768616335cdeac4e853f72d36329381527c3166099c614601cc5317c94b6713",
     "license": "MIT"
   },
   "libsignal": {
@@ -25,7 +25,7 @@
   },
   "mupdf": {
     "version": "1.28.1",
-    "url": "https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz",
+    "url": "https://github.com/s-block/voxos/releases/download/mupdf-1.28.1-source/mupdf-1.28.1-source.tar.gz",
     "sha256": "dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3",
     "license": "AGPL-3.0-or-later"
   },
