@@ -200,10 +200,12 @@ command shows the repository's subject settings:
 gh api repos/<owner>/<repository>/actions/oidc/customization/sub
 ```
 
-If `use_immutable_subject` is `true`, the prefix is `sub_claim_prefix`, such as
-`repo:octo-org@123/octo-repo@456`, which includes the owner and repository IDs.
-Otherwise, with the default template, it is `repo:<owner>/<repository>`. If the
-sign-in step fails with
+Repositories that use GitHub's immutable subjects take the response's
+`sub_claim_prefix`, such as `repo:octo-org@123/octo-repo@456`, which includes
+the owner and repository IDs. That covers every repository created, renamed or
+transferred since 15 July 2026, whatever `use_immutable_subject` says, and
+older repositories where `use_immutable_subject` is `true`. Other repositories
+use `repo:<owner>/<repository>`. If the sign-in step fails with
 `Not authorized to perform sts:AssumeRoleWithWebIdentity`, CloudTrail's
 `AssumeRoleWithWebIdentity` event in the `WEB_AWS_REGION` region shows the
 subject GitHub sent.
