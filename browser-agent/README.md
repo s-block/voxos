@@ -79,4 +79,5 @@ override to include its security fixes. Keep this override until Stagehand's
 own OpenAI dependency accepts a patched SDK. The Undici override keeps its
 6.x dependency on a patched release. `npm test` verifies structured output,
 request routing and credentials through both the native and OpenAI-compatible
-adapters. Run `npm audit --package-lock-only` when updating the lockfile.
+adapters. Run `node scripts/npm-audit.mjs browser-agent` from the repository
+root when updating the lockfile.

@@ -313,10 +313,8 @@ jobs:
           pip-audit --requirement /tmp/voxos-requirements.txt --no-deps --disable-pip
       - name: Audit locked JavaScript runtime and development dependencies
         run: |
-          set -euo pipefail
-          for project in frontend browser-agent whatsapp-bridge helm/images/steel docker/codex-runner web; do
-            npm audit --package-lock-only --prefix "$project"
-          done
+          node --test scripts/npm-audit.test.mjs
+          node scripts/npm-audit.mjs frontend browser-agent whatsapp-bridge helm/images/steel docker/codex-runner web
 
   semgrep:
     name: semgrep
