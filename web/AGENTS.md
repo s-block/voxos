@@ -36,6 +36,11 @@ These rules apply inside `web/`, in addition to the repository root
   Analytics only after a visitor allows it, and only on the configured site's
   host. Track a click by adding `data-analytics-event="<event_name>"` to the
   element; do not load other tracking scripts.
+- IndexNow is opt-in through `WEB_INDEXNOW_KEY`. `src/pages/[indexNowKey].txt.ts`
+  serves the key file, and `scripts/indexnow.ts` submits changed pages after
+  the deploy's upload. Keep page selection in the tested functions in
+  `src/seo/indexnow.ts`. Log only counts and response statuses, never the key,
+  which is also the key file's name.
 - `infra/cloudfront-function.js` runs in CloudFront's `cloudfront-js-2.0`
   runtime. Keep it a plain script with no imports, and update its tests with
   it.
