@@ -61,6 +61,24 @@ describe("parseRepoDoc", () => {
     );
   });
 
+  it("skips an intro paragraph that leads into a list", () => {
+    const doc = parseRepoDoc(
+      [
+        "# Browser Accounts",
+        "",
+        "Voxos exposes one general browser tool. It accepts an instruction and either:",
+        "",
+        "- a public start URL; or",
+        "- a saved account handle.",
+        "",
+        "A Browser Account is an optional credential profile for that same browser tool.",
+      ].join("\n"),
+      "docs/wiki/Browser-Accounts.md",
+    );
+
+    expect(doc.description).toBe("A Browser Account is an optional credential profile for that same browser tool.");
+  });
+
   it("truncates long descriptions on a word boundary", () => {
     const sentence = "Voxos combines voice, phone calls, SMS and WhatsApp in one agent backend. ";
     const doc = parseRepoDoc(`# Long\n\n${sentence.repeat(4)}\n`, "docs/wiki/Long.md");

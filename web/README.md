@@ -50,10 +50,12 @@ collection:
 - **Guides.** `docs/guides/README.md` is the guides index at `/guides/`, and
   every guide it links becomes a page at `/guides/<file-name>/`, listed under
   **Guides** in the sidebar.
-- **Titles and metadata.** The first `# Heading` is the page title. A
-  `Last updated: YYYY-MM-DD` line becomes the page's last-updated date. The first
-  prose paragraph of at least 50 characters is the search description; skills
-  use their catalog description instead.
+- **Titles and metadata.** The first `# Heading` is the page title, followed by
+  "| Voxos" unless the heading already names Voxos. A `Last updated: YYYY-MM-DD`
+  line becomes the page's last-updated date, its structured-data
+  `dateModified` and its sitemap `lastmod`. The first prose paragraph of at
+  least 50 characters that does not end in a colon is the search description;
+  skills use their catalog description instead.
 - **Links.** Links to published pages become site routes, links to other
   repository files open on GitHub, and external links are unchanged.
 - **Machine-readable copies.** Each page is also served as Markdown at
