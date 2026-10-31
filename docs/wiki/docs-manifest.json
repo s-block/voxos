@@ -1,6 +1,6 @@
 {
   "docs_dir": "docs/wiki",
-  "generated_at": "2026-10-29T14:23:32.775977Z",
+  "generated_at": "2026-10-31T10:18:46.304164Z",
   "pages": [
     {
       "last_updated": "2026-10-01",
@@ -33,9 +33,9 @@
       "title": "Chat And Text"
     },
     {
-      "last_updated": "2026-10-29",
+      "last_updated": "2026-10-31",
       "path": "Developer-Setup.md",
-      "source_fingerprint": "0513-1533-34c9-9b24",
+      "source_fingerprint": "7016-aa0c-b4da-859d",
       "title": "Developer Setup"
     },
     {
@@ -81,9 +81,9 @@
       "title": "Providers And Keys"
     },
     {
-      "last_updated": "2026-10-26",
+      "last_updated": "2026-10-31",
       "path": "Quick-Start.md",
-      "source_fingerprint": "1143-27eb-02f1-8dcd",
+      "source_fingerprint": "1e1f-b33c-f690-a78a",
       "title": "Quick Start"
     },
     {
@@ -93,9 +93,9 @@
       "title": "Self-Hosted Models"
     },
     {
-      "last_updated": "2026-08-25",
+      "last_updated": "2026-10-31",
       "path": "Troubleshooting.md",
-      "source_fingerprint": "8f12-f73b-6065-07aa",
+      "source_fingerprint": "4ad4-d474-0ee2-a319",
       "title": "Troubleshooting"
     },
     {

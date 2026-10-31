@@ -42,7 +42,8 @@ export function parseRepoDoc(markdown: string, repoPath: string): RepoDoc {
 function describe(body: string, repoPath: string): string {
   const paragraph = proseBlocks(body)
     .map(plainText)
-    .find((text) => text.length >= MIN_DESCRIPTION_LENGTH);
+    // A paragraph ending in a colon leads into a list or code, so it is cut short on its own.
+    .find((text) => text.length >= MIN_DESCRIPTION_LENGTH && !text.endsWith(":"));
   if (!paragraph) {
     throw new Error(
       `${repoPath}: add an intro paragraph of at least ${MIN_DESCRIPTION_LENGTH} characters for the page description`,

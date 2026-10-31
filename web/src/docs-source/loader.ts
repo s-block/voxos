@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Loader, LoaderContext } from "astro/loaders";
-import { githubUrls } from "../site.config";
+import { githubUrls, site } from "../site.config";
 import { parseRepoDoc } from "./parse";
 import { repoFileUrl } from "./repo";
 import type { DocSource, DocsSite } from "./sources";
@@ -40,6 +40,15 @@ export function repoDocsLoader(docs: DocsSite): Loader {
 }
 
 /**
+ * Starlight titles each page "<title> | Voxos". A page whose own title already
+ * names the project, such as "Voxos Helm chart", keeps that title alone.
+ */
+export function titleHead(title: string): { tag: "title"; content: string }[] {
+  const words = title.toLowerCase().split(/\W+/);
+  return words.includes(site.name.toLowerCase()) ? [{ tag: "title", content: title }] : [];
+}
+
+/**
  * Entries carry no digest, so every load renders again. Rendering about 30
  * pages is quick, and it keeps pages current when the link plugin changes.
  */
@@ -57,6 +66,7 @@ async function storeSource(
       lastUpdated: doc.lastUpdated,
       editUrl: githubUrls.edit(source.repoPath),
       repoPath: source.repoPath,
+      head: titleHead(doc.title),
     },
   });
   store.set({

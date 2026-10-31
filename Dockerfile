@@ -10,7 +10,7 @@ COPY whatsapp-bridge/src/ src/
 RUN npm run build \
     && npm prune --omit=dev
 
-FROM --platform=$BUILDPLATFORM rust:1.92.0-slim-bookworm@sha256:f1f73538ebe623fd3673a35aff3df358ae1084c64c55646516e5b17b321b6c9b AS librsvg-rust-source
+FROM --platform=$BUILDPLATFORM rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d AS librsvg-rust-source
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends xz-utils \

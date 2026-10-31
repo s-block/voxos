@@ -25,7 +25,7 @@
   },
   "mupdf": {
     "version": "1.28.1",
-    "url": "https://mupdf.com/downloads/archive/mupdf-1.28.1-source.tar.gz",
+    "url": "https://github.com/s-block/voxos/releases/download/mupdf-1.28.1-source/mupdf-1.28.1-source.tar.gz",
     "sha256": "dc94c60b2537e2ac9a2d379dd3801545f84a3a302d15c9da358362a1270707c3",
     "license": "AGPL-3.0-or-later"
   },
