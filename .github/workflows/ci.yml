@@ -57,7 +57,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install uv
-        run: python -m pip install --only-binary ':all:' uv==0.13.4
+        run: python -m pip install --only-binary ':all:' uv==0.13.7
 
       - name: Install Python dependencies
         run: uv sync --all-extras --dev --frozen
@@ -86,7 +86,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install uv
-        run: python -m pip install --only-binary ':all:' uv==0.13.4
+        run: python -m pip install --only-binary ':all:' uv==0.13.7
 
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen
@@ -109,7 +109,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install uv
-        run: python -m pip install --only-binary ':all:' uv==0.13.4
+        run: python -m pip install --only-binary ':all:' uv==0.13.7
 
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen
@@ -227,7 +227,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install uv
-        run: python -m pip install --only-binary ':all:' uv==0.13.4
+        run: python -m pip install --only-binary ':all:' uv==0.13.7
 
       - name: Install dependencies
         run: uv sync --all-extras --dev --frozen

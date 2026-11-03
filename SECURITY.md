@@ -29,6 +29,8 @@ with hash verification. Run `make security-lock` to refresh this Python 3.12,
 Ubuntu 24.04 x86_64 environment with the seven-day package cooldown, then review the
 lockfile diff and run the scanners. Vulnerability advisories and Semgrep's
 `p/ci` rules are fetched when the scans run.
+uv 0.13.7 has a reviewed cooldown exception for its bundled Rustls security
+fixes; the other tools retain the seven-day cooldown.
 
 Semgrep 1.182.1 pins MCP 1.29 and OpenTelemetry 1.37. Their advisories
 [CVE-2026-59951](https://github.com/modelcontextprotocol/python-sdk/security/advisories/GHSA-84m7-p3x7-pcfv),
