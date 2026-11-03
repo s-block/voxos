@@ -44,6 +44,7 @@ or a `blocked` result with evidence describing why the objective could not be ve
 ## Security boundary
 
 - Keep this API on a private application network. Every task requires the shared service bearer credential. Validate end-user authorization in the caller before sending a task.
+- Internal HTTP assumes a trusted container or cluster network. Keep the browser services behind the chart's network policies and outside public ingress. HTTP carries task variables and bearer credentials without transport encryption; use a TLS proxy when traffic crosses an untrusted network.
 - Validate caller authorization before attaching variables or expanding allowed origins.
 - Use exact HTTPS origins and the narrowest origin set required by the task.
 - Default to `read_only`; enable `state_changes_allowed` only for an explicitly authorized action.

@@ -2,6 +2,7 @@
 .DEFAULT_GOAL := help
 .PHONY: helm-check publication-check
 .PHONY: web-install web-dev web-check web-build web-preview web-deploy
+.PHONY: security-lock
 
 -include app/.env
 
@@ -32,6 +33,15 @@ update-requirements: ## Update dependencies to latest versions and recreate lock
 
 check-outdated: ## Check for outdated dependencies
 	uv pip list --outdated
+
+security-lock: ## Refresh the hashed Python 3.12 Linux CI scanner dependencies
+	# Reviewed uv 0.13.7 fixes Rustls advisories. Remove this cutoff after 2026-11-10.
+	uv pip compile .github/security/requirements.in \
+		--python-version 3.12 --python-platform x86_64-manylinux_2_39 \
+		--only-binary ':all:' --generate-hashes --upgrade --exclude-newer '7 days' \
+		--exclude-newer-package uv=2026-11-04T00:00:00Z \
+		--custom-compile-command 'make security-lock' \
+		--output-file .github/security/requirements.txt
 
 # Git Hooks
 pre-commit-install: ## Install local pre-commit hooks
