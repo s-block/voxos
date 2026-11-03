@@ -103,6 +103,11 @@ session. A server with an existing session opens it, while a server without one
 shows its sign-in screen. Signing out only ends the session for the selected
 server.
 
+Android release builds block cleartext traffic. Debug builds permit local HTTP
+traffic for development tools; server selection continues to require HTTPS.
+Android excludes app data from cloud backup and device transfer. On a new device,
+add the server and sign in again to load the account's saved conversations.
+
 ## Error monitoring
 
 Copy `sentry.config.example.json` to the ignored `sentry.config.json` and fill

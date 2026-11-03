@@ -19,6 +19,24 @@ updates:
         update-types:
           - "version-update:semver-major"
 
+  - package-ecosystem: "pip"
+    directory: "/.github/security"
+    schedule:
+      interval: "quarterly"
+    cooldown:
+      default-days: 90
+    groups:
+      security-tools-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
