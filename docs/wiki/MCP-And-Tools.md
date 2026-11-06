@@ -1,4 +1,4 @@
-# MCP And Tools
+# MCP And Tools For AI Agents
 
 Last updated: 2026-10-27
 

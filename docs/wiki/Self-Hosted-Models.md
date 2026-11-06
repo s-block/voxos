@@ -1,4 +1,4 @@
-# Self-Hosted Models
+# Self-Hosted Models: Ollama, LM Studio, vLLM And llama.cpp
 
 Last updated: 2026-08-26
 

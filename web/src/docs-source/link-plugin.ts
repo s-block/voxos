@@ -2,7 +2,7 @@ import type { HastPluginEntry } from "satteri";
 import { githubUrls } from "../site.config";
 import { resolveRepoLink, type RepoLinkTargets } from "./links";
 import { repoFileUrl } from "./repo";
-import type { DocsSite } from "./sources";
+import { SITE_PAGE_ROUTES, type DocsSite } from "./sources";
 
 /**
  * Sätteri HAST plugin that rewrites links in published repository docs so
@@ -13,7 +13,7 @@ export function repoLinksPlugin(docs: DocsSite): HastPluginEntry {
     docs.sources.map((source) => [repoFileUrl(source.repoPath).href, source.repoPath]),
   );
   const targets: RepoLinkTargets = {
-    routes: docs.routes,
+    routes: new Map([...docs.routes, ...SITE_PAGE_ROUTES]),
     blobUrl: githubUrls.blob,
     treeUrl: githubUrls.tree,
   };

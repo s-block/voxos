@@ -1,0 +1,60 @@
+import base64
+import importlib.util
+import stat
+from pathlib import Path
+from types import ModuleType
+
+import pytest
+
+SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "init_local_env.py"
+KEY_PLACEHOLDER = "LOCAL_SECRET_ENCRYPTION_KEY=replace-with-base64-32-byte-key"  # pragma: allowlist secret
+EXAMPLE_CONTENT = "DB_USER=voxos\n"
+
+
+@pytest.fixture
+def script() -> ModuleType:
+    spec = importlib.util.spec_from_file_location("init_local_env", SCRIPT_PATH)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _settings(content: str) -> dict[str, str]:
+    return dict(line.split("=", 1) for line in content.splitlines() if "=" in line)
+
+
+def test_fills_placeholder_empty_and_missing_settings(script: ModuleType) -> None:
+    content, filled = script.fill_generated_settings(
+        f"{KEY_PLACEHOLDER}\nBROWSER_AGENT_SERVICE_TOKEN=\nDB_USER=voxos\n"
+    )
+
+    settings = _settings(content)
+    assert set(filled) == set(script.GENERATED_SETTINGS)
+    assert len(base64.b64decode(settings["LOCAL_SECRET_ENCRYPTION_KEY"])) == 32
+    assert len(settings["BROWSER_AGENT_SERVICE_TOKEN"]) == 64
+    assert settings["MCP_OAUTH_STATE_SIGNING_SECRET"] != settings["VOICE_ROUTE_SIGNING_SECRET"]
+    assert settings["DB_USER"] == "voxos"
+
+
+def test_keeps_values_that_are_already_set(script: ModuleType) -> None:
+    original = "".join(f"{name}=existing-{name}\n" for name in script.GENERATED_SETTINGS)
+
+    content, filled = script.fill_generated_settings(original)
+
+    assert content == original
+    assert filled == []
+
+
+def test_creates_owner_only_env_and_a_second_run_changes_nothing(script: ModuleType, tmp_path: Path) -> None:
+    env_path = tmp_path / ".env"
+    example_path = tmp_path / ".env.example"
+    example_path.write_text(EXAMPLE_CONTENT, encoding="utf-8")
+
+    assert script.init_local_env(env_path, example_path)
+    first_run = env_path.read_text(encoding="utf-8")
+
+    assert stat.S_IMODE(env_path.stat().st_mode) == 0o600
+    assert script.init_local_env(env_path, example_path) == []
+    assert env_path.read_text(encoding="utf-8") == first_run
+    assert example_path.read_text(encoding="utf-8") == EXAMPLE_CONTENT

@@ -1,6 +1,7 @@
 import type { APIRoute, GetStaticPaths } from "astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { rewriteMarkdownLinks, type RepoLinkTargets } from "../docs-source/links";
+import { SITE_PAGE_ROUTES } from "../docs-source/sources";
 import { configuredSite } from "../site-url";
 import { githubUrls } from "../site.config";
 
@@ -8,7 +9,7 @@ import { githubUrls } from "../site.config";
 export const getStaticPaths = (async () => {
   const entries = await getCollection("docs");
   const targets: RepoLinkTargets = {
-    routes: new Map(entries.map((entry) => [entry.data.repoPath, `/${entry.id}/`])),
+    routes: new Map([...entries.map((entry): [string, string] => [entry.data.repoPath, `/${entry.id}/`]), ...SITE_PAGE_ROUTES]),
     blobUrl: githubUrls.blob,
     treeUrl: githubUrls.tree,
   };
