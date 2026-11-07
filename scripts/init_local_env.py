@@ -43,17 +43,18 @@ def fill_generated_settings(content: str) -> tuple[str, list[str]]:
     """Returns the content with unset secrets generated, and the names it filled."""
     filled: list[str] = []
     for name, generate in GENERATED_SETTINGS.items():
-        pattern = re.compile(rf"^{name}=(.*)$", re.MULTILINE)
+        # Matches every assignment form dotenv loads, so a set value is never overridden by an appended one.
+        pattern = re.compile(rf"^([ \t]*(?:export[ \t]+)?{name}[ \t]*=[ \t]*)(.*)$", re.MULTILINE)
         match = pattern.search(content)
         if match is None:
             separator = "" if content.endswith("\n") or not content else "\n"
             content = f"{content}{separator}{name}={generate()}\n"
             filled.append(name)
             continue
-        value = match.group(1).strip()
+        value = match.group(2).strip().strip("\"'")
         if value and not value.startswith(PLACEHOLDER_PREFIX):
             continue
-        content = f"{content[: match.start()]}{name}={generate()}{content[match.end() :]}"
+        content = f"{content[: match.start()]}{match.group(1)}{generate()}{content[match.end() :]}"
         filled.append(name)
     return content, filled
 
@@ -64,6 +65,8 @@ def init_local_env(env_path: Path, example_path: Path) -> list[str]:
     content, filled = fill_generated_settings(source.read_text(encoding="utf-8"))
     if filled or source != env_path:
         descriptor = os.open(env_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        # The mode above only applies to a new file; an existing one may be world-readable.
+        os.fchmod(descriptor, 0o600)
         with os.fdopen(descriptor, "w", encoding="utf-8") as env_file:
             env_file.write(content)
     return filled

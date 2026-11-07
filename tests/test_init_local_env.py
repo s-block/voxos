@@ -46,6 +46,48 @@ def test_keeps_values_that_are_already_set(script: ModuleType) -> None:
     assert filled == []
 
 
+@pytest.mark.parametrize("assignment", ["export {name}=existing", "{name} = existing", "  export  {name}= 'existing'"])
+def test_keeps_values_in_any_assignment_form_dotenv_loads(script: ModuleType, assignment: str) -> None:
+    original = "".join(f"{assignment.format(name=name)}\n" for name in script.GENERATED_SETTINGS)
+
+    content, filled = script.fill_generated_settings(original)
+
+    assert content == original
+    assert filled == []
+
+
+@pytest.mark.parametrize("value", ["", '""', "''"])
+def test_fills_empty_quoted_values_and_keeps_the_export_prefix(script: ModuleType, value: str) -> None:
+    name = next(iter(script.GENERATED_SETTINGS))
+
+    content, filled = script.fill_generated_settings(f"export {name}={value}\n")
+
+    assert name in filled
+    assert content.count(f"{name}=") == 1
+    assert content.startswith(f"export {name}=")
+    assert len(content.splitlines()[0]) > len(f"export {name}={value}")
+
+
+def test_ignores_a_commented_out_setting(script: ModuleType) -> None:
+    name = next(iter(script.GENERATED_SETTINGS))
+
+    content, filled = script.fill_generated_settings(f"# {name}=old\n")
+
+    assert name in filled
+    assert content.startswith(f"# {name}=old\n{name}=")
+
+
+def test_restricts_an_existing_world_readable_env_when_writing_secrets(script: ModuleType, tmp_path: Path) -> None:
+    env_path = tmp_path / ".env"
+    env_path.write_text(EXAMPLE_CONTENT, encoding="utf-8")
+    env_path.chmod(0o644)
+
+    assert script.init_local_env(env_path, tmp_path / ".env.example")
+
+    assert stat.S_IMODE(env_path.stat().st_mode) == 0o600
+    assert "DB_USER=voxos" in env_path.read_text(encoding="utf-8")
+
+
 def test_creates_owner_only_env_and_a_second_run_changes_nothing(script: ModuleType, tmp_path: Path) -> None:
     env_path = tmp_path / ".env"
     example_path = tmp_path / ".env.example"
