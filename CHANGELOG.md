@@ -9,6 +9,7 @@ This changelog follows the Keep a Changelog format. Add new entries under
 
 ### Added
 
+- Added the Open Source Alternatives listing badge to the README and website footer.
 - Added links from the docs and landing page to the guides and cost calculator,
   three FAQ answers, and structured data and an `llms.txt` entry for the
   calculator.
