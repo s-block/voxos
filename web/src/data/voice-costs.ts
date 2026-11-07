@@ -1,4 +1,12 @@
 /** List prices read from each provider's own page. US numbers and US dollars. */
+/** The calculator page's details, shared by its page, structured data and llms.txt entry. */
+export const costCalculatorPage = {
+  path: "/voice-agent-cost/",
+  name: "Voice AI agent cost calculator",
+  description:
+    "Estimate what a self-hosted voice AI phone agent costs a month with Twilio or Telnyx, and compare your server bill with Vapi and Retell platform fees.",
+} as const;
+
 export const PRICES_CHECKED = "6 November 2026";
 
 export interface PhoneRates {

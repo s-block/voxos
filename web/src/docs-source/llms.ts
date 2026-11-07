@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { costCalculatorPage } from "../data/voice-costs";
 import { parseRepoDoc } from "./parse";
 import { repoFileUrl } from "./repo";
 import type { DocsSite } from "./sources";
@@ -17,5 +18,7 @@ export function llmsTxtDetails(docs: DocsSite, siteUrl: URL): string {
     "Voxos is MIT licensed and self-hosted: it runs on your own infrastructure with your own provider keys.",
     "## Docs",
     pages.join("\n"),
+    "## Tools",
+    `- [${costCalculatorPage.name}](${new URL(costCalculatorPage.path, siteUrl)}): ${costCalculatorPage.description}`,
   ].join("\n\n");
 }

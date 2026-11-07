@@ -9,6 +9,14 @@ This changelog follows the Keep a Changelog format. Add new entries under
 
 ### Added
 
+- Added links from the docs and landing page to the guides and cost calculator,
+  three FAQ answers, and structured data and an `llms.txt` entry for the
+  calculator.
+
+## [0.1.0] - 2026-11-07
+
+### Added
+
 - Added `make env`, which creates `.env` and generates its local secrets.
 - Added website guides for Telnyx, WhatsApp, Ollama, GitHub MCP and web search,
   two comparison pages, and a voice agent cost calculator.

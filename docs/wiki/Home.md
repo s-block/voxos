@@ -1,6 +1,6 @@
 # Voxos Documentation
 
-Last updated: 2026-08-26
+Last updated: 2026-11-07
 
 Voxos is a user-owned AI agent backend and local console. It combines text chat,
 LiveKit voice sessions, durable agent state, schedules, inbound agent webhooks, phone integrations, a
@@ -16,6 +16,8 @@ repository.
 
 - [Quick Start](Quick-Start.md) explains local setup, Docker Compose, and the
   frontend.
+- [Guides](../guides/README.md) are step-by-step walkthroughs for phone agents,
+  WhatsApp, local models, MCP tools and choosing a platform.
 - [Frontend Guide](Frontend-Guide.md) walks through Chat, Voice, Agent,
   Knowledge, Operations, Providers, Phone, Connection, Tools, MCP, and Account.
 - [Providers And Keys](Providers-And-Keys.md) explains text and voice provider

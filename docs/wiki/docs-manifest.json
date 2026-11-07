@@ -1,6 +1,6 @@
 {
   "docs_dir": "docs/wiki",
-  "generated_at": "2026-11-06T21:41:07.341290Z",
+  "generated_at": "2026-11-07T07:16:22.951415Z",
   "pages": [
     {
       "last_updated": "2026-10-01",
@@ -51,15 +51,15 @@
       "title": "Frontend Guide"
     },
     {
-      "last_updated": "2026-08-26",
+      "last_updated": "2026-11-07",
       "path": "Home.md",
-      "source_fingerprint": "428e-0b17-6fda-1f8c",
+      "source_fingerprint": "b5a0-0c44-89f4-195c",
       "title": "Voxos Documentation"
     },
     {
-      "last_updated": "2026-10-27",
+      "last_updated": "2026-11-07",
       "path": "MCP-And-Tools.md",
-      "source_fingerprint": "343d-10c0-d767-786b",
+      "source_fingerprint": "0277-622e-755e-b3d4",
       "title": "MCP And Tools For AI Agents"
     },
     {
@@ -69,9 +69,9 @@
       "title": "Operations Runs And Schedules"
     },
     {
-      "last_updated": "2026-08-21",
+      "last_updated": "2026-11-07",
       "path": "Phone-Integrations.md",
-      "source_fingerprint": "1e7d-d7ef-a5f9-d1db",
+      "source_fingerprint": "7853-11ba-eee0-db6a",
       "title": "Phone Integrations: AI Agents On Calls, SMS And WhatsApp"
     },
     {
@@ -87,9 +87,9 @@
       "title": "Quick Start: Run A Self-Hosted Voice AI Agent"
     },
     {
-      "last_updated": "2026-08-26",
+      "last_updated": "2026-11-07",
       "path": "Self-Hosted-Models.md",
-      "source_fingerprint": "4c12-4057-0f7a-9a5a",
+      "source_fingerprint": "9397-1f57-5966-3c40",
       "title": "Self-Hosted Models: Ollama, LM Studio, vLLM And llama.cpp"
     },
     {
