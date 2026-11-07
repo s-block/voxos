@@ -47,7 +47,7 @@ repository.
 ## Existing Focused Docs
 
 - [User MCP Servers](../user-mcp-servers.md)
-- [MCP Service Catalog For VoxOS](../mcp-service-catalog.md)
+- [MCP Service Catalog For Voxos](../mcp-service-catalog.md)
 
 ## Verification Notes
 

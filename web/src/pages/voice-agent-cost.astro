@@ -1,0 +1,258 @@
+---
+import { phoneProviders, platformFees, PRICES_CHECKED, voiceModels } from "../data/voice-costs";
+import LandingLayout from "../layouts/LandingLayout.astro";
+import { site } from "../site.config";
+
+const money = (value: number): string => `$${value.toFixed(4).replace(/0{1,2}$/, "")}`;
+const providers = Object.entries(phoneProviders);
+---
+
+<LandingLayout
+  title={`Voice AI agent cost calculator: self-hosted vs per-minute | ${site.name}`}
+  description="Estimate what a self-hosted voice AI phone agent costs a month with Twilio or Telnyx, and compare your server bill with Vapi and Retell platform fees."
+  image="/og/index.png"
+  imageAlt={site.name}
+>
+  <article class="cost vx-container">
+    <h1>Voice AI agent cost calculator</h1>
+    <p class="lead">
+      Self-hosting removes the per-minute platform fee, but you pay for your own server. Put in your numbers to see where
+      that crosses over. Prices were read from each provider's own page on {PRICES_CHECKED}, and they do change.
+    </p>
+
+    <form data-cost-form class="grid">
+      <label>Minutes a month <input name="minutes" type="number" min="0" step="100" value="1000" /></label>
+      <label>
+        Outbound share (%)
+        <input name="outbound" type="number" min="0" max="100" step="5" value="0" />
+      </label>
+      <label>
+        Phone provider
+        <select name="phone">{providers.map(([id, rates]) => <option value={id}>{rates.label}</option>)}</select>
+      </label>
+      <label>Phone numbers <input name="numbers" type="number" min="0" step="1" value="1" /></label>
+      <label>
+        Voice model
+        <select name="model">{voiceModels.map((model, index) => <option value={index}>{model.label}</option>)}</select>
+      </label>
+      <label>
+        Voice model, $ a minute
+        <input name="voice" type="number" min="0" step="0.001" value={voiceModels[0]?.perMinute} />
+      </label>
+      <label>
+        Your server, $ a month
+        <input name="server" type="number" min="0" step="5" value="0" />
+      </label>
+    </form>
+    <p class="note" data-cost-model-note>{voiceModels[0]?.note}</p>
+
+    <section class="result" aria-live="polite" data-cost-result hidden>
+      <h2>Your self-hosted month</h2>
+      <p class="total" data-cost-total></p>
+      <p data-cost-breakdown></p>
+      <h2>Platform fees for the same minutes</h2>
+      <p class="note">These cover the platform fee only. You'd still pay for models and phone minutes on top.</p>
+      <ul data-cost-fees></ul>
+    </section>
+
+    <h2>Prices used</h2>
+    <div class="table">
+      <table>
+        <thead><tr><th>Phone provider</th><th>Inbound</th><th>Outbound</th><th>Streaming</th><th>Number</th></tr></thead>
+        <tbody>
+          {
+            providers.map(([, rates]) => (
+              <tr>
+                <td><a href={rates.source}>{rates.label}</a></td>
+                <td>{money(rates.inboundPerMinute)}/min</td>
+                <td>{money(rates.outboundPerMinute)}/min</td>
+                <td>{money(rates.mediaStreamPerMinute)}/min</td>
+                <td>${rates.numberPerMonth.toFixed(2)}/mo</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+    <ul class="notes">
+      {providers.map(([, rates]) => <li>{rates.label}: {rates.note}</li>)}
+      {voiceModels.map((model) => <li><a href={model.source}>{model.label}</a>: {model.note}</li>)}
+      {platformFees.map((fee) => <li><a href={fee.source}>{fee.label}</a>: {money(fee.perMinute)}/min.</li>)}
+    </ul>
+
+    <h2>What this leaves out</h2>
+    <p>
+      Your own time, taxes, SMS, and LiveKit Cloud if you use it instead of running the open-source LiveKit server. The
+      server figure is yours to fill in, because it depends on where you host and how many calls run at once.
+    </p>
+    <p>
+      Ready to try it? Start with the <a href="/docs/quick-start/">Quick Start</a>, or read
+      <a href="/guides/open-source-vapi-alternatives/">open-source alternatives to Vapi and Retell</a>.
+    </p>
+  </article>
+</LandingLayout>
+
+<script>
+  import { phoneProviders, platformFees, voiceModels, type PhoneProviderId } from "../data/voice-costs";
+  import { breakEvenMinutes, selfHostedCost } from "../components/tools/voice-cost";
+
+  const form = document.querySelector<HTMLFormElement>("[data-cost-form]");
+  const result = document.querySelector<HTMLElement>("[data-cost-result]");
+  const total = document.querySelector<HTMLElement>("[data-cost-total]");
+  const breakdown = document.querySelector<HTMLElement>("[data-cost-breakdown]");
+  const fees = document.querySelector<HTMLElement>("[data-cost-fees]");
+  const modelNote = document.querySelector<HTMLElement>("[data-cost-model-note]");
+
+  if (form && result && total && breakdown && fees && modelNote) {
+    const dollars = (value: number): string =>
+      value.toLocaleString("en-US", { style: "currency", currency: "USD" });
+    const nonNegative = (value: FormDataEntryValue | null): number => {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+    };
+
+    const render = (): void => {
+      const data = new FormData(form);
+      const minutes = nonNegative(data.get("minutes"));
+      const server = nonNegative(data.get("server"));
+      const cost = selfHostedCost(
+        {
+          minutesPerMonth: minutes,
+          outboundShare: Math.min(nonNegative(data.get("outbound")), 100) / 100,
+          phoneNumbers: nonNegative(data.get("numbers")),
+          voicePerMinute: nonNegative(data.get("voice")),
+          serverPerMonth: server,
+        },
+        phoneProviders[data.get("phone") as PhoneProviderId],
+      );
+      total.textContent = `${dollars(cost.total)} a month`;
+      const voiceCost = data.get("voice") === "" ? "voice model not included until you enter a rate" : `voice model ${dollars(cost.voice)}`;
+      const serverCost = server > 0 ? `server ${dollars(cost.server)}` : "server not included until you enter a cost";
+      breakdown.textContent = `Phone ${dollars(cost.phone)}, ${voiceCost}, ${serverCost}.`;
+      fees.replaceChildren(
+        ...platformFees.map((fee) => {
+          const item = document.createElement("li");
+          const evenAt = Math.ceil(breakEvenMinutes(server, fee.perMinute)).toLocaleString("en-US");
+          const crossover = server > 0 ? ` Your server costs the same as this fee at ${evenAt} minutes a month.` : "";
+          item.textContent = `${fee.label}: ${dollars(minutes * fee.perMinute)} a month.${crossover}`;
+          return item;
+        }),
+      );
+      result.hidden = false;
+    };
+
+    form.addEventListener("input", (event) => {
+      const target = event.target;
+      if (target instanceof HTMLSelectElement && target.name === "model") {
+        const model = voiceModels[Number(target.value)];
+        const voice = form.elements.namedItem("voice");
+        if (model && voice instanceof HTMLInputElement) voice.value = model.perMinute?.toString() ?? "";
+        modelNote.textContent = model?.note ?? "";
+      }
+      render();
+    });
+    form.addEventListener("submit", (event) => event.preventDefault());
+    render();
+  }
+</script>
+
+<style>
+  .cost {
+    max-width: 52rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .lead {
+    color: var(--vx-ink-soft);
+    font-size: 1.1rem;
+  }
+
+  h2 {
+    margin-top: 2.25rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+    margin-top: 1.75rem;
+  }
+
+  label {
+    display: grid;
+    gap: 0.35rem;
+    font-weight: 600;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 0.55em 0.7em;
+    border: 2px solid var(--vx-line-strong);
+    border-radius: var(--vx-radius);
+    background: var(--vx-paper);
+    color: var(--vx-ink);
+    font: inherit;
+    font-weight: 400;
+  }
+
+  input:focus-visible,
+  select:focus-visible {
+    outline: 3px solid var(--vx-violet);
+    outline-offset: 2px;
+  }
+
+  .note,
+  .notes {
+    color: var(--vx-ink-muted);
+    font-size: 0.95rem;
+  }
+
+  .result {
+    margin-top: 1.75rem;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid var(--vx-ink);
+    border-radius: var(--vx-radius);
+    background: var(--vx-tint-mint);
+  }
+
+  .result[hidden] {
+    display: none;
+  }
+
+  .result h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+  }
+
+  .result h2 + p ~ h2 {
+    margin-top: 1.25rem;
+  }
+
+  .total {
+    margin: 0.25rem 0;
+    font-family: var(--vx-font-display);
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+  }
+
+  .table {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    padding: 0.5em 0.75em;
+    border-bottom: 1px solid var(--vx-line);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  a {
+    color: var(--vx-violet-deep);
+  }
+</style>

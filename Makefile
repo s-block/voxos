@@ -1,6 +1,6 @@
 .PHONY: help install install-dev pre-commit-install pre-commit secrets secrets-all secrets-baseline lint format type-check mypy frontend-lint whatsapp-bridge-install whatsapp-bridge-build whatsapp-bridge-check codex-runner-build docs-validate docs-manifest docs-index docs-refresh-check example-skills-list example-skills-load db-enable-vector up restart compose-up compose-restart mcp-stack-up mcp-stack-down mcp-stack-logs mcp-stack-config monzo-mcp-restart monzo-mcp-package-check test test-cov test-bills test-bills-inconclusive-artifacts clean build run ngrok worker worker-runs worker-codex worker-whatsapp scheduler frontend app-get app-devices app-format app-analyze app-test run-ios run-ios-device deploy-ios-device build-prod-ipa deploy-testflight app-run-ios app-run-android app-build-ios app-build-android app-open-ios
 .DEFAULT_GOAL := help
-.PHONY: helm-check publication-check
+.PHONY: env helm-check publication-check
 .PHONY: web-install web-dev web-check web-build web-preview web-deploy
 .PHONY: security-lock
 
@@ -168,6 +168,9 @@ db-enable-vector: ## Enable pgvector in the configured local Postgres database
 		--username "$${POSTGRES_ADMIN_USER}" \
 		--dbname "$${DB_NAME}" \
 		-c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+env: ## Create .env from .env.example and generate its local secrets
+	python3 scripts/init_local_env.py
 
 up: ## Build, reconcile, and verify the complete local Docker Compose stack
 	docker compose --env-file ./.env --profile voice --profile whatsapp up \

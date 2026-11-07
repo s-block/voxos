@@ -9,6 +9,9 @@ This changelog follows the Keep a Changelog format. Add new entries under
 
 ### Added
 
+- Added `make env`, which creates `.env` and generates its local secrets.
+- Added website guides for Telnyx, WhatsApp, Ollama, GitHub MCP and web search,
+  two comparison pages, and a voice agent cost calculator.
 - Added the project changelog.
 - Added weekly Dependabot updates for Python, frontend, GitHub Actions, Docker,
   Docker Compose, and pre-commit dependencies.
