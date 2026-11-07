@@ -6,6 +6,7 @@
   <img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white">
   <a href="https://github.com/s-block/voxos/actions/workflows/ci.yml"><img alt="Security checks" src="https://img.shields.io/badge/security-bandit%20%7C%20safety%20%7C%20semgrep%20%7C%20trivy-2ea44f?style=for-the-badge"></a>
   <a href="https://github.com/s-block/voxos/pkgs/container/voxos-oss-api"><img alt="GHCR image" src="https://img.shields.io/badge/image-ghcr.io-24292f?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://www.opensourcealternatives.to"><img src="https://www.opensourcealternatives.to/badge-osa.svg" alt="As seen on Open Source Alternatives"></a>
 </p>
 
 # Voxos

@@ -50,6 +50,9 @@ const columns: { title: string; links: FooterLink[] }[] = [
       <a href="/" aria-label="Voxos home" class="home"><Logo id="site-footer" /></a>
       <p>Open-source voice AI agents that answer the phone, text back and get things done.</p>
       <p class="aside">Made with coffee and a worrying number of webhooks.</p>
+      <a href="https://www.opensourcealternatives.to" class="listing">
+        <img src="/badge-osa.svg" alt="As seen on Open Source Alternatives" width="270" height="20" loading="lazy" />
+      </a>
     </div>
     {
       columns.map((column) => (
@@ -75,6 +78,17 @@ const columns: { title: string; links: FooterLink[] }[] = [
 </footer>
 
 <style>
+  .listing {
+    display: inline-block;
+    margin-top: 1rem;
+  }
+
+  .listing img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
   .site-footer {
     margin-top: 6rem;
     padding: 4rem 0 3rem;
