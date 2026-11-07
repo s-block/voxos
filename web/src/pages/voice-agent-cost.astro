@@ -1,17 +1,21 @@
 ---
-import { phoneProviders, platformFees, PRICES_CHECKED, voiceModels } from "../data/voice-costs";
+import { costCalculatorPage, phoneProviders, platformFees, PRICES_CHECKED, voiceModels } from "../data/voice-costs";
 import LandingLayout from "../layouts/LandingLayout.astro";
+import { graph, organizationNode, webApplicationNode, websiteNode } from "../seo/structured-data";
+import { configuredSite } from "../site-url";
 import { site } from "../site.config";
 
 const money = (value: number): string => `$${value.toFixed(4).replace(/0{1,2}$/, "")}`;
 const providers = Object.entries(phoneProviders);
+const siteUrl = configuredSite(Astro.site);
 ---
 
 <LandingLayout
   title={`Voice AI agent cost calculator: self-hosted vs per-minute | ${site.name}`}
-  description="Estimate what a self-hosted voice AI phone agent costs a month with Twilio or Telnyx, and compare your server bill with Vapi and Retell platform fees."
+  description={costCalculatorPage.description}
   image="/og/index.png"
   imageAlt={site.name}
+  structuredData={graph(websiteNode(siteUrl), organizationNode(siteUrl), webApplicationNode(costCalculatorPage, siteUrl))}
 >
   <article class="cost vx-container">
     <h1>Voice AI agent cost calculator</h1>

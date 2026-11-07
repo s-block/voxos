@@ -20,6 +20,24 @@ export const faqs: readonly Faq[] = [
     link: { href: githubUrls.license, label: "MIT License" },
   },
   {
+    question: "Is Voxos an open-source alternative to Vapi or Retell?",
+    answer:
+      "Yes, if you want a self-hosted agent rather than a hosted call platform. Voxos is MIT licensed, charges no platform fee, and covers voice, phone calls, SMS, WhatsApp, chat, memory and MCP tools. It is not built for bulk dialing campaigns, and realtime voice still runs on OpenAI, Gemini or xAI.",
+    link: { href: "/guides/open-source-vapi-alternatives/", label: "Compare the options" },
+  },
+  {
+    question: "How much does a self-hosted voice AI agent cost?",
+    answer:
+      "Voxos charges no platform fee. You pay your phone provider for numbers and minutes, your voice model provider for usage, and whoever hosts your server. The calculator estimates a month from your own call volume.",
+    link: { href: "/voice-agent-cost/", label: "Voice agent cost calculator" },
+  },
+  {
+    question: "How is Voxos different from OpenClaw?",
+    answer:
+      "Both are MIT-licensed, self-hosted agents with phone calls, SMS and WhatsApp. Voxos is built so several signed-in users can share one deployment, with row-level security and per-user encrypted keys. OpenClaw's security guide recommends separate gateways for people who do not trust each other.",
+    link: { href: "/guides/voxos-vs-openclaw/", label: "Voxos vs OpenClaw" },
+  },
+  {
     question: "Can Voxos answer and make phone calls?",
     answer:
       "Yes. Connect a Twilio or Telnyx number and inbound calls reach your agent through LiveKit. Agents can also call your saved contacts with a stated goal, and caller access is set per contact.",

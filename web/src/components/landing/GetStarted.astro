@@ -1,5 +1,5 @@
 ---
-import { ArrowRight, BookOpen, Container, Laptop } from "@lucide/astro";
+import { ArrowRight, BookOpen, Calculator, Container, Laptop, Phone, Scale } from "@lucide/astro";
 import { repositoryUrl } from "../../site.config";
 import CopyButton from "../ui/CopyButton.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
@@ -24,6 +24,24 @@ const guides = [
     title: "Kubernetes",
     text: "Separate database and application releases with the Helm chart.",
     href: "/docs/helm/",
+  },
+  {
+    icon: Phone,
+    title: "Phone agent guides",
+    text: "Answer and place calls with a Twilio or Telnyx number.",
+    href: "/guides/",
+  },
+  {
+    icon: Calculator,
+    title: "Voice agent cost calculator",
+    text: "Compare your own server with per-minute platform fees.",
+    href: "/voice-agent-cost/",
+  },
+  {
+    icon: Scale,
+    title: "Vapi and Retell alternatives",
+    text: "How open-source options compare with hosted platforms.",
+    href: "/guides/open-source-vapi-alternatives/",
   },
 ];
 ---
