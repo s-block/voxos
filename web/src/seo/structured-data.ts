@@ -61,6 +61,29 @@ export function softwareNode(siteUrl: URL): JsonLdNode {
   };
 }
 
+export interface WebToolDetails {
+  readonly path: string;
+  readonly name: string;
+  readonly description: string;
+}
+
+/** A free tool that runs in the browser, such as a calculator. */
+export function webApplicationNode(tool: WebToolDetails, siteUrl: URL): JsonLdNode {
+  return {
+    "@type": "WebApplication",
+    name: tool.name,
+    description: tool.description,
+    url: new URL(tool.path, siteUrl).href,
+    applicationCategory: "BusinessApplication",
+    browserRequirements: "Requires JavaScript",
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    inLanguage: "en",
+    isPartOf: { "@id": websiteId(siteUrl) },
+    publisher: { "@id": organizationId(siteUrl) },
+  };
+}
+
 export function faqNode(entries: readonly FaqEntry[]): JsonLdNode {
   return {
     "@type": "FAQPage",

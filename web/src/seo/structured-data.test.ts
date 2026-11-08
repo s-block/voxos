@@ -6,6 +6,7 @@ import {
   graph,
   organizationNode,
   serializeJsonLd,
+  webApplicationNode,
   websiteNode,
 } from "./structured-data";
 
@@ -17,6 +18,18 @@ describe("serializeJsonLd", () => {
 
     expect(json).not.toContain("</script>");
     expect(JSON.parse(json)["@graph"][0].mainEntity[0].name).toBe("Does </script> break out?");
+  });
+});
+
+describe("webApplicationNode", () => {
+  it("gives the tool its absolute URL and links it to the site", () => {
+    const siteUrl = new URL("https://example.com");
+
+    const node = webApplicationNode({ path: "/tool/", name: "Tool", description: "A tool." }, siteUrl);
+
+    expect(node.url).toBe("https://example.com/tool/");
+    expect(node.isPartOf).toEqual({ "@id": "https://example.com/#website" });
+    expect(node.publisher).toEqual({ "@id": "https://example.com/#organization" });
   });
 });
 
