@@ -5,7 +5,7 @@ stdio MCP commands are intentionally not accepted from the frontend because they
 would let a web user register arbitrary commands for the worker host to execute.
 
 For common providers, use the MCP settings catalog or
-[MCP Service Catalog For VoxOS](mcp-service-catalog.md). The catalog pre-fills
+[MCP Service Catalog For Voxos](mcp-service-catalog.md). The catalog pre-fills
 vetted remote URLs, transport, auth mode, provider setup steps, and starter tool
 guidance. Custom MCP servers can still be added manually.
 

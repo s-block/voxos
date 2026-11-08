@@ -9,7 +9,9 @@ These rules apply inside `web/`, in addition to the repository root
   source files, so fix wording in the source (for example `docs/wiki/`), and
   fix loading or link problems in `src/docs-source/`.
 - Never mention or link to a hosted or commercial Voxos service. The site links
-  only to its own pages, the GitHub repository, and third-party docs.
+  only to its own pages, the GitHub repository, third-party docs, and the
+  Open Source Alternatives directory through the footer badge its free listing
+  requires. Serve that badge from `public/`, so pages load nothing from that site.
 - Every claim on the landing page must be backed by the docs. Copy lives in
   `src/data/`, and each item links to the docs section that supports it. Check
   the source docs before adding or changing a capability. The post-build link

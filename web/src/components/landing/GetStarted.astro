@@ -1,16 +1,16 @@
 ---
-import { ArrowRight, BookOpen, Container, Laptop } from "@lucide/astro";
+import { ArrowRight, BookOpen, Calculator, Container, Laptop, Phone, Scale } from "@lucide/astro";
 import { repositoryUrl } from "../../site.config";
 import CopyButton from "../ui/CopyButton.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 
-const cloneCommands = [`git clone ${repositoryUrl}.git`, "cd voxos", "cp .env.example .env"];
+const cloneCommands = [`git clone ${repositoryUrl}.git`, "cd voxos", "make env"];
 
 const guides = [
   {
     icon: BookOpen,
     title: "Quick Start",
-    text: "The full Docker Compose walkthrough, including the secrets to generate.",
+    text: "The full Docker Compose walkthrough, including Firebase sign-in.",
     href: "/docs/quick-start/",
   },
   {
@@ -25,14 +25,32 @@ const guides = [
     text: "Separate database and application releases with the Helm chart.",
     href: "/docs/helm/",
   },
+  {
+    icon: Phone,
+    title: "Phone agent guides",
+    text: "Answer and place calls with a Twilio or Telnyx number.",
+    href: "/guides/",
+  },
+  {
+    icon: Calculator,
+    title: "Voice agent cost calculator",
+    text: "Compare your own server with per-minute platform fees.",
+    href: "/voice-agent-cost/",
+  },
+  {
+    icon: Scale,
+    title: "Vapi and Retell alternatives",
+    text: "How open-source options compare with hosted platforms.",
+    href: "/guides/open-source-vapi-alternatives/",
+  },
 ];
 ---
 
 <section class="start" aria-labelledby="get-started">
   <div class="vx-container grid">
     <div>
-      <SectionHeading id="get-started" eyebrow="Get started" title="Up and running in a coffee break.">
-        Clone the repo, add a few secrets to <code>.env</code>, and bring up the whole stack with Docker Compose.
+      <SectionHeading id="get-started" eyebrow="Get started" title="Run it on your own machine.">
+        Clone the repo, let <code>make env</code> generate the local secrets, add your Firebase project settings, and bring up the whole stack with Docker Compose.
       </SectionHeading>
       <ul class="guides">
         {
@@ -62,7 +80,7 @@ const guides = [
           analyticsEvent="copy_install_command"
         />
       </div>
-      <pre><code>{cloneCommands.map((command) => <span class="line"><span class="prompt" aria-hidden="true">$ </span>{command}</span>)}<span class="comment"># add the secrets from the Quick Start to .env</span></code></pre>
+      <pre><code>{cloneCommands.map((command) => <span class="line"><span class="prompt" aria-hidden="true">$ </span>{command}</span>)}<span class="comment"># add your Firebase project settings to .env</span></code></pre>
       <pre class="second"><code><span class="line"><span class="prompt" aria-hidden="true">$ </span>make up</span><span class="comment"># API, LiveKit, Postgres + pgvector and the workers</span><span class="comment"># then open the console at http://localhost:5173</span></code></pre>
     </div>
   </div>

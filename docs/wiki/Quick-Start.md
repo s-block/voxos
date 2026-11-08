@@ -1,4 +1,4 @@
-# Quick Start
+# Quick Start: Run A Self-Hosted Voice AI Agent
 
 Last updated: 2026-10-31
 
@@ -38,45 +38,25 @@ The root `docker-compose.yml` is the preferred local stack. It starts:
 Raw Compose commands keep those profiles opt-in. The canonical `make up`
 command enables both so local development has one complete stack.
 
-Create local settings:
+Create `.env` and generate its local secrets:
 
 ```bash
-cp .env.example .env
+make env
 ```
 
-Generate a stable local encryption key and store it as
-`LOCAL_SECRET_ENCRYPTION_KEY` in `.env`:
+This copies `.env.example` to `.env` and fills in
+`LOCAL_SECRET_ENCRYPTION_KEY`, `MCP_OAUTH_STATE_SIGNING_SECRET`,
+`VOICE_ROUTE_SIGNING_SECRET`, `BROWSER_AGENT_SERVICE_TOKEN` and
+`STEEL_SERVICE_TOKEN`. Running it again keeps values that are already set. Keep
+these values stable and private: rotating the encryption key makes stored local
+credentials unreadable. All API replicas in one environment must use the same
+signing secrets. Host-mode API or workers also need
+`BROWSER_ACCOUNTS_STAGEHAND_SERVICE_TOKEN` set to the browser-agent token. See
+[Developer Setup](Developer-Setup.md#browser-runtime-and-account-settings) for
+sandbox and queue configuration.
 
-```bash
-python -c 'import base64, os; print(base64.b64encode(os.urandom(32)).decode())'
-```
-
-Generate a separate persistent signing secret for browser-based MCP OAuth and
-store it as `MCP_OAUTH_STATE_SIGNING_SECRET` in `.env`:
-
-```bash
-python -c 'import secrets; print(secrets.token_urlsafe(32))'
-```
-
-Keep this value stable and private. It signs short-lived OAuth state so the
-callback can be returned to the correct Voxos user and MCP server. Do not reuse
-a provider API key or the local vault-encryption key. All API replicas in one
-environment must use the same value.
-
-Generate two separate local browser service credentials and append them to the
-ignored `.env` file:
-
-```bash
-printf 'BROWSER_AGENT_SERVICE_TOKEN=%s\n' "$(openssl rand -hex 32)" >> .env
-printf 'STEEL_SERVICE_TOKEN=%s\n' "$(openssl rand -hex 32)" >> .env
-```
-
-Keep these values stable and private. Compose shares the browser-agent token
-with its API and worker callers and uses the Steel token for the private
-browser proxy. Host-mode API or workers also need
-`BROWSER_ACCOUNTS_STAGEHAND_SERVICE_TOKEN` set to the browser-agent token.
-See [Developer Setup](Developer-Setup.md#browser-runtime-and-account-settings)
-for sandbox and queue configuration.
+Add your Firebase project's settings to the `FIREBASE_*` values in `.env`, so
+you can sign in to the console.
 
 Start the stack:
 

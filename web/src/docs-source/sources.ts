@@ -39,6 +39,14 @@ const WIKI_HOME = "docs/wiki/Home.md";
 const SKILLS_CATALOG = "examples/skills/catalog.toml";
 const SKILLS_OVERVIEW = "examples/skills/README.md";
 
+/**
+ * Site pages that docs may link to by their source file. Links resolve to the
+ * page on the site; on GitHub they open the page's source.
+ */
+export const SITE_PAGE_ROUTES: ReadonlyMap<string, string> = new Map([
+  ["web/src/pages/voice-agent-cost.astro", "/voice-agent-cost/"],
+]);
+
 /** Repository pages published beyond the wiki sidebar and the skills catalog. */
 const MORE_PAGES: readonly ExtraPage[] = [
   { label: "Kubernetes with Helm", repoPath: "helm/README.md", id: "docs/helm" },

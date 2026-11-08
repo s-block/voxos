@@ -1,10 +1,15 @@
-# Phone Integrations
+# Phone Integrations: AI Agents On Calls, SMS And WhatsApp
 
-Last updated: 2026-08-21
+Last updated: 2026-11-07
 
 The Phone page connects communication providers, stores phone credentials,
 registers phone-number resources, and routes voice, SMS, or WhatsApp events
 into Voxos.
+
+For step-by-step walkthroughs, see the
+[Twilio phone agent](../guides/Twilio-Phone-Agent.md),
+[Telnyx phone agent](../guides/Telnyx-Phone-Agent.md) and
+[WhatsApp agent](../guides/WhatsApp-AI-Agent.md) guides.
 
 ## Supported Providers
 

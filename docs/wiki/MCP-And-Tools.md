@@ -1,6 +1,6 @@
-# MCP And Tools
+# MCP And Tools For AI Agents
 
-Last updated: 2026-10-27
+Last updated: 2026-11-07
 
 Voxos exposes two broad tool families to agents: built-in internal tools and
 user-owned remote MCP tools. Tool access is policy-driven and audited.
@@ -9,6 +9,10 @@ Voxos uses MCP Python SDK 2 for remote transports and exposed internal servers.
 Streamable HTTP clients use an explicit HTTPX 2 client with bounded timeouts;
 redirect responses are rejected before another request is sent. Broker
 assertions are minted for each outbound HTTP request.
+
+For step-by-step walkthroughs, see
+[Connect your AI agent to GitHub with MCP](../guides/GitHub-MCP-Agent.md) and
+[Give your AI agent web search with MCP](../guides/Web-Search-Agent.md).
 
 ## Internal Tools
 

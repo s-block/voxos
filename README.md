@@ -6,6 +6,7 @@
   <img alt="Python 3.12" src="https://img.shields.io/badge/python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white">
   <a href="https://github.com/s-block/voxos/actions/workflows/ci.yml"><img alt="Security checks" src="https://img.shields.io/badge/security-bandit%20%7C%20safety%20%7C%20semgrep%20%7C%20trivy-2ea44f?style=for-the-badge"></a>
   <a href="https://github.com/s-block/voxos/pkgs/container/voxos-oss-api"><img alt="GHCR image" src="https://img.shields.io/badge/image-ghcr.io-24292f?style=for-the-badge&logo=github&logoColor=white"></a>
+  <a href="https://www.opensourcealternatives.to"><img src="https://www.opensourcealternatives.to/badge-osa.svg" alt="As seen on Open Source Alternatives"></a>
 </p>
 
 # Voxos
@@ -105,31 +106,17 @@ This is the easiest way to run the backend stack locally. It starts:
 - `pgvector`: Postgres 16 with pgvector and the non-superuser app role
 - `agent-run-worker`: durable runs, including inbound SMS agent replies
 
-1. Create local environment settings:
+1. Create `.env` and generate its local secrets:
 
 ```bash
-cp .env.example .env
+make env
 ```
 
-2. Generate a persistent local encryption key:
+Keep the generated values stable: rotating `LOCAL_SECRET_ENCRYPTION_KEY` makes
+existing local ciphertext undecryptable. Running `make env` again keeps values
+that are already set.
 
-```bash
-python -c 'import base64, os; print(base64.b64encode(os.urandom(32)).decode())'
-```
-
-Put the printed value in `.env` as `LOCAL_SECRET_ENCRYPTION_KEY`. Keep this key
-stable for your local database; rotating it makes existing local ciphertext
-undecryptable.
-
-Generate a separate persistent secret for browser-based MCP OAuth:
-
-```bash
-python -c 'import secrets; print(secrets.token_urlsafe(32))'
-```
-
-Store it in `.env` as `MCP_OAUTH_STATE_SIGNING_SECRET`. Keep it stable across
-API restarts and identical across replicas; do not reuse a provider API key or
-the local vault-encryption key.
+2. Add your Firebase project settings to the `FIREBASE_*` values in `.env`.
 
 For authenticated API calls, set `FIREBASE_PROJECT_ID` to your real Firebase
 project id. The placeholder value is enough to start the app, but real Firebase

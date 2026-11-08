@@ -1,6 +1,6 @@
-# Self-Hosted Models
+# Self-Hosted Models: Ollama, LM Studio, vLLM And llama.cpp
 
-Last updated: 2026-08-26
+Last updated: 2026-11-07
 
 Voxos can use an explicitly registered local model server or a public HTTPS
 endpoint through one generic **OpenAI compatible** text provider. The server
@@ -11,6 +11,9 @@ the encrypted user vault and sends it only to that configured endpoint.
 
 These instructions were checked against the linked official runtime
 documentation on 2026-08-19.
+
+For a step-by-step walkthrough, see
+[Run a self-hosted AI agent with Ollama](../guides/Local-Models-Ollama.md).
 
 ## Why One OpenAI-Compatible Provider
 

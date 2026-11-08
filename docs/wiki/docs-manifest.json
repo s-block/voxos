@@ -1,6 +1,6 @@
 {
   "docs_dir": "docs/wiki",
-  "generated_at": "2026-10-31T10:18:46.304164Z",
+  "generated_at": "2026-11-07T07:16:22.951415Z",
   "pages": [
     {
       "last_updated": "2026-10-01",
@@ -51,16 +51,16 @@
       "title": "Frontend Guide"
     },
     {
-      "last_updated": "2026-08-26",
+      "last_updated": "2026-11-07",
       "path": "Home.md",
-      "source_fingerprint": "5c39-d50a-c6eb-1dc0",
+      "source_fingerprint": "b5a0-0c44-89f4-195c",
       "title": "Voxos Documentation"
     },
     {
-      "last_updated": "2026-10-27",
+      "last_updated": "2026-11-07",
       "path": "MCP-And-Tools.md",
-      "source_fingerprint": "4c7d-9421-6299-81d1",
-      "title": "MCP And Tools"
+      "source_fingerprint": "0277-622e-755e-b3d4",
+      "title": "MCP And Tools For AI Agents"
     },
     {
       "last_updated": "2026-10-05",
@@ -69,10 +69,10 @@
       "title": "Operations Runs And Schedules"
     },
     {
-      "last_updated": "2026-08-21",
+      "last_updated": "2026-11-07",
       "path": "Phone-Integrations.md",
-      "source_fingerprint": "b354-df18-f052-eb0d",
-      "title": "Phone Integrations"
+      "source_fingerprint": "7853-11ba-eee0-db6a",
+      "title": "Phone Integrations: AI Agents On Calls, SMS And WhatsApp"
     },
     {
       "last_updated": "2026-08-24",
@@ -83,14 +83,14 @@
     {
       "last_updated": "2026-10-31",
       "path": "Quick-Start.md",
-      "source_fingerprint": "1e1f-b33c-f690-a78a",
-      "title": "Quick Start"
+      "source_fingerprint": "23d4-2dd9-7eb7-fb68",
+      "title": "Quick Start: Run A Self-Hosted Voice AI Agent"
     },
     {
-      "last_updated": "2026-08-26",
+      "last_updated": "2026-11-07",
       "path": "Self-Hosted-Models.md",
-      "source_fingerprint": "80cf-d808-5108-fe04",
-      "title": "Self-Hosted Models"
+      "source_fingerprint": "9397-1f57-5966-3c40",
+      "title": "Self-Hosted Models: Ollama, LM Studio, vLLM And llama.cpp"
     },
     {
       "last_updated": "2026-10-31",
@@ -101,8 +101,8 @@
     {
       "last_updated": "2026-10-05",
       "path": "Voice-And-LiveKit.md",
-      "source_fingerprint": "6913-dbe4-e547-ffcf",
-      "title": "Voice And LiveKit"
+      "source_fingerprint": "b281-6b17-7ed4-4bb0",
+      "title": "Voice And LiveKit: Realtime AI Voice Agents"
     },
     {
       "last_updated": "2026-07-05",
