@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { phoneProviders } from "../../data/voice-costs";
-import { breakEvenMinutes, selfHostedCost } from "./voice-cost";
+import { breakEvenMinutes, openAiAudioPerMinute, selfHostedCost } from "./voice-cost";
 
 describe("selfHostedCost", () => {
   it("adds inbound minutes, streaming, the number, the voice model and the server", () => {
@@ -26,5 +26,12 @@ describe("breakEvenMinutes", () => {
   it("is the server bill divided by the fee", () => {
     expect(breakEvenMinutes(40, 0.05)).toBeCloseTo(800);
     expect(breakEvenMinutes(0, 0.05)).toBe(0);
+  });
+});
+
+describe("openAiAudioPerMinute", () => {
+  it("prices 600 caller and 1,200 agent audio tokens a minute", () => {
+    expect(openAiAudioPerMinute(10, 20)).toBeCloseTo(0.03);
+    expect(openAiAudioPerMinute(32, 64)).toBeCloseTo(0.096);
   });
 });

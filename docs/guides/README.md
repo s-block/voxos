@@ -1,6 +1,6 @@
 # Guides
 
-Last updated: 2026-11-06
+Last updated: 2026-11-13
 
 Step-by-step walkthroughs that take a running Voxos install to a working
 result, with links into the reference docs for every detail.
@@ -19,5 +19,7 @@ result, with links into the reference docs for every detail.
 
 ## Choosing
 
+- [How much does a voice AI agent cost per minute?](Voice-Agent-Cost-Per-Minute.md)
+- [Realtime voice model pricing compared](Voice-Model-Pricing.md)
 - [Open-source alternatives to Vapi and Retell](Open-Source-Vapi-Alternatives.md)
 - [Voxos vs OpenClaw: two self-hosted AI agents compared](Voxos-Vs-OpenClaw.md)

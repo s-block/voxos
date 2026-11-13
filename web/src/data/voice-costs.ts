@@ -1,13 +1,15 @@
+import { openAiAudioPerMinute } from "../components/tools/voice-cost";
+
 /** List prices read from each provider's own page. US numbers and US dollars. */
 /** The calculator page's details, shared by its page, structured data and llms.txt entry. */
 export const costCalculatorPage = {
   path: "/voice-agent-cost/",
   name: "Voice AI agent cost calculator",
   description:
-    "Estimate what a self-hosted voice AI phone agent costs a month with Twilio or Telnyx, and compare your server bill with Vapi and Retell platform fees.",
+    "Estimate what a self-hosted voice AI phone agent costs a month with Twilio or Telnyx and OpenAI, Gemini or xAI voice models, and compare your server bill with Vapi and Retell fees.",
 } as const;
 
-export const PRICES_CHECKED = "6 November 2026";
+export const PRICES_CHECKED = "13 November 2026";
 
 export interface PhoneRates {
   readonly label: string;
@@ -37,7 +39,7 @@ export const phoneProviders = {
     mediaStreamPerMinute: 0.0035,
     numberPerMonth: 1,
     note: "Voice API plus starting SIP trunking rates, local US number. SMS adds $0.10 a month per number.",
-    source: "https://telnyx.com/pricing/call-control",
+    source: "https://telnyx.com/pricing/voice-api",
   },
 } as const satisfies Record<string, PhoneRates>;
 
@@ -45,11 +47,14 @@ export type PhoneProviderId = keyof typeof phoneProviders;
 
 export interface VoiceModelRate {
   readonly label: string;
-  /** Undefined when the provider publishes no per-minute price. */
-  readonly perMinute: number | undefined;
+  readonly perMinute: number;
   readonly note: string;
   readonly source: string;
 }
+
+const OPENAI_PRICING = "https://developers.openai.com/api/docs/pricing";
+const OPENAI_ESTIMATE_NOTE =
+  "OpenAI counts 600 audio tokens for each minute the caller talks and 1,200 for each minute the agent talks. This assumes both talk for the whole call. Each reply also re-reads the call so far at the cached rate, which grows on long calls, so treat it as a rough guide.";
 
 export const voiceModels: readonly VoiceModelRate[] = [
   {
@@ -59,16 +64,22 @@ export const voiceModels: readonly VoiceModelRate[] = [
     source: "https://ai.google.dev/gemini-api/docs/pricing",
   },
   {
+    label: "OpenAI gpt-realtime-2.1-mini",
+    perMinute: openAiAudioPerMinute(10, 20),
+    note: `$10 per 1M audio tokens in and $20 out. ${OPENAI_ESTIMATE_NOTE}`,
+    source: OPENAI_PRICING,
+  },
+  {
+    label: "OpenAI gpt-realtime-2.1",
+    perMinute: openAiAudioPerMinute(32, 64),
+    note: `$32 per 1M audio tokens in and $64 out. ${OPENAI_ESTIMATE_NOTE}`,
+    source: OPENAI_PRICING,
+  },
+  {
     label: "xAI Grok voice",
     perMinute: 0.08,
     note: "grok-voice-3.0 speech to speech.",
-    source: "https://docs.x.ai/docs/models",
-  },
-  {
-    label: "OpenAI Realtime (enter your own)",
-    perMinute: undefined,
-    note: "OpenAI prices its realtime models per token, with no per-minute figure. For example, gpt-realtime-2.1-mini is $10 per 1M audio tokens in and $20 out. Check your usage to estimate a rate.",
-    source: "https://platform.openai.com/docs/pricing",
+    source: "https://docs.x.ai/developers/models",
   },
 ];
 
