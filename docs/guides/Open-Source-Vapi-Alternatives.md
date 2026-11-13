@@ -56,7 +56,9 @@ project for sign-in.
 
 Self-hosting removes the platform fee, but you pay for your own server and your
 own time. The [voice agent cost calculator](../../web/src/pages/voice-agent-cost.astro)
-shows where that crosses over for your call volume.
+shows where that crosses over for your call volume, and
+[how much a voice AI agent costs per minute](Voice-Agent-Cost-Per-Minute.md)
+walks through an example.
 
 ## If you want to write the agent yourself
 

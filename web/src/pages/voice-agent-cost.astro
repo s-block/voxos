@@ -84,6 +84,18 @@ const siteUrl = configuredSite(Astro.site);
       {platformFees.map((fee) => <li><a href={fee.source}>{fee.label}</a>: {money(fee.perMinute)}/min.</li>)}
     </ul>
 
+    <h2>How the estimate works</h2>
+    <p>
+      Phone cost is your minutes times the provider's inbound or outbound rate, weighted by the outbound share, plus
+      media streaming for every minute and the monthly fee for each number. Voice model cost is your minutes times the
+      model's rate. Your server is whatever you enter. The platform figures are only Vapi's and Retell's own fees for the
+      same minutes, so you can see where your server bill matches them.
+    </p>
+    <p>
+      The <a href="/guides/voice-agent-cost-per-minute/">voice agent cost per minute guide</a> walks through a worked
+      example, and <a href="/guides/voice-model-pricing/">realtime voice model pricing compared</a> lists more models.
+    </p>
+
     <h2>What this leaves out</h2>
     <p>
       Your own time, taxes, SMS, and LiveKit Cloud if you use it instead of running the open-source LiveKit server. The
@@ -150,7 +162,7 @@ const siteUrl = configuredSite(Astro.site);
       if (target instanceof HTMLSelectElement && target.name === "model") {
         const model = voiceModels[Number(target.value)];
         const voice = form.elements.namedItem("voice");
-        if (model && voice instanceof HTMLInputElement) voice.value = model.perMinute?.toString() ?? "";
+        if (model && voice instanceof HTMLInputElement) voice.value = model.perMinute.toString();
         modelNote.textContent = model?.note ?? "";
       }
       render();
